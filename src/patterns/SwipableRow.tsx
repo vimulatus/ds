@@ -4,15 +4,18 @@ import { useTouch } from '@/lib/touch';
 
 export type SwipeTone = 'accent' | 'success' | 'failure' | 'warning' | 'neutral';
 
-const TONE: Record<SwipeTone, string> = {
-  accent: 'bg-accent text-accent-contrast',
-  success: 'bg-success text-accent-contrast',
-  failure: 'bg-failure text-accent-contrast',
-  warning: 'bg-warning text-accent-contrast',
-  neutral: 'bg-ink-extra-muted text-accent-contrast',
+/** What the swipe paints behind the row. `neutral` is the quiet grey, a step darker on the leading side. */
+const TONE: Record<Exclude<SwipeTone, 'neutral'>, string> = {
+  accent: 'bg-accent',
+  success: 'bg-success',
+  failure: 'bg-failure',
+  warning: 'bg-warning',
 };
+const toneClass = (tone: SwipeTone, side: 'leading' | 'trailing') =>
+  tone === 'neutral' ? (side === 'leading' ? 'bg-edge' : 'bg-edge-muted') : TONE[tone];
 
 export type SwipeAction = {
+  /** The accessible name. The action shows its icon alone. */
   label: string;
   icon: ReactNode;
   tone?: SwipeTone;
@@ -37,7 +40,9 @@ const SETTLE_MS = 250;
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
- * Swipe actions for a row on touch. Swipe left to reveal the trailing
+ * Swipe actions for a row on touch. The swipe paints the side it opens in
+ * the action's color, quiet grey by default, and each action shows its icon
+ * alone, growing from half size once letting go would act. Swipe left to reveal the trailing
  * actions; let go past half their width and they stay open, swipe past half
  * the row and the first one commits. Swipe right past a third of the row to
  * commit the leading action. A short drag springs back. A vertical drag
@@ -109,7 +114,10 @@ export function SwipableRow({ children, trailing = [], leading, className }: Swi
     if (state?.axis === 'x') release();
   };
 
+  const side = offset < 0 ? 'trailing' : 'leading';
   const behind = offset < 0 ? trailing : leading ? [leading] : [];
+  // The icons grow from half size once letting go would do something: keep the actions open, or commit.
+  const past = offset < 0 ? armedLeft || -offset > revealWidth / 2 : armedRight;
 
   return (
     <div
@@ -136,14 +144,19 @@ export function SwipableRow({ children, trailing = [], leading, className }: Swi
                   tabIndex={-1}
                   onClick={() => run(action)}
                   className={cn(
-                    'flex min-w-0 flex-col items-center justify-center gap-1 overflow-hidden text-xs font-medium transition-[flex-grow] duration-200 ease-out [&_svg]:size-6',
-                    TONE[action.tone ?? 'neutral'],
-                    armed ? 'grow-[99]' : 'grow',
-                    'basis-0'
+                    'flex min-w-0 basis-0 items-center justify-center overflow-hidden transition-[flex-grow] duration-200 ease-out',
+                    toneClass(action.tone ?? 'neutral', side),
+                    armed ? 'grow-[99]' : 'grow'
                   )}
                 >
-                  {action.icon}
-                  <span className="truncate">{action.label}</span>
+                  <span
+                    className={cn(
+                      'flex text-panel [&_svg]:size-8 transition-transform duration-300 ease-in-out',
+                      past ? 'scale-100' : 'scale-50'
+                    )}
+                  >
+                    {action.icon}
+                  </span>
                 </button>
               );
             })}
