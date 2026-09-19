@@ -1,6 +1,6 @@
 import { X } from '@phosphor-icons/react';
 import { Fragment, type KeyboardEvent, type ReactNode, useId, useRef, useState } from 'react';
-import { ScrollArea } from '@/components/ScrollArea';
+import { Scroll } from '@/components/Scroll';
 import { EmptyStatePanel, type EmptyStatePanelProps } from '@/components/EmptyStatePanel';
 import { Toolbar } from '@/components/Toolbar';
 import { cn } from '@/lib/cn';
@@ -112,7 +112,7 @@ export function EntityList({
 
   return (
     <div className={cn('relative flex min-h-0 flex-1 flex-col', className)}>
-      <ScrollArea className="flex-1">
+      <Scroll className="flex-1">
         <div
           ref={listRef}
           role="listbox"
@@ -160,7 +160,7 @@ export function EntityList({
             </div>
           ))}
         </div>
-      </ScrollArea>
+      </Scroll>
 
       {count > 0 && (
         <div className="pointer-events-none absolute inset-x-0 bottom-3 z-action-menu flex justify-center transition-[opacity,translate] duration-200 ease-out starting:translate-y-2 starting:opacity-0">
