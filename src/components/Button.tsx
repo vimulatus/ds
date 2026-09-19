@@ -152,12 +152,7 @@ export function Button({
     tip === undefined ? (
       button
     ) : (
-      <Tooltip
-        content={tip}
-        shortcut={Array.isArray(shortcut) ? shortcut[0] : shortcut}
-        side={tooltipPlacement.split('-')[0] as 'top' | 'bottom' | 'left' | 'right'}
-        disabled={tooltipDisabled}
-      >
+      <Tooltip label={tip} shortcut={shortcut} placement={tooltipPlacement} disabled={tooltipDisabled}>
         {button}
       </Tooltip>
     );
