@@ -4,6 +4,8 @@ import '@fontsource-variable/roboto-mono';
 import '../src/styles/tokens.css';
 import type { Decorator, Preview } from '@storybook/react-vite';
 import { INITIAL_VIEWPORTS, MINIMAL_VIEWPORTS, type ViewportMap } from 'storybook/viewport';
+import { ConfirmHost } from '../src/components/ConfirmDialog';
+import { ToastProvider, ToastViewport } from '../src/components/Toast';
 import { TooltipProvider } from '../src/components/Tooltip';
 import { setTouch } from '../src/lib/touch';
 
@@ -27,9 +29,13 @@ const withTheme: Decorator = (Story, context) => {
 };
 
 const withProviders: Decorator = (Story) => (
-  <TooltipProvider delay={400}>
-    <Story />
-  </TooltipProvider>
+  <ToastProvider>
+    <TooltipProvider delay={400}>
+      <Story />
+      <ConfirmHost />
+      <ToastViewport />
+    </TooltipProvider>
+  </ToastProvider>
 );
 
 export default {
