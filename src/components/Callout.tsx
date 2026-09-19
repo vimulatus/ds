@@ -1,113 +1,232 @@
 import { Popover } from '@base-ui/react/popover';
-import { autoUpdate, flip, offset, shift, useFloating } from '@floating-ui/react-dom';
+import {
+  autoUpdate,
+  flip as flipMiddleware,
+  offset,
+  type Placement,
+  shift,
+  useFloating,
+} from '@floating-ui/react-dom';
 import {
   type ComponentProps,
-  type ReactElement,
+  createContext,
   type ReactNode,
   type RefObject,
+  useContext,
   useLayoutEffect,
 } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '@/lib/cn';
+import { Surface } from './Surface';
+import { tooltipClasses } from './Tooltip';
 
 export type CalloutVariant = 'default' | 'danger';
-export type CalloutSide = 'top' | 'right' | 'bottom' | 'left';
+export type CalloutPlacement = Placement;
 
-const SURFACE: Record<CalloutVariant, string> = {
-  default: 'bg-tooltip text-ink',
-  danger: 'bg-tooltip-failure text-failure-ink',
+const variantClasses: Record<CalloutVariant, string> = {
+  default: tooltipClasses(),
+  danger:
+    'flex items-center rounded-lg bg-tooltip-failure p-2 text-xs text-failure wrap-break-word',
 };
 
-/** The classes of a callout surface. */
-export function calloutClasses(variant: CalloutVariant = 'default') {
-  return cn(
-    'max-w-64 rounded-lg border border-edge-muted p-2 text-xs shadow-lg',
-    SURFACE[variant]
-  );
-}
+const CONTENT_CLASS = 'z-tool-tip max-w-[min(18rem,calc(100vw-32px))]';
+
+type Anchor = RefObject<HTMLElement | null> | HTMLElement | null | undefined;
+
+type CalloutContextValue = {
+  pinned: boolean;
+  open: boolean;
+  anchorRef: Anchor;
+  placement: CalloutPlacement;
+  flip: boolean | string;
+  gutter: number;
+  overflowPadding: number;
+};
+
+const CalloutContext = createContext<CalloutContextValue>({
+  pinned: false,
+  open: false,
+  anchorRef: undefined,
+  placement: 'bottom',
+  flip: true,
+  gutter: 6,
+  overflowPadding: 16,
+});
 
 export type CalloutProps = {
-  /** The trigger. It must accept a ref and spread props. Give it no tooltip of its own. */
-  children: ReactElement<Record<string, unknown>>;
-  content: ReactNode;
-  variant?: CalloutVariant;
-  side?: CalloutSide;
+  /**
+   * Stays open while `open` is true, anchored by `anchorRef`. It is not a
+   * popover: no trigger, no focus move, and it never joins the dismiss stack,
+   * so a dialog behind it still closes on Escape.
+   */
+  pinned?: boolean;
+  open?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** The element a pinned callout points at. */
+  anchorRef?: Anchor;
+  placement?: CalloutPlacement;
+  /** `false` holds the placement; a placement string, or several separated by spaces, is the fallback. */
+  flip?: boolean | string;
+  gutter?: number;
+  overflowPadding?: number;
+  children?: ReactNode;
 };
 
-/**
- * A short note anchored to a control, for information a phone must reach.
- * It opens on hover after 400ms and on tap or click; leaving, a tap away or
- * Escape closes it. Focus stays on the trigger.
- */
-export function Callout({ children, content, variant = 'default', side = 'right' }: CalloutProps) {
+function splitPlacement(placement: CalloutPlacement) {
+  const [side, align = 'center'] = placement.split('-') as [
+    'top' | 'right' | 'bottom' | 'left',
+    ('start' | 'end' | 'center')?,
+  ];
+  return { side, align };
+}
+
+/** Opens on hover after a delay, closes when the pointer leaves both the trigger and the content. Touch has no hover, so a tap toggles it through the trigger. */
+function CalloutRoot({
+  pinned = false,
+  open,
+  defaultOpen,
+  onOpenChange,
+  anchorRef,
+  placement,
+  flip = true,
+  gutter = 6,
+  overflowPadding = 16,
+  children,
+}: CalloutProps) {
+  const context: CalloutContextValue = {
+    pinned,
+    open: open ?? false,
+    anchorRef,
+    placement: placement ?? 'bottom',
+    flip,
+    gutter,
+    overflowPadding,
+  };
+  if (pinned) {
+    return <CalloutContext.Provider value={context}>{open ? children : null}</CalloutContext.Provider>;
+  }
   return (
-    <Popover.Root>
-      <Popover.Trigger openOnHover delay={400} render={children} />
-      <Popover.Portal>
-        <Popover.Positioner side={side} sideOffset={6} className="z-action-menu">
-          <Popover.Popup
-            initialFocus={false}
-            className={cn(calloutClasses(variant), 'menu-open-animation outline-none')}
-          >
-            {content}
-          </Popover.Popup>
-        </Popover.Positioner>
-      </Popover.Portal>
-    </Popover.Root>
+    <CalloutContext.Provider value={context}>
+      <Popover.Root
+        open={open}
+        defaultOpen={defaultOpen}
+        onOpenChange={(next) => onOpenChange?.(next)}
+        modal={false}
+      >
+        {children}
+      </Popover.Root>
+    </CalloutContext.Provider>
   );
 }
 
-export type PinnedCalloutProps = ComponentProps<'div'> & {
-  /** The element the callout points at. */
-  anchor: RefObject<HTMLElement | null>;
+function CalloutSurface({ variant, className, children }: { variant: CalloutVariant; className?: string; children?: ReactNode }) {
+  return (
+    <Surface depth={3} className={cn(variantClasses[variant], className)}>
+      {children}
+    </Surface>
+  );
+}
+
+export type CalloutContentProps = Omit<ComponentProps<'div'>, 'className'> & {
+  className?: string;
   variant?: CalloutVariant;
-  /**
-   * Where it goes. `right` falls back to `bottom-start` when there is no
-   * room; the others hold their side.
-   */
-  placement?: 'right' | 'bottom-start' | CalloutSide;
+  /** Render in place instead of on `body`. Off, the callout clips and flips within its scrolling ancestor. */
+  portal?: boolean;
 };
 
-/**
- * A callout that stays while a state holds, such as a field error. It has
- * no trigger, moves no focus and never dismisses, so it never joins Base
- * UI's dismiss stack: Escape and a tap outside still reach the dialog
- * beneath it. It renders in place at `z-action-menu`, positioned with Floating
- * UI, so an open menu or toast still covers it.
- */
-export function PinnedCallout({
-  anchor,
-  variant = 'default',
-  placement = 'right',
-  className,
-  style,
-  ref,
-  ...props
-}: PinnedCalloutProps) {
+function PinnedContent({ variant = 'default', portal, className, children }: CalloutContentProps) {
+  const context = useContext(CalloutContext);
+  const fallbacks =
+    typeof context.flip === 'string' ? (context.flip.split(' ') as Placement[]) : undefined;
   const { refs, floatingStyles } = useFloating({
-    placement,
-    strategy: 'fixed',
+    placement: context.placement,
     whileElementsMounted: autoUpdate,
     middleware: [
-      offset(6),
-      placement === 'right' && flip({ fallbackPlacements: ['bottom-start'], crossAxis: false }),
-      shift({ padding: 8 }),
+      offset(context.gutter),
+      context.flip !== false &&
+        flipMiddleware({ fallbackPlacements: fallbacks, padding: context.overflowPadding }),
+      shift({ padding: context.overflowPadding }),
     ],
   });
-
+  const anchor = context.anchorRef;
+  // A ref fills after render, so read it after every commit.
   useLayoutEffect(() => {
-    refs.setReference(anchor.current);
-  }, [anchor, refs]);
+    refs.setReference((anchor && 'current' in anchor ? anchor.current : anchor) ?? null);
+  });
 
+  const positioner = (
+    <div ref={refs.setFloating} role="note" className={CONTENT_CLASS} style={floatingStyles}>
+      <CalloutSurface variant={variant} className={className}>
+        {children}
+      </CalloutSurface>
+    </div>
+  );
+  return portal === false ? positioner : createPortal(positioner, document.body);
+}
+
+function CalloutContent(props: CalloutContentProps) {
+  const context = useContext(CalloutContext);
+  if (context.pinned) return <PinnedContent {...props} />;
+  const { variant = 'default', portal, className, children, ...rest } = props;
+  const { side, align } = splitPlacement(context.placement);
+  const positioner = (
+    <Popover.Positioner
+      side={side}
+      align={align}
+      sideOffset={context.gutter}
+      collisionPadding={context.overflowPadding}
+      collisionAvoidance={context.flip === false ? { side: 'none', align: 'none' } : undefined}
+      className={CONTENT_CLASS}
+    >
+      <Popover.Popup
+        {...rest}
+        role="note"
+        initialFocus={false}
+        finalFocus={false}
+        className="outline-none"
+      >
+        <CalloutSurface variant={variant} className={className}>
+          {children}
+        </CalloutSurface>
+      </Popover.Popup>
+    </Popover.Positioner>
+  );
+  return portal === false ? positioner : <Popover.Portal>{positioner}</Popover.Portal>;
+}
+
+export type CalloutTriggerProps = Omit<ComponentProps<typeof Popover.Trigger>, 'className'> & {
+  className?: string;
+};
+
+function CalloutTrigger({ className, ...props }: CalloutTriggerProps) {
   return (
-    <div
+    <Popover.Trigger
+      openOnHover
+      delay={400}
+      closeDelay={150}
       {...props}
-      ref={(el) => {
-        refs.setFloating(el);
-        if (typeof ref === 'function') ref(el);
-        else if (ref) ref.current = el;
-      }}
-      className={cn(calloutClasses(variant), 'z-action-menu', className)}
-      style={{ ...floatingStyles, ...style }}
+      className={cn('inline-flex items-center', className)}
     />
   );
 }
+
+/**
+ * A short note anchored to a control. It opens on hover, like a tooltip,
+ * and on tap, so a phone can reach it; a tap away or Escape closes it.
+ * Pinned, it stays open while a state holds, which is how every form
+ * control shows its error.
+ *
+ * @do Use `default` for information the user must be able to reach on touch.
+ * @do Use `danger` for a validation error, pinned to the invalid control.
+ * @do Keep `Tooltip` for a label on hover: rail glyphs, icon buttons.
+ * @dont Do not give the trigger a `label` or `tooltip`; the callout is the
+ *   hover surface.
+ * @dont Do not put controls inside a callout; that is a `Popover`.
+ * @dont Do not pin a `default` callout; a note that never leaves is a
+ *   `Description`.
+ */
+export const Callout = Object.assign(CalloutRoot, {
+  Trigger: CalloutTrigger,
+  Content: CalloutContent,
+});
