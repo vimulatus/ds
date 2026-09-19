@@ -1,100 +1,142 @@
+import { CaretDown, Check } from '@phosphor-icons/react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import { Select, type SelectOption } from '@/components/Select';
-import { PHONE } from '../phone';
+import { Select, type SelectItemNode } from '@/components/Select';
 
-const ROLES: SelectOption[] = [
+type Option = { value: string; label: string; hint?: string };
+
+const OPTIONS: Option[] = [
   { value: 'owner', label: 'Owner', hint: 'Full access, including billing' },
   { value: 'admin', label: 'Admin', hint: 'Manage members and settings' },
   { value: 'member', label: 'Member', hint: 'Create and edit content' },
   { value: 'guest', label: 'Guest', hint: 'View shared items only' },
 ];
 
-const PLAIN = ROLES.map(({ value, label }) => ({ value, label }));
+const ITEM_CLASS =
+  'flex items-center justify-between gap-3 rounded-md px-2 py-1.5 text-sm outline-none data-highlighted:bg-hover';
 
 /**
- * Picks one value from a short fixed list. The trigger matches Input, so a
- * select and a text field sit on one line; the list opens under it on
- * glass and checks the current value.
+ * A Base UI select, styled for the app. It is slot-based: you supply the
+ * trigger and the item renderer, while `Select.Content` handles portalling,
+ * popper sizing, menu chrome, and its own layer depth.
  *
  * **Do**
- * - Give it a `label`, or an `aria-label` when the label sits elsewhere.
- * - Keep the list short: past a dozen options, use a searchable list.
+ * - Let `Select.Content` own the menu chrome; pass only sizing classes to it.
+ * - Include `Select.ItemIndicator` so the current selection is visible in the
+ *   list.
+ * - Use `portalScope="local"` when the select lives inside a dialog or other
+ *   portal scope.
+ *
+ * **Don't**
+ * - Wrap `Select.Content` in a Portal — it already portals itself.
+ * - Use Select for more than roughly a dozen options; use a list with search.
  */
 const meta = {
   title: 'Forms/Select',
-  component: Select,
-  args: { options: PLAIN, size: 'md' },
-  argTypes: { size: { control: 'select', options: ['sm', 'md'] } },
-  parameters: { docs: { story: { inline: false, iframeHeight: 280 } } },
-} satisfies Meta<typeof Select>;
+  parameters: { docs: { story: { inline: false, iframeHeight: 260 } } },
+} satisfies Meta;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Pass `value` and `onValueChange` to control it, or `defaultValue`. */
+/**
+ * `optionValue` and `optionTextValue` tell the select which fields identify
+ * and label each option. `Select.Value` receives the selected option, so the
+ * trigger renders whatever you want.
+ */
 export const Basic: Story = {
-  render: function Render(args) {
-    const [value, setValue] = useState<string | null>('member');
+  render: function Render() {
+    const [value, setValue] = useState<Option>(OPTIONS[2]!);
     return (
-      <Select
-        {...args}
-        label="Role"
+      <Select<Option>
+        options={OPTIONS}
         value={value}
-        onValueChange={setValue}
-        fieldClassName="w-44"
-      />
+        onChange={(option) => option && setValue(option)}
+        optionValue="value"
+        optionTextValue="label"
+        gutter={4}
+        itemComponent={(props: { item: SelectItemNode<Option> }) => (
+          <Select.Item item={props.item} className={ITEM_CLASS}>
+            <Select.ItemLabel>{props.item.rawValue.label}</Select.ItemLabel>
+            <Select.ItemIndicator>
+              <Check className="size-3" />
+            </Select.ItemIndicator>
+          </Select.Item>
+        )}
+      >
+        <Select.Trigger className="h-8 w-44 rounded-md border border-edge-muted px-2 text-sm text-ink-muted">
+          <Select.Value<Option>>{(state) => state.selectedOption().label}</Select.Value>
+          <CaretDown className="size-3 shrink-0 text-ink-subtle" />
+        </Select.Trigger>
+        <Select.Content>
+          <Select.Listbox />
+        </Select.Content>
+      </Select>
     );
   },
 };
 
-/** An option's `hint` adds a quiet second line in the list; the trigger shows the label only. */
+/**
+ * `itemComponent` renders arbitrary content. Keep `Select.ItemLabel` around
+ * the primary text so typeahead and the accessible name still work.
+ */
 export const RichItems: Story = {
-  name: 'Rich items',
-  args: { options: ROLES },
-  render: (args) => (
-    <Select {...args} label="Role" defaultValue="admin" fieldClassName="w-56" />
-  ),
+  render: function Render() {
+    const [value, setValue] = useState<Option>(OPTIONS[1]!);
+    return (
+      <Select<Option>
+        options={OPTIONS}
+        value={value}
+        onChange={(option) => option && setValue(option)}
+        optionValue="value"
+        optionTextValue="label"
+        gutter={4}
+        itemComponent={(props: { item: SelectItemNode<Option> }) => (
+          <Select.Item item={props.item} className={ITEM_CLASS}>
+            <span className="flex flex-col gap-0.5">
+              <Select.ItemLabel>{props.item.rawValue.label}</Select.ItemLabel>
+              <span className="text-xs text-ink-subtle">{props.item.rawValue.hint}</span>
+            </span>
+            <Select.ItemIndicator>
+              <Check className="size-3" />
+            </Select.ItemIndicator>
+          </Select.Item>
+        )}
+      >
+        <Select.Trigger className="h-8 w-56 rounded-md border border-edge-muted px-2 text-sm text-ink-muted">
+          <Select.Value<Option>>{(state) => state.selectedOption().label}</Select.Value>
+          <CaretDown className="size-3 shrink-0 text-ink-subtle" />
+        </Select.Trigger>
+        <Select.Content className="min-w-56">
+          <Select.Listbox />
+        </Select.Content>
+      </Select>
+    );
+  },
 };
 
-/** Heights match Input: 24 and 32px. */
-export const Sizes: Story = {
-  render: (args) => (
-    <div className="flex items-end gap-2">
-      <Select {...args} size="sm" aria-label="Role, small" defaultValue="member" className="w-32" />
-      <Select {...args} size="md" aria-label="Role" defaultValue="member" className="w-36" />
-    </div>
+/** A disabled select keeps its value visible but will not open. */
+export const Disabled: Story = {
+  render: () => (
+    <Select<Option>
+      options={OPTIONS}
+      value={OPTIONS[0]}
+      disabled
+      optionValue="value"
+      optionTextValue="label"
+      itemComponent={(props: { item: SelectItemNode<Option> }) => (
+        <Select.Item item={props.item} className={ITEM_CLASS}>
+          <Select.ItemLabel>{props.item.rawValue.label}</Select.ItemLabel>
+        </Select.Item>
+      )}
+    >
+      <Select.Trigger className="h-8 w-44 rounded-md border border-edge-muted px-2 text-sm text-ink-disabled">
+        <Select.Value<Option>>{(state) => state.selectedOption().label}</Select.Value>
+        <CaretDown className="size-3 shrink-0" />
+      </Select.Trigger>
+      <Select.Content>
+        <Select.Listbox />
+      </Select.Content>
+    </Select>
   ),
-};
-
-/** `placeholder` shows until a value is picked. */
-export const Placeholder: Story = {
-  render: (args) => (
-    <Select {...args} label="Role" placeholder="Pick a role" fieldClassName="w-44" />
-  ),
-};
-
-/** Disabled keeps its value visible but will not open. Invalid pins its error to the right. */
-export const DisabledAndInvalid: Story = {
-  name: 'Disabled and invalid',
-  render: (args) => (
-    <div className="flex flex-col gap-5">
-      <Select {...args} label="Role" defaultValue="owner" disabled fieldClassName="w-44" />
-      <Select
-        {...args}
-        label="Role"
-        placeholder="Pick a role"
-        invalid
-        error="Pick a role for the new member."
-        fieldClassName="w-44"
-      />
-    </div>
-  ),
-};
-
-/** On a phone the trigger and the rows grow for a thumb. */
-export const Phone: Story = {
-  ...PHONE,
-  args: { options: ROLES },
-  render: (args) => <Select {...args} label="Role" defaultValue="member" />,
 };
