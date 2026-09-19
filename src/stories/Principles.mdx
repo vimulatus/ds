@@ -1,0 +1,39 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Principles" />
+
+# Principles
+
+These rules decide how a screen looks. Each rule names what the system does. When two rules conflict, the earlier rule wins.
+
+## 1. Content comes before chrome
+
+The user came for the content. Give it the centre and the space. Put navigation, actions and properties at the edges.
+
+## 2. Keep the chrome quiet
+
+Chrome uses muted ink, `ghost` buttons and no fills. A control gets louder only when the user points at it or opens it.
+
+## 3. Use layered shades for depth
+
+A surface nearer the user is one shade lighter. Set the depth with `Layer`, and `bg-surface` follows. Do not pick a background color by hand.
+
+## 4. Use hairline edges, not shadows
+
+A card or a region has a hairline border and no shadow. A raised control is a `pane`, with a thin rim and a small shadow. Only floating surfaces cast a real shadow.
+
+## 5. Use glass for floating surfaces only
+
+Menus, popovers, dialogs and toasts are glass: a blur, a translucent fill and one soft shadow. Nothing on the page itself is glass.
+
+## 6. Give a screen one `cta`
+
+The `cta` is the next step for the user. One screen has one `cta` at most. Other actions use `outlined`, `ghost`, `accent` or `danger`.
+
+## 7. Put ink on its own tint
+
+A colored label uses the hue's ink on the same hue's tint, for example `text-green-ink` on `bg-green-bg`. Do not put white text on a saturated fill.
+
+## 8. Treat touch mode as a full form
+
+A phone is not a smaller desktop. In touch mode, controls grow, sheets replace popovers, and hover states do not carry meaning. Design and check the touch form of every screen that has one.
