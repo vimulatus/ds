@@ -8,11 +8,11 @@ detail pattern.
 
 A Storybook of Vasu's visual language, built on Base UI, that he studies and reuses in his own projects.
 
-**Stage:** new. A clean-room rebuild of an earlier Solid prototype, in React and Base UI. Nothing consumes it yet.
+**Stage:** new. The React and Base UI successor to Vasu's Solid prototype, kept on disk until he deletes it. It keeps the prototype's custom API and its styling; the TypeScript is written fresh. Vasu's own designs replace the prototype's where they differ. Nothing consumes it yet.
 
 - **Users** — ? Vasu, as a reference while he designs his own projects. His shadcn/Radix system in `~/Documents/projects/design-system` is separate.
 - **Works when** — ? every story renders in both themes and at iPhone 14 where it has a phone form, and a pattern story composes the components instead of redrawing them
-- **Non-goals** — code or branding from the product that inspired the look: write every component fresh, never port or transliterate. Splits and a second per-view sidebar. Email and channel rows. A published package: local only, no remote. The touch press shimmer.
+- **Non-goals** — branding from the product that inspired the look, and its component code: write the TypeScript fresh on Base UI, and take only the API names, the class strings and the tokens (copied as is) from the prototype. Splits and a second per-view sidebar. Email and channel rows. A published package: local only, no remote. The touch press shimmer.
 
 ## Ship
 
