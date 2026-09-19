@@ -9,7 +9,7 @@ import { Tooltip } from '@/components/Tooltip';
  * `shortcut` renders the keys beside the label; an array is a chord, joined
  * by "then".
  *
- * A `Button` with `label` or `shortcut` wraps itself in a tooltip, so most
+ * A `Button` with `label`, `tooltip` or `shortcut` wraps itself in a tooltip, so most
  * call sites never use `Tooltip` directly.
  *
  * A tooltip is a label, and hover has no thumb. Information the user must
@@ -59,9 +59,9 @@ export const ViaButton: Story = {
       <Button variant="outlined" size="icon-sm" label="Search" shortcut="cmd+k">
         <MagnifyingGlass />
       </Button>
-      <Tooltip label="Permanently deletes the selection">
-        <Button variant="ghost">Delete</Button>
-      </Tooltip>
+      <Button variant="ghost" tooltip="Permanently deletes the selection">
+        Delete
+      </Button>
     </div>
   ),
 };
