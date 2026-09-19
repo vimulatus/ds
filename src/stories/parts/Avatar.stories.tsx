@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Avatar, AvatarGroup } from '@/components/Avatar';
+import { Card } from '@/components/Card';
 import { hashHue } from '@/lib/hue';
 
 /** A flat head-and-shoulders portrait as an inline SVG, so stories load offline. */
@@ -102,10 +103,14 @@ export const HashedColors: Story = {
   ),
 };
 
-/** A stack overlaps its avatars and parts them with a ring in the surface color. Past `max`, the rest become a count. */
+/**
+ * A stack overlaps its avatars and parts them with a ring in `bg-surface`,
+ * which follows the depth, so it disappears into a card at any depth. Past
+ * `max`, the rest become a count.
+ */
 export const Group: Story = {
   render: () => (
-    <div className="flex flex-col gap-4">
+    <Card className="w-fit gap-4">
       {(['sm', 'md', 'lg'] as const).map((size) => (
         <div key={size} className="flex items-center gap-3">
           <span className="w-8 font-mono text-xs text-ink-subtle">{size}</span>
@@ -121,6 +126,6 @@ export const Group: Story = {
           />
         </div>
       ))}
-    </div>
+    </Card>
   ),
 };

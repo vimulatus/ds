@@ -49,18 +49,16 @@ function isMac() {
  * as `⌘K`.
  */
 export function hotkeyKeys(shortcut: string): string[] {
-  const mac = isMac();
-  if (!shortcut.includes('+') || shortcut === '+') {
-    const chars = Array.from(shortcut);
-    const split = chars.findIndex((char) => !MODIFIER_GLYPHS.includes(char));
-    if (split < 0) return chars;
-    return [...chars.slice(0, split), chars.slice(split).join('')];
-  }
-  return shortcut.split('+').map((part) => {
-    const key = part.trim().toLowerCase();
-    const modifier = (mac ? MAC : OTHER)[key];
-    if (modifier) return modifier;
-    return NAMED[key] ?? (key.length === 1 ? key.toUpperCase() : part.trim());
+  const names = isMac() ? MAC : OTHER;
+  const tokens = shortcut.length > 1 && shortcut.includes('+') ? shortcut.split('+') : [shortcut];
+  return tokens.flatMap((token) => {
+    const key = token.trim().toLowerCase();
+    const named = names[key] ?? NAMED[key];
+    if (named) return [named];
+    const glyphs = Array.from(token.trim());
+    const split = glyphs.findIndex((char) => !MODIFIER_GLYPHS.includes(char));
+    if (split <= 0) return [key.length === 1 ? key.toUpperCase() : token.trim()];
+    return [...glyphs.slice(0, split), glyphs.slice(split).join('').toUpperCase()];
   });
 }
 

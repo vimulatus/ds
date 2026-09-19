@@ -39,7 +39,7 @@ function Separator({ className, ...props }: Classed<ComponentProps<typeof Base.S
     <Base.Separator
       {...props}
       className={cn(
-        'shrink-0 bg-edge-muted data-[orientation=vertical]:mx-1 data-[orientation=vertical]:h-4 data-[orientation=vertical]:w-px',
+        'shrink-0 bg-edge data-[orientation=vertical]:mx-1 data-[orientation=vertical]:h-4 data-[orientation=vertical]:w-px',
         'data-[orientation=horizontal]:my-1 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-4',
         className
       )}
