@@ -1,6 +1,5 @@
 import type { ComponentProps } from 'react';
 import { cn } from '@/lib/cn';
-import { Item } from './Item';
 import { type Depth, Layer } from './Layer';
 
 export type CardVariant = 'ghost' | 'outlined' | 'filled';
@@ -67,20 +66,104 @@ function Footer({ className, ...props }: ComponentProps<'div'>) {
   );
 }
 
+/** A header row: a Tile or Icon beside Content, and Actions at the end. */
+function Row({ className, ...props }: ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="card-row"
+      {...props}
+      className={cn(
+        'flex min-w-0 items-center gap-3 rounded-xl border border-transparent bg-transparent text-sm text-ink',
+        className
+      )}
+    />
+  );
+}
+
+function Icon({ className, ...props }: ComponentProps<'span'>) {
+  return (
+    <span
+      data-slot="card-icon"
+      {...props}
+      className={cn(
+        'inline-flex h-5 w-4 shrink-0 self-start items-center justify-center [&>svg]:size-4',
+        className
+      )}
+    />
+  );
+}
+
+function Tile({ className, ...props }: ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="card-tile"
+      {...props}
+      className={cn(
+        'flex size-10 shrink-0 self-start items-center justify-center overflow-hidden rounded-lg bg-hover text-ink-muted [&>svg]:size-5 [&>img]:size-full [&>img]:object-cover',
+        className
+      )}
+    />
+  );
+}
+
+function Content({ className, ...props }: ComponentProps<'div'>) {
+  return <div data-slot="card-content" {...props} className={cn('flex min-w-0 flex-1 flex-col gap-1', className)} />;
+}
+
+function Title({ className, ...props }: ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="card-title"
+      {...props}
+      className={cn('min-w-0 text-sm font-semibold leading-5 wrap-break-word', className)}
+    />
+  );
+}
+
+function Description({ className, ...props }: ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="card-description"
+      {...props}
+      className={cn('text-sm font-normal leading-5 text-ink-muted wrap-break-word', className)}
+    />
+  );
+}
+
+function Metadata({ className, ...props }: ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="card-metadata"
+      {...props}
+      className={cn(
+        'flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium leading-4 text-ink-subtle',
+        className
+      )}
+    />
+  );
+}
+
+function Actions({ className, ...props }: ComponentProps<'div'>) {
+  return <div data-slot="card-actions" {...props} className={cn('flex shrink-0 items-center gap-1', className)} />;
+}
+
 /**
  * An intrinsic-height frame for rich content: a hairline edge and a 12px
  * radius. Compose Header, Media, Body and Footer in the order the content
- * needs; Title, Icon, Description, Metadata and Actions are Item's, so a card
- * and a list row carry one hierarchy.
+ * needs. A Header holds Title, Description and Metadata, or a Row with a
+ * Tile or Icon beside Content and Actions at the end.
  */
 export const Card = Object.assign(Root, {
   Header,
   Media,
   Body,
   Footer,
-  Title: Item.Title,
-  Icon: Item.Icon,
-  Description: Item.Description,
-  Metadata: Item.Metadata,
-  Actions: Item.Actions,
+  Row,
+  Tile,
+  Icon,
+  Content,
+  Title,
+  Description,
+  Metadata,
+  Actions,
 });
