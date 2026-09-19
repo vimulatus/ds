@@ -89,12 +89,17 @@ export type ToastOptions = {
 type ToastType = 'success' | 'failure' | 'loading';
 
 function show(title: ReactNode, options: ToastOptions = {}, type?: ToastType) {
-  const { action, ...rest } = options;
+  const { action, id = crypto.randomUUID(), ...rest } = options;
+  const onClick = () => {
+    action?.onClick();
+    manager.close(id);
+  };
   return manager.add({
     ...rest,
+    id,
     title,
     type,
-    actionProps: action && { children: action.label, onClick: action.onClick },
+    actionProps: action && { children: action.label, onClick },
   });
 }
 
