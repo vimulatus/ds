@@ -1,16 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { type ReactNode, useState } from 'react';
 import { Button } from '@/components/Button';
-import { cn } from '@/lib/cn';
-import { SpecTable } from './Swatch';
 
 /**
- * Motion is short and does not ask for attention. A menu grows in over
- * 120ms, a dialog rises and settles over 160ms, and a scrim fades over
- * 120ms, on one fast-out curve. Each utility plays a keyframe once when the
- * element mounts. The phone sheet (`motion-sheet`) follows the finger with
- * Base UI's drawer variables. Under `prefers-reduced-motion` the animations
- * are off.
+ * Motion gets out of the way. Surfaces open in 120 to 160ms on one curve,
+ * `cubic-bezier(0.16, 1, 0.3, 1)`: fast out of the gate, soft on landing.
+ * Hover changes are instant. Loops are kept for progress and live states,
+ * and every animation stops under `prefers-reduced-motion`.
  */
 const meta = {
   title: 'Foundations/Motion',
@@ -19,27 +15,44 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Utilities: Story = {
+const TOKENS = [
+  ['menu-open', '120ms', 'cubic-bezier(0.16, 1, 0.3, 1)', 'menus, popovers'],
+  ['dialog-overlay-open', '120ms', 'ease-out', 'dialog scrim'],
+  ['dialog-content-open', '160ms', 'cubic-bezier(0.16, 1, 0.3, 1)', 'dialog panel'],
+  ['slide-in', '150ms', 'cubic-bezier(0.16, 1, 0.3, 1)', 'entering rows'],
+  ['accordion-down / up', '150ms', 'ease-out', 'disclosures'],
+  ['collapse (JS)', '140ms', 'ease-out', 'sidebar sections'],
+  ['motion-sheet', '400ms', 'cubic-bezier(0.32, 0.72, 0, 1)', 'phone sheet, follows the finger'],
+  ['hover', '0ms', 'none', 'every hover state'],
+];
+
+/** The whole motion vocabulary. Durations sit between 120 and 160ms; the phone sheet takes 400ms. */
+export const Tokens: Story = {
   render: () => (
-    <SpecTable
-      head={['Utility', 'Duration', 'From', 'Used for']}
-      rows={[
-        ['menu-open-animation', '120ms', 'opacity 0, 2px up, scale 0.96', 'Menus, popovers, tooltips, selects'],
-        ['dialog-content-open-animation', '160ms', 'opacity 0, 4px down, scale 0.98', 'Dialogs'],
-        ['dialog-overlay-open-animation', '120ms', 'opacity 0', 'Scrims, field errors'],
-        ['dialog-fullscreen-open-animation', '160ms', 'opacity 0, 6px down', 'Full-screen dialogs'],
-        ['mobile-sheet-open-animation', '340ms', 'off the bottom edge', 'Phone sheets'],
-        ['motion-sheet', '400ms', 'off the bottom edge, then the finger', 'The Base UI phone sheet'],
-      ]}
-    />
+    <table className="w-full max-w-3xl text-sm">
+      <thead>
+        <tr className="border-b border-edge-muted text-left text-xs text-ink-subtle">
+          <th className="py-1.5 font-medium">Animation</th>
+          <th className="py-1.5 font-medium">Duration</th>
+          <th className="py-1.5 font-medium">Easing</th>
+          <th className="py-1.5 font-medium">Used for</th>
+        </tr>
+      </thead>
+      <tbody>
+        {TOKENS.map(([name, duration, easing, use]) => (
+          <tr key={name} className="border-b border-edge-muted">
+            <td className="py-1.5 font-mono text-xs text-ink">{name}</td>
+            <td className="py-1.5 text-xs text-ink-muted">{duration}</td>
+            <td className="py-1.5 font-mono text-xs text-ink-muted">{easing}</td>
+            <td className="py-1.5 text-xs text-ink-subtle">{use}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   ),
 };
 
-/** Plays a mount animation: each replay mounts the element again. */
-function Enter({ className, children }: { className: string; children?: ReactNode }) {
-  return <div className={className}>{children}</div>;
-}
-
+/** Replays an entry animation by remounting its child. */
 function Replay({ label, children }: { label: string; children: ReactNode }) {
   const [run, setRun] = useState(0);
   return (
@@ -47,74 +60,47 @@ function Replay({ label, children }: { label: string; children: ReactNode }) {
       <Button variant="outlined" size="sm" onClick={() => setRun(run + 1)}>
         Replay {label}
       </Button>
-      <div key={run} className="h-32">
+      <div key={run} className="h-28">
         {children}
       </div>
     </div>
   );
 }
 
-/** Each utility as it opens. Replay runs it again. */
+/** Each surface's real entry animation. Press Replay to see it again. */
 export const Entrances: Story = {
   render: () => (
     <div className="flex flex-wrap gap-10">
-      <Replay label="menu-open-animation">
-        <Enter className="menu-open-animation glass w-44 rounded-xl border border-edge-muted bg-menu-glass p-1 text-sm [--transform-origin:top_left]">
+      <Replay label="menu">
+        <div className="menu-open-animation glass w-44 rounded-xl bg-menu-glass p-1.5 text-sm">
           {['Rename', 'Duplicate', 'Move to folder'].map((item) => (
-            <div key={item} className="rounded-md px-2 py-1.5 text-ink">
+            <div key={item} className="rounded-lg px-2 py-1.5 text-ink">
               {item}
             </div>
           ))}
-        </Enter>
+        </div>
       </Replay>
-      <Replay label="dialog-content-open-animation">
-        <Enter className="dialog-content-open-animation glass flex h-28 w-60 items-center justify-center rounded-xl border border-edge-muted bg-menu-glass text-sm text-ink">
-          Rename the launch plan
-        </Enter>
+      <Replay label="dialog">
+        <div className="dialog-content-open-animation glass flex h-24 w-56 items-center justify-center rounded-xl bg-menu-glass text-sm text-ink">
+          Rename document
+        </div>
       </Replay>
-      <Replay label="dialog-overlay-open-animation">
-        <Enter className="dialog-overlay-open-animation flex h-28 w-60 items-center justify-center rounded-xl border border-edge-muted bg-surface text-sm text-ink">
-          Task created
-        </Enter>
+      <Replay label="row">
+        <div className="animate-slide-in w-56 rounded-lg bg-hover px-3 py-2 text-sm text-ink">New task added</div>
       </Replay>
     </div>
   ),
 };
 
-const EASINGS = [
-  { name: 'ease-[cubic-bezier(0.16,1,0.3,1)]', className: 'ease-[cubic-bezier(0.16,1,0.3,1)]', curve: 'cubic-bezier(0.16, 1, 0.3, 1)', use: 'Menus and dialogs as they open' },
-  { name: 'ease-out', className: 'ease-out', curve: 'cubic-bezier(0, 0, 0.2, 1)', use: 'Scrims and small state changes' },
-  { name: 'ease-drawer', className: 'ease-drawer', curve: 'cubic-bezier(0.32, 0.72, 0, 1)', use: 'Sheets and drawers' },
-];
-
-/** Three curves, one duration. Press Move to run them side by side. */
-export const Easings: Story = {
-  render: function Render() {
-    const [moved, setMoved] = useState(false);
-    return (
-      <div className="flex max-w-2xl flex-col gap-4">
-        <Button variant="outlined" size="sm" className="self-start" onClick={() => setMoved(!moved)}>
-          Move
-        </Button>
-        {EASINGS.map((easing) => (
-          <div key={easing.name} className="flex flex-col gap-1.5">
-            <div className="flex items-baseline gap-3">
-              <span className="font-mono text-xs text-ink">{easing.name}</span>
-              <span className="font-mono text-xxs text-ink-subtle">{easing.curve}</span>
-              <span className="text-xs text-ink-muted">{easing.use}</span>
-            </div>
-            <div className="@container h-6 rounded-md bg-surface p-1">
-              <div
-                className={cn(
-                  'size-4 rounded-sm bg-accent transition-transform duration-500',
-                  easing.className,
-                  moved && 'translate-x-[calc(100cqw-1rem)]'
-                )}
-              />
-            </div>
-          </div>
-        ))}
+/** Progress loops: an indeterminate bar, a pulsing dot, and the skeleton shimmer. */
+export const Progress: Story = {
+  render: () => (
+    <div className="flex items-center gap-8">
+      <div className="relative h-1 w-48 overflow-hidden rounded-full bg-hover">
+        <div className="animate-indeterminate-bar absolute inset-y-0 w-1/3 rounded-full bg-accent" />
       </div>
-    );
-  },
+      <span className="animate-todo-pulse size-2 rounded-full bg-accent" />
+      <div className="skeleton-shimmer h-4 w-40 rounded-md bg-skeleton" />
+    </div>
+  ),
 };
