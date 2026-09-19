@@ -50,6 +50,10 @@ export function Property({ label, children }: { label: ReactNode; children: Reac
   );
 }
 
+/** The in-place editing look: a hover wash, and a grey ring on focus. */
+export const editablePropertyClasses =
+  '-mx-1.5 px-1.5 text-sm hover:bg-hover focus-visible:bg-input focus-visible:ring-2 focus-visible:ring-edge-muted';
+
 /**
  * An editable property. The value is the control: a ghost input with no
  * pencil and no edit state.
@@ -65,7 +69,13 @@ export function EditableProperty({
       <label htmlFor={id} className="truncate text-ink-subtle">
         {label}
       </label>
-      <Input id={id} variant="ghost" size="sm" {...props} className={className} />
+      <Input
+        id={id}
+        variant="ghost"
+        size="sm"
+        {...props}
+        className={cn(editablePropertyClasses, className)}
+      />
     </>
   );
 }

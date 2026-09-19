@@ -5,7 +5,8 @@ import { EmptyStatePanel } from '@/components/EmptyStatePanel';
 import { Input } from '@/components/Input';
 import { MaskReveal } from '@/components/MaskReveal';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@/components/Menu';
-import { EditableProperty, Property, PropertyGrid } from '@/patterns/PropertyGrid';
+import { cn } from '@/lib/cn';
+import { EditableProperty, editablePropertyClasses, Property, PropertyGrid } from '@/patterns/PropertyGrid';
 import { ResourceDetail } from '@/patterns/ResourceDetail';
 import { Activity } from './Activity';
 import { AssignPopover, SourceBadge } from './Assign';
@@ -116,7 +117,7 @@ function FieldRow({
         size="sm"
         aria-label="Field name"
         placeholder="Field"
-        className="text-ink-subtle"
+        className={cn(editablePropertyClasses, 'text-ink-subtle')}
         value={label}
         onChange={(event) => onLabel(event.currentTarget.value)}
       />
@@ -125,6 +126,7 @@ function FieldRow({
         size="sm"
         aria-label={label || 'Field value'}
         placeholder="Value"
+        className={editablePropertyClasses}
         value={value}
         onChange={(event) => onValue(event.currentTarget.value)}
       />

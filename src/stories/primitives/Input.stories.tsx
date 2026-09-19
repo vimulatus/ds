@@ -1,13 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Input } from '@/components/Input';
-import { PHONE } from '../phone';
 
 /**
- * A single-line text control. `outlined` sits in a form: a hairline edge on
- * the input fill, and focus adds a soft 2px accent ring. `ghost` is a value
- * that edits in place: no frame until hover. Heights match Button, so an
- * input and a button sit on one line. For a label and an error, use
- * TextField.
+ * A thin native input. A hairline `edge-muted` border frames it on the input
+ * fill, and focus adds a soft 2px ring instead of an accent outline. Sizes
+ * match Button, so an input and a button sit on one line.
  */
 const meta = {
   title: 'Primitives/Input',
@@ -25,44 +22,24 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {};
 
-/** Heights are 24 and 32px, for each variant. */
 export const Sizes: Story = {
   render: () => (
     <div className="flex flex-col gap-2">
-      {(['outlined', 'ghost'] as const).map((variant) =>
-        (['sm', 'md'] as const).map((size) => (
-          <Input
-            key={variant + size}
-            variant={variant}
-            size={size}
-            placeholder={`${variant}, ${size}`}
-            aria-label={`${variant}, ${size}`}
-          />
-        ))
-      )}
+      {(['sm', 'md'] as const).map((size) => (
+        <Input key={size} size={size} placeholder={`size="${size}"`} />
+      ))}
     </div>
   ),
 };
 
-/** `aria-invalid` turns the hairline and ring to failure. */
+/** `aria-invalid` turns the border and ring to `failure`. */
 export const States: Story = {
   render: () => (
     <div className="flex flex-col gap-2">
-      <Input defaultValue="Q3 planning" aria-label="Filled" />
-      <Input aria-invalid defaultValue="not-an-email" aria-label="Invalid" />
-      <Input disabled placeholder="Disabled" aria-label="Disabled" />
-      <Input variant="ghost" defaultValue="Ghost: hover to see the fill" aria-label="Ghost" />
-    </div>
-  ),
-};
-
-/** On a phone `md` grows to 40px with 16px text, so iOS does not zoom on focus. */
-export const Phone: Story = {
-  ...PHONE,
-  render: () => (
-    <div className="flex flex-col gap-2">
-      <Input placeholder="Search documents" aria-label="Search" />
-      <Input variant="ghost" defaultValue="Untitled document" aria-label="Title" />
+      <Input defaultValue="Q3 planning" />
+      <Input aria-invalid defaultValue="not-an-email" />
+      <Input disabled placeholder="Disabled" />
+      <Input variant="ghost" placeholder="Ghost: the parent owns the frame" />
     </div>
   ),
 };
