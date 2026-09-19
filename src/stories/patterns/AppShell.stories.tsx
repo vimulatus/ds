@@ -31,7 +31,8 @@ import { LeadDetail } from './lead-detail/LeadDetail';
  * mark; labels live in tooltips on the right, and the active view fills its
  * glyph in accent with a marker flush to the edge. The canvas is one
  * rounded `bg-panel` pane on a hairline, 8px in from the window. One rail,
- * one canvas: no splits and no second sidebar.
+ * one canvas: no splits and no second sidebar. On a phone the same items
+ * become a bar of tabs under the canvas: the first four, then More.
  */
 const meta = {
   title: 'Patterns/App shell',
@@ -147,7 +148,6 @@ export const Default: Story = {
   ),
 };
 
-/** A list view in the canvas. The list stands empty here; the canvas holds whatever the view renders. */
 /** A lead in the canvas, with Leads active on the rail. */
 export const Lead: Story = {
   render: () => (
@@ -157,6 +157,7 @@ export const Lead: Story = {
   ),
 };
 
+/** A list view in the canvas. The list stands empty here; the canvas holds whatever the view renders. */
 export const List: Story = {
   render: () => (
     <Shell view="tasks">
@@ -170,12 +171,27 @@ export const List: Story = {
   ),
 };
 
-/** On a phone the rail sheds and the canvas fills the screen edge to edge, with no radius. */
+/**
+ * On a phone the rail becomes a bar of tabs under the canvas: the first four
+ * views, then More, which opens a sheet with the other views, the workspace
+ * and the account. The canvas stays a floating pane, 8px in from the page.
+ */
 export const Phone: Story = {
   ...PHONE,
   render: () => (
     <Shell view="files">
       <LaunchPlan />
+    </Shell>
+  ),
+};
+
+/** A lead on a phone. Leads lives in More, so More reads active. */
+export const PhoneLead: Story = {
+  ...PHONE,
+  name: 'Phone lead',
+  render: () => (
+    <Shell view="leads">
+      <LeadDetail />
     </Shell>
   ),
 };
