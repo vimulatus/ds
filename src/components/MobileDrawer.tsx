@@ -119,27 +119,30 @@ function MobileDrawerContent({ className, maxHeight, targetHeight, style, onFocu
 
   return (
     <Layer depth={0}>
-      <Base.Popup
-        {...props}
-        onFocus={(event) => {
-          onFocus?.(event);
-          scrollToFocusedInput(event);
-        }}
-        style={{
-          '--drawer-max-h': `${max}dvh`,
-          ...(target != null ? { '--drawer-h': `${target}dvh` } : {}),
-          ...(style as CSSProperties),
-        } as CSSProperties}
-        className={cn(
-          'portal-scope',
-          'fixed! inset-x-0 bottom-(--virtual-keyboard-height,0px) z-modal mobile-sheet glass bg-menu-glass [--color-dialog:var(--color-menu-glass)] flex flex-col max-h-[min(var(--drawer-max-h),calc(100dvh-var(--safe-top,0px)-var(--virtual-keyboard-height,0px)-8px))] data-transitioning:transition-transform data-transitioning:duration-200 ease-out motion-reduce:transition-none',
-          // Base UI marks enter, exit and drag with its own attributes; this carries the slide.
-          'motion-sheet',
-          target != null ? 'h-(--drawer-h)' : 'h-fit',
-          'pb-[max(16px,var(--mobile-sheet-safe-padding))] has-[[data-drawer-scroll-body]]:pb-0',
-          className
-        )}
-      />
+      {/* Base UI binds the swipe and the touch scroll lock on the viewport, a full-screen layer. */}
+      <Base.Viewport className="fixed inset-0 z-modal">
+        <Base.Popup
+          {...props}
+          onFocus={(event) => {
+            onFocus?.(event);
+            scrollToFocusedInput(event);
+          }}
+          style={{
+            '--drawer-max-h': `${max}dvh`,
+            ...(target != null ? { '--drawer-h': `${target}dvh` } : {}),
+            ...(style as CSSProperties),
+          } as CSSProperties}
+          className={cn(
+            'portal-scope',
+            'fixed! inset-x-0 bottom-(--virtual-keyboard-height,0px) z-modal mobile-sheet glass bg-menu-glass [--color-dialog:var(--color-menu-glass)] flex flex-col max-h-[min(var(--drawer-max-h),calc(100dvh-var(--safe-top,0px)-var(--virtual-keyboard-height,0px)-8px))] data-transitioning:transition-transform data-transitioning:duration-200 ease-out motion-reduce:transition-none',
+            // Base UI marks enter, exit and drag with its own attributes; this carries the slide.
+            'motion-sheet',
+            target != null ? 'h-(--drawer-h)' : 'h-fit',
+            'pb-[max(16px,var(--mobile-sheet-safe-padding))] has-[[data-drawer-scroll-body]]:pb-0',
+            className
+          )}
+        />
+      </Base.Viewport>
     </Layer>
   );
 }
