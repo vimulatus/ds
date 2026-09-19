@@ -1,98 +1,107 @@
-import { ArrowRight, CheckCircle, Envelope, MagnifyingGlass, X } from '@phosphor-icons/react';
+import { ArrowRight, CheckCircle, Envelope, MagnifyingGlass } from '@phosphor-icons/react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/Button';
-import { Field } from '@/components/Field';
+import { ButtonGroup } from '@/components/ButtonGroup';
 import { InputGroup } from '@/components/InputGroup';
 
 /**
- * An Input with addons in one frame: an icon, a unit or a small button at
- * either end. The frame owns the border and the focus ring.
+ * Composes an Input with decorative addons, standard Buttons, and a reactive
+ * clear action inside one shared frame.
  *
  * **Do**
- * - Keep addons short: one icon, one unit, one action.
- * - Use a Button at `icon-sm` with `aria-label` for an action.
- * - Wrap it in a Field for a label and an error.
+ * - Put exactly one `InputGroup.Input` inside the root.
+ * - Put icons and actions in `InputGroup.Addon` and set their visual edge with
+ *   `align`; DOM order does not determine placement.
+ * - Use `InputGroup.ClearButton` for the standard reactive clear action.
+ * - Nest the root in `ButtonGroup` when it must share a frame with sibling
+ *   Buttons; size and framing are inherited by the group, not the input.
  */
 const meta = {
   title: 'Forms/InputGroup',
   component: InputGroup,
-  args: { size: 'md', placeholder: 'Search documents' },
-  argTypes: { size: { control: 'select', options: ['sm', 'md'] } },
-  decorators: [(Story) => <div className="max-w-sm">{Story()}</div>],
 } satisfies Meta<typeof InputGroup>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** A search icon before, a clear button after. Clearing puts focus back in the input. */
+/**
+ * The clear slot follows the input value, dispatches the normal input event,
+ * and restores focus without a tooltip.
+ */
 export const SearchAndClear: Story = {
   name: 'Search and clear',
-  render: function Render(args) {
+  render: function Render() {
     const [query, setQuery] = useState('Quarterly plan');
-    const input = useRef<HTMLInputElement>(null);
     return (
-      <InputGroup
-        {...args}
-        ref={input}
-        type="search"
-        value={query}
-        onValueChange={setQuery}
-        aria-label="Search documents"
-        start={<MagnifyingGlass />}
-        end={
-          query && (
-            <Button
-              size="icon-sm"
-              aria-label="Clear"
-              className="-me-1.5"
-              onClick={() => {
-                setQuery('');
-                input.current?.focus();
-              }}
-            >
-              <X />
-            </Button>
-          )
-        }
-      />
+      <InputGroup className="max-w-sm">
+        <InputGroup.Input
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.currentTarget.value)}
+          placeholder="Search documents"
+          aria-label="Search documents"
+        />
+        <InputGroup.Addon align="inline-start">
+          <MagnifyingGlass aria-hidden="true" />
+        </InputGroup.Addon>
+        <InputGroup.Addon align="inline-end">
+          <InputGroup.ClearButton />
+        </InputGroup.Addon>
+      </InputGroup>
     );
   },
 };
 
-/** Text, icon and button addons. */
+/**
+ * Addon alignment controls visual placement independently of DOM order. Use
+ * `InputGroup.Button` for an interactive action.
+ */
 export const AddonsAndActions: Story = {
   name: 'Addons and actions',
   render: () => (
-    <div className="flex flex-col gap-3">
-      <InputGroup
-        type="email"
-        defaultValue="team@example.com"
-        aria-label="Team email"
-        start={<Envelope />}
-        end={<CheckCircle className="text-success" />}
-      />
-      <InputGroup
-        placeholder="example.com"
-        aria-label="Website"
-        start="https://"
-        end={
-          <Button size="icon-sm" aria-label="Open website" className="-me-1.5">
+    <div className="flex w-full max-w-sm flex-col gap-3">
+      <InputGroup>
+        <InputGroup.Input type="email" defaultValue="team@example.com" aria-label="Team email" />
+        <InputGroup.Addon align="inline-start">
+          <Envelope aria-hidden="true" />
+        </InputGroup.Addon>
+        <InputGroup.Addon align="inline-end">
+          <CheckCircle className="text-success" aria-hidden="true" />
+        </InputGroup.Addon>
+      </InputGroup>
+
+      <InputGroup>
+        <InputGroup.Addon align="inline-start">https://</InputGroup.Addon>
+        <InputGroup.Input placeholder="example.com" aria-label="Website" />
+        <InputGroup.Addon align="inline-end">
+          <InputGroup.Button aria-label="Open website" square>
             <ArrowRight />
-          </Button>
-        }
-      />
-      <InputGroup size="sm" placeholder="0" aria-label="Budget" start="$" end="per month" />
+          </InputGroup.Button>
+        </InputGroup.Addon>
+      </InputGroup>
     </div>
   ),
 };
 
-/** Inside a Field, the frame takes the invalid hairline and the error pins beside it. */
-export const InAField: Story = {
-  name: 'In a field',
+/**
+ * When nested in ButtonGroup, InputGroup inherits its size and lets the outer
+ * group own the shared frame.
+ */
+export const ButtonGroupComposition: Story = {
+  name: 'Button group composition',
   render: () => (
-    <Field label="Website" invalid error="Enter a domain, such as example.com.">
-      <InputGroup start="https://" defaultValue="example" />
-    </Field>
+    <ButtonGroup variant="outlined" size="md" className="w-full max-w-sm" aria-label="Search documents">
+      <InputGroup>
+        <InputGroup.Input placeholder="Search documents" aria-label="Search query" />
+        <InputGroup.Addon align="inline-start">
+          <MagnifyingGlass aria-hidden="true" />
+        </InputGroup.Addon>
+      </InputGroup>
+      <ButtonGroup.Divider />
+      <Button aria-label="Submit search" square>
+        <ArrowRight />
+      </Button>
+    </ButtonGroup>
   ),
 };
