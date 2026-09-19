@@ -164,19 +164,19 @@ export function EntityList({
 
       {count > 0 && (
         <div className="pointer-events-none absolute inset-x-0 bottom-3 z-action-menu flex justify-center transition-[opacity,translate] duration-200 ease-out starting:translate-y-2 starting:opacity-0">
-          <Toolbar.Root aria-label="Selection" className="pointer-events-auto">
+          <Toolbar size="icon-sm" aria-label="Selection" className="pointer-events-auto">
             <span className="px-2 text-xs font-medium text-ink tabular-nums">{count} selected</span>
             {selectionActions && (
               <>
-                <Toolbar.Separator />
+                <Toolbar.Divider />
                 <Toolbar.Group>{selectionActions}</Toolbar.Group>
               </>
             )}
-            <Toolbar.Separator />
+            <Toolbar.Divider />
             <Toolbar.Button label="Clear selection" shortcut="Esc" onClick={() => onSelectedChange?.(new Set())}>
               <X />
             </Toolbar.Button>
-          </Toolbar.Root>
+          </Toolbar>
         </div>
       )}
     </div>

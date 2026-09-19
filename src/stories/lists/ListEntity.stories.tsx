@@ -138,7 +138,7 @@ export const WithMeta: Story = {
         kind="document"
         title="Spring launch plan"
         secondary="Launch / Planning"
-        badges={<TagDot hue="blue" size="sm" className="text-xs text-ink-muted">Launch</TagDot>}
+        badges={<span className="inline-flex min-w-0 items-center gap-2 text-xs text-ink-muted"><TagDot fill="var(--color-blue)" size="sm" />Launch</span>}
         people={[{ name: 'Nina Park' }, { name: 'Omar Haddad' }]}
         time="2h"
       />
@@ -155,7 +155,7 @@ export const WithMeta: Story = {
         kind="call"
         title="Weekly launch sync"
         secondary="32 min"
-        badges={<Badge size="sm" hue="green">Recorded</Badge>}
+        badges={<Badge size="sm" className="border-transparent bg-green-bg text-green-ink">Recorded</Badge>}
         people={[{ name: 'Nina Park' }, { name: 'Omar Haddad' }, { name: 'Lena Novak' }, { name: 'Jonas Berg' }]}
         time="Tue"
       />

@@ -1,6 +1,6 @@
 import { DotsThree } from '@phosphor-icons/react';
 import { type ComponentProps, type KeyboardEvent, type ReactNode, useRef, useState } from 'react';
-import { AvatarGroup } from '@/components/Avatar';
+import { Avatar, AvatarGroup } from '@/components/Avatar';
 import { Checkbox } from '@/components/Checkbox';
 import { Menu, MenuContent, MenuTrigger } from '@/components/Menu';
 import { cn } from '@/lib/cn';
@@ -226,7 +226,17 @@ export function ListEntity({
       </span>
 
       {badges && <span className="flex shrink-0 items-center gap-1 @max-lg:hidden">{badges}</span>}
-      {people && people.length > 0 && <AvatarGroup people={people} size="sm" className="shrink-0 @max-md:hidden" />}
+      {people && people.length > 0 && (
+        <AvatarGroup size="sm" className="shrink-0 @max-md:hidden">
+          {people.slice(0, 3).map(({ name, src }) => (
+            <Avatar key={name} size="sm">
+              {src && <Avatar.Image src={src} alt="" />}
+              <Avatar.Fallback>{name.split(' ').slice(0, 2).map((word) => word[0]).join('')}</Avatar.Fallback>
+            </Avatar>
+          ))}
+          {people.length > 3 && <AvatarGroup.Count size="sm">+{people.length - 3}</AvatarGroup.Count>}
+        </AvatarGroup>
+      )}
       {time && (
         <span className="shrink-0 whitespace-nowrap text-xs text-ink-subtle tabular-nums touch:self-start touch:pt-0.5">
           {time}

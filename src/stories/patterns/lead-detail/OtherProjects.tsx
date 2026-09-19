@@ -79,12 +79,12 @@ function ProjectRow({
           </span>
         </span>
         {closed?.closed ? (
-          <Badge size="sm" hue="red">
+          <Badge size="sm" className="border-transparent bg-red-bg text-red-ink">
             Not interested
             <span className="hidden @[560px]/article:inline">· {closed.closed.reason}</span>
           </Badge>
         ) : fit ? (
-          <Badge size="sm" hue="green" className="hidden @[560px]/article:inline-flex">
+          <Badge size="sm" className="border-transparent bg-green-bg text-green-ink hidden @[560px]/article:inline-flex">
             {fit}
           </Badge>
         ) : undefined}
@@ -113,7 +113,7 @@ function ProjectRow({
         </PropertyGrid>
         <div className="flex flex-wrap items-center gap-2">
           {fit && (
-            <Badge size="sm" hue="green" className="@[560px]/article:hidden">
+            <Badge size="sm" className="border-transparent bg-green-bg text-green-ink @[560px]/article:hidden">
               {fit}
             </Badge>
           )}

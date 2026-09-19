@@ -3,12 +3,21 @@ import { useState } from 'react';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
 import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from '@/components/Popover';
+import { cn } from '@/lib/cn';
+import { HUE_CLASSES } from '@/lib/hue';
 import { PEOPLE, type Person, SOURCE_HUE, type Source } from './data';
+
+const initials = (name: string) =>
+  name
+    .split(' ')
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join('');
 
 /** A lead source on its own hue. */
 export function SourceBadge({ source }: { source: Source }) {
   return (
-    <Badge size="sm" hue={SOURCE_HUE[source]} className="w-fit">
+    <Badge size="sm" className={cn('w-fit border-transparent', HUE_CLASSES[SOURCE_HUE[source]].tint)}>
       {source}
     </Badge>
   );
@@ -18,7 +27,9 @@ export function SourceBadge({ source }: { source: Source }) {
 export function PersonLine({ person }: { person: Person }) {
   return (
     <span className="flex items-center gap-1.5">
-      <Avatar name={person.name} size="sm" aria-hidden />
+      <Avatar size="sm" aria-hidden>
+        <Avatar.Fallback>{initials(person.name)}</Avatar.Fallback>
+      </Avatar>
       {person.name}
     </span>
   );
@@ -54,7 +65,9 @@ export function AssignPopover({
                 }}
                 className="flex items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-sm hover:bg-hover focus-visible:outline-2 focus-visible:outline-accent touch:min-h-11"
               >
-                <Avatar name={candidate.name} size="md" aria-hidden />
+                <Avatar size="md" aria-hidden>
+                  <Avatar.Fallback>{initials(candidate.name)}</Avatar.Fallback>
+                </Avatar>
                 <span className="flex min-w-0 flex-1 flex-col leading-tight">
                   <span className="text-ink">{candidate.name}</span>
                   <span className="text-xs text-ink-subtle">{candidate.role}</span>

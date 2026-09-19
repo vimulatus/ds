@@ -35,7 +35,10 @@ export function RailAccount({ name, src, children }: { name: string; src?: strin
       <Toolbar.Button
         render={<MenuTrigger variant="ghost" size="icon-md" label={name} tooltipSide="right" />}
       >
-        <Avatar name={name} src={src} aria-hidden />
+        <Avatar aria-hidden>
+          {src && <Avatar.Image src={src} alt="" />}
+          <Avatar.Fallback>{name.split(' ').slice(0, 2).map((word) => word[0]).join('')}</Avatar.Fallback>
+        </Avatar>
       </Toolbar.Button>
       <MenuContent side="right" align="end">
         {children}

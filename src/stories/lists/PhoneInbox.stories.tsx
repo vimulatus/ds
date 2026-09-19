@@ -56,7 +56,7 @@ function Inbox({ initialSelected = [] }: { initialSelected?: string[] }) {
           tone: 'accent',
           title: 'All done',
           description: 'Nothing left in your inbox.',
-          action: (
+          children: (
             <Button variant="outlined" size="md" onClick={() => setItems(INBOX)}>
               Start over
             </Button>

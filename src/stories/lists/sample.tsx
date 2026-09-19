@@ -13,7 +13,7 @@ export const ROWS: EntityListItem[] = [
     time: '2m',
     unread: true,
     people: [{ name: 'Nina Park' }, { name: 'Omar Haddad' }],
-    badges: <TagDot hue="blue" size="sm" className="text-xs text-ink-muted">Launch</TagDot>,
+    badges: <span className="inline-flex min-w-0 items-center gap-2 text-xs text-ink-muted"><TagDot fill="var(--color-blue)" size="sm" />Launch</span>,
   },
   {
     id: 'faq',
@@ -42,7 +42,7 @@ export const ROWS: EntityListItem[] = [
     title: 'Launch budget',
     secondary: 'Finance',
     time: '3h',
-    badges: <TagDot hue="green" size="sm" className="text-xs text-ink-muted">Finance</TagDot>,
+    badges: <span className="inline-flex min-w-0 items-center gap-2 text-xs text-ink-muted"><TagDot fill="var(--color-green)" size="sm" />Finance</span>,
   },
   {
     id: 'sync',
@@ -77,7 +77,7 @@ export const ROWS: EntityListItem[] = [
     title: 'Product demo.mp4',
     secondary: '4:12',
     time: 'Tue',
-    badges: <Badge size="sm" hue="violet">Final cut</Badge>,
+    badges: <Badge size="sm" className="border-transparent bg-violet-bg text-violet-ink">Final cut</Badge>,
   },
   {
     id: 'voiceover',

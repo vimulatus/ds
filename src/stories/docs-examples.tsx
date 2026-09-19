@@ -211,7 +211,7 @@ export function CenterLine() {
           <MagnifyingGlass />
           Search
         </Button>
-        <Badge hue="green">Live</Badge>
+        <Badge className="border-transparent bg-green-bg text-green-ink">Live</Badge>
         <span className="size-6 rounded-full bg-violet-bg" />
         <span className="text-sm">Launch plan</span>
       </div>
@@ -249,17 +249,20 @@ export function EmptyStates() {
         <EmptyStatePanel
           centered
           className="min-h-40 w-full"
-          illustration={<Tray className="size-8 text-ink-extra-muted" />}
+          graphic={Tray}
+          graphicClassName="size-8 text-ink-extra-muted"
           title="No files yet"
           description="Upload a file or drop one here."
-          action={<Button variant="outlined">Upload file</Button>}
-        />
+        >
+          <Button variant="outlined">Upload file</Button>
+        </EmptyStatePanel>
       }
       bad={
         <EmptyStatePanel
           centered
           className="min-h-40 w-full"
-          illustration={<Tray className="size-8 text-ink-extra-muted" />}
+          graphic={Tray}
+          graphicClassName="size-8 text-ink-extra-muted"
           title="Nothing to see here!"
           description="It looks like you haven't uploaded anything yet."
         />
@@ -331,9 +334,9 @@ export function IconLabels() {
 export function Badges() {
   return (
     <Example caption="A badge is a state in one or two words, never a sentence.">
-      <Badge hue="amber">In review</Badge>
-      <Badge hue="green">Done</Badge>
-      <Badge hue="red">Overdue</Badge>
+      <Badge className="border-transparent bg-amber-bg text-amber-ink">In review</Badge>
+      <Badge className="border-transparent bg-green-bg text-green-ink">Done</Badge>
+      <Badge className="border-transparent bg-red-bg text-red-ink">Overdue</Badge>
       <Badge variant="outlined">Draft</Badge>
     </Example>
   );

@@ -151,7 +151,8 @@ export const List: Story = {
     <Shell view="tasks">
       <EmptyStatePanel
         centered
-        illustration={<Tray className="size-12" />}
+        graphic={Tray}
+        graphicClassName="size-12"
         title="No tasks"
         description="Tasks assigned to you show up here."
       />

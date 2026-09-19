@@ -103,7 +103,7 @@ export const Empty: Story = {
         tone: 'neutral',
         title: 'No files yet',
         description: 'Files you create or upload show up here.',
-        action: (
+        children: (
           <Button variant="outlined" size="sm">
             Upload a file
           </Button>
