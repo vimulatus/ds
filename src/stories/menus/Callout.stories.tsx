@@ -18,6 +18,21 @@ import { TextField } from '@/components/TextField';
 const meta = {
   title: 'Menus/Callout',
   component: Callout,
+  args: {
+    content: 'Everyone on the team can open this file. Sharing settings live on the team page.',
+    variant: 'default',
+    side: 'right',
+    children: (
+      <Button size="icon-sm" aria-label="Why">
+        <Info />
+      </Button>
+    ),
+  },
+  argTypes: {
+    variant: { control: 'select', options: ['default', 'danger'] },
+    side: { control: 'select', options: ['top', 'right', 'bottom', 'left'] },
+    children: { control: false },
+  },
   parameters: { docs: { story: { inline: false, iframeHeight: 240 } } },
 } satisfies Meta<typeof Callout>;
 
@@ -29,15 +44,10 @@ type Story = StoryObj<typeof meta>;
  * Focus stays on the trigger, and the trigger has no tooltip of its own.
  */
 export const Default: Story = {
-  args: { children: <span />, content: '' },
-  render: () => (
+  render: (args) => (
     <div className="flex items-center gap-2 p-8">
       <span className="text-sm text-ink">Shared with the team</span>
-      <Callout content="Everyone on the team can open this file. Sharing settings live on the team page.">
-        <Button size="icon-sm" aria-label="Why">
-          <Info />
-        </Button>
-      </Callout>
+      <Callout {...args} />
     </div>
   ),
 };
@@ -47,7 +57,6 @@ export const Default: Story = {
  * to clear it. Narrow the viewport and the callout drops under the field.
  */
 export const Danger: Story = {
-  args: { children: <span />, content: '' },
   render: function Render() {
     const [value, setValue] = useState('launch plan');
     const valid = /^[A-Za-z0-9_-]+$/.test(value);
@@ -70,32 +79,23 @@ export const Danger: Story = {
 
 /** Pinned callouts around one anchor, one per side. */
 export const Placements: Story = {
-  args: { children: <span />, content: '' },
   render: function Render() {
     const anchor = useRef<HTMLDivElement>(null);
-    const [ready, setReady] = useState(false);
     return (
       <div className="flex items-center justify-center p-24">
-        <div
-          ref={(el) => {
-            anchor.current = el;
-            if (el && !ready) setReady(true);
-          }}
-          className="rounded-md border border-edge px-4 py-2 text-sm text-ink"
-        >
+        <div ref={anchor} className="rounded-md border border-edge px-4 py-2 text-sm text-ink">
           Anchor
         </div>
-        {ready &&
-          (['top', 'right', 'bottom', 'left'] as const).map((side) => (
-            <PinnedCallout
-              key={side}
-              anchor={anchor}
-              placement={side}
-              variant={side === 'bottom' ? 'danger' : 'default'}
-            >
-              Placed {side}
-            </PinnedCallout>
-          ))}
+        {(['top', 'right', 'bottom', 'left'] as const).map((side) => (
+          <PinnedCallout
+            key={side}
+            anchor={anchor}
+            placement={side}
+            variant={side === 'bottom' ? 'danger' : 'default'}
+          >
+            Placed {side}
+          </PinnedCallout>
+        ))}
       </div>
     );
   },
@@ -107,7 +107,6 @@ export const Placements: Story = {
  */
 export const InADialog: Story = {
   name: 'In a dialog',
-  args: { children: <span />, content: '' },
   render: () => (
     <div className="p-8">
       <Dialog.Root>

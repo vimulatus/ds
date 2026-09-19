@@ -106,9 +106,16 @@ export function PinnedCallout({
   useLayoutEffect(() => {
     const target = anchor.current;
     if (!target) return;
-    target.style.setProperty('anchor-name', name);
+    const names = () =>
+      (target.style.getPropertyValue('anchor-name') || '')
+        .split(',')
+        .map((n) => n.trim())
+        .filter((n) => n && n !== name);
+    target.style.setProperty('anchor-name', [...names(), name].join(', '));
     return () => {
-      target.style.removeProperty('anchor-name');
+      const rest = names();
+      if (rest.length) target.style.setProperty('anchor-name', rest.join(', '));
+      else target.style.removeProperty('anchor-name');
     };
   }, [anchor, name]);
 
