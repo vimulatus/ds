@@ -25,7 +25,8 @@ A Storybook of Vasu's visual language, built on Base UI, that he studies and reu
 ```
 src/styles/     palette.css (raw colors) -> themes.css (roles per theme) -> tokens.css (Tailwind @theme, layers, glass,
                 motion, touch), copied as is from the prototype; base-ui.css adds what Base UI needs
-src/lib/        cn (clsx + tailwind-merge), touch (data-touch-device, useTouch)
+src/lib/        cn (clsx + tailwind-merge), touch (data-touch-device, useTouch), mobile (useMobile), hue,
+                variants (createVariants), placement
 src/components/ one file per component. Base UI parts styled with Tailwind, or plain elements
 src/patterns/   compositions of components: ResourceDetail, PropertyGrid, AppShell (SidebarRail, BottomNav, Canvas),
                 EntityList, ListEntity, EntityIcon, SwipableRow
@@ -36,11 +37,12 @@ src/stories/    one folder per Storybook section; a pattern story composes src/p
 ## Conventions
 
 - Import by path: `@/components/Button`, `@/patterns/ResourceDetail`. No barrel file.
+- A component keeps the prototype's API and look, written fresh on Base UI. Vasu's own designs are the exceptions: MaskReveal, Hotkey, EmptyStatePanel and its drawings, RadioGroup, the EntityList and ListEntity row look, the app shell and the tinted swipe actions.
 - A component wraps Base UI when Base UI has the behavior. Base UI docs ship in `node_modules/@base-ui/react/docs`.
 - Colors come from role utilities only: `bg-page|panel|surface|hover|input|menu|dialog|tooltip`, `text-ink|ink-muted|ink-subtle|ink-extra-muted|ink-placeholder|ink-disabled`, `border-edge|edge-muted`, `accent`, and `<hue>`, `<hue>-ink`, `<hue>-bg` for the 12 hues plus `success`, `failure`, `warning`, `write`. Never a raw palette color. A class built at runtime needs a literal class map such as `src/lib/hue.ts`, because Tailwind only emits classes it finds in the source.
 - A floating surface is `glass bg-menu-glass`, and animates with `menu-open-animation`, `dialog-content-open-animation` or `dialog-overlay-open-animation`; a scrim is `scrim-glass`. Stacking uses `z-modal-overlay|modal|action-menu|tool-tip|toast-region`.
-- `Layer depth={n}` sets `bg-surface` to surface step n. `Card` sets depth 1.
-- Variants are `ghost`, `outlined`, `accent`, `danger`, `cta`; sizes are `sm` (24px) and `md` (32px), with `icon-sm` and `icon-md`. A screen has at most one `cta`.
+- `Layer depth={n}` sets `bg-surface` to surface step n. `Card` takes the depth around it unless you pass `depth` or `offset`.
+- Button variants are `ghost`, `outlined`, `accent`, `danger`, `cta`; sizes are `sm` (24px) and `md` (32px), with `icon-sm` and `icon-md`. A screen has at most one `cta`.
 - `touch:` and `not-touch:` variants style touch mode; `useTouch()` reads it in React.
 - Icons are `@phosphor-icons/react`. A component sizes them with `[&_svg]:size-*`.
 - A story file opens with a doc comment that says what the component is for.
