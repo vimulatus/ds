@@ -8,10 +8,11 @@ const Column = ({ children }: { children: ReactNode }) => (
 );
 
 /**
- * What a view shows when it has nothing to show. `kind` picks one of four
- * states and brings its graphic and default copy: no search results, no
- * filter results, not found and error. Each kind tints its graphic: accent
- * for the misses, warning for not found, danger for an error; `tone`
+ * What a view shows when it has nothing to show. `kind` picks one of five
+ * states and brings its graphic and default copy: no items yet, no search
+ * results, no filter results, not found and error. Each kind tints its
+ * graphic: neutral for an empty list, accent for the misses, warning for not
+ * found, danger for an error; `tone`
  * overrides it. The title lands on the same baseline in every state. The
  * graphic enters in two layers at once: the slab rises from below while the
  * icon's pieces drop in from above, one after another.
@@ -22,7 +23,7 @@ const meta = {
   argTypes: {
     kind: {
       control: 'select',
-      options: ['no-search-results', 'no-filter-results', 'not-found', 'error'],
+      options: ['no-items', 'no-search-results', 'no-filter-results', 'not-found', 'error'],
     },
     tone: {
       control: 'select',
@@ -38,6 +39,16 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+/** A list with nothing in it yet. The one action adds the first item. */
+export const NoItems: Story = {
+  args: {
+    kind: 'no-items',
+    title: 'No files yet',
+    description: 'Files you create or upload show up here.',
+    primaryAction: { label: 'Upload a file', onClick: () => {} },
+  },
+};
 
 /** A search that matched nothing. The title can name the query. */
 export const NoSearchResults: Story = {

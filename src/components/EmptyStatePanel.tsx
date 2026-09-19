@@ -2,13 +2,14 @@ import type { ComponentType, ReactNode } from 'react';
 import {
   ErrorGraphic,
   NoFilterResultsGraphic,
+  NoItemsGraphic,
   NoSearchResultsGraphic,
   NotFoundGraphic,
 } from '@/components/EmptyStateGraphics';
 import { PillButton } from '@/components/PillButton';
 import { cn } from '@/lib/cn';
 
-export type EmptyStateKind = 'no-search-results' | 'no-filter-results' | 'not-found' | 'error';
+export type EmptyStateKind = 'no-items' | 'no-search-results' | 'no-filter-results' | 'not-found' | 'error';
 
 export type EmptyStateTone = 'neutral' | 'accent' | 'warning' | 'danger';
 
@@ -24,6 +25,12 @@ const TONE_CLASS: Record<EmptyStateTone, string> = {
 
 /** The graphic, tone and default copy of each kind. Props override them. */
 const KINDS: Record<EmptyStateKind, { graphic: Graphic; tone: EmptyStateTone; title: string; description: string }> = {
+  'no-items': {
+    graphic: NoItemsGraphic,
+    tone: 'neutral',
+    title: 'Nothing here yet',
+    description: 'Items you add show up here.',
+  },
   'no-search-results': {
     graphic: NoSearchResultsGraphic,
     tone: 'accent',

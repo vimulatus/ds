@@ -121,6 +121,29 @@ export function NoFilterResultsGraphic({ className }: GraphicProps) {
   );
 }
 
+/** The empty-set sign: a ring with a stroke through it, for a list with nothing in it yet. */
+export function NoItemsGraphic({ className }: GraphicProps) {
+  return (
+    <Slab
+      label="Nothing here yet"
+      className={className}
+      symbol={(id) => (
+        <g
+          id={`${id}-base-symbol`}
+          className="es-icon"
+          stroke="currentColor"
+          strokeOpacity=".72"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="120" cy="88" r="11" fill="none" strokeWidth="2" />
+          <path d="M129 72l-18 32" fill="none" strokeWidth="2" />
+        </g>
+      )}
+    />
+  );
+}
+
 /** 404, one digit at a time. */
 export function NotFoundGraphic({ className }: GraphicProps) {
   return (
