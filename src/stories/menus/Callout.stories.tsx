@@ -1,9 +1,17 @@
-import { Dialog } from '@base-ui/react/dialog';
 import { Info } from '@phosphor-icons/react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import { Button } from '@/components/Button';
 import { Callout, PinnedCallout } from '@/components/Callout';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/Dialog';
 import { TextField } from '@/components/TextField';
 
 /**
@@ -109,28 +117,27 @@ export const InADialog: Story = {
   name: 'In a dialog',
   render: () => (
     <div className="p-8">
-      <Dialog.Root>
-        <Dialog.Trigger render={<Button variant="outlined" />}>New tag</Dialog.Trigger>
-        <Dialog.Portal>
-          <Dialog.Backdrop className="motion-fade fixed inset-0 z-dialog bg-scrim" />
-          <Dialog.Popup className="motion-dialog fixed top-1/2 left-1/2 z-dialog flex w-96 max-w-[calc(100vw-2rem)] -translate-1/2 flex-col gap-4 rounded-xl border border-edge-muted bg-dialog p-4 shadow-lg">
-            <Dialog.Title className="text-sm font-semibold text-ink">New tag</Dialog.Title>
-            <TextField
-              label="Tag"
-              defaultValue="launch plan"
-              invalid
-              error="Use letters, numbers, dashes and underscores."
-              spellCheck={false}
-            />
-            <div className="flex justify-end gap-2">
-              <Dialog.Close render={<Button variant="ghost" />}>Cancel</Dialog.Close>
-              <Button variant="cta" disabled>
-                Save
-              </Button>
-            </div>
-          </Dialog.Popup>
-        </Dialog.Portal>
-      </Dialog.Root>
+      <Dialog>
+        <DialogTrigger render={<Button variant="outlined" />}>New tag</DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New tag</DialogTitle>
+          </DialogHeader>
+          <TextField
+            label="Tag"
+            defaultValue="launch plan"
+            invalid
+            error="Use letters, numbers, dashes and underscores."
+            spellCheck={false}
+          />
+          <DialogFooter>
+            <DialogClose render={<Button variant="ghost" />}>Cancel</DialogClose>
+            <Button variant="cta" disabled>
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   ),
 };
