@@ -137,7 +137,9 @@ function SelectContent({ className, children, depth, mount, portalScope, ...prop
             <BaseSelect.Popup
               {...props}
               className={cn(
-                'z-action-menu max-h-[var(--available-height)] min-w-[var(--anchor-width)] overflow-y-auto rounded-xl border border-edge bg-menu-glass p-1.5 glass menu-open-animation',
+                // Glass owns the box and the List scrolls inside it: the rim is an
+                // `::after` at `inset: 0`, which would scroll with the content.
+                'z-action-menu flex max-h-[var(--available-height)] min-w-[var(--anchor-width)] flex-col rounded-xl border border-edge bg-menu-glass p-1.5 glass menu-open-animation',
                 className
               )}
             >
@@ -158,7 +160,10 @@ export type SelectListboxProps = Omit<ComponentProps<typeof BaseSelect.List>, 'c
 function SelectListbox({ className, ...props }: SelectListboxProps) {
   const { nodes, itemComponent: ItemComponent } = useSelectContext();
   return (
-    <BaseSelect.List {...props} className={cn('flex flex-col gap-(--app-border-width)', className)}>
+    <BaseSelect.List
+      {...props}
+      className={cn('flex min-h-0 flex-1 flex-col gap-(--app-border-width) overflow-y-auto', className)}
+    >
       {nodes.map((node) => (
         <ItemComponent key={node.key} item={node} />
       ))}
