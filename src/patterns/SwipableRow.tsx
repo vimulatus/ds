@@ -20,6 +20,7 @@ const LIGHT_INK = 'light-mode:[&>*]:text-[color-mix(in_oklab,currentColor_55%,va
 export type SwipeAction = {
   label: string;
   icon: ReactNode;
+  /** Defaults to `accent`. */
   tone?: SwipeTone;
   onAction: () => void;
   /** The row leaves the list after this action: it slides out and collapses before `onAction` runs. */
@@ -142,7 +143,7 @@ export function SwipableRow({ children, trailing = [], leading, className }: Swi
                   onClick={() => run(action)}
                   className={cn(
                     'flex min-w-0 flex-col items-center justify-center gap-1 overflow-hidden text-xs font-medium transition-[flex-grow] duration-200 ease-out [&_svg]:size-6',
-                    TONE[action.tone ?? 'neutral'],
+                    TONE[action.tone ?? 'accent'],
                     LIGHT_INK,
                     armed ? 'grow-[99]' : 'grow',
                     'basis-0'
