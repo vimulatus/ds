@@ -1,4 +1,4 @@
-import { Tray, X } from '@phosphor-icons/react';
+import { X } from '@phosphor-icons/react';
 import { Fragment, type KeyboardEvent, type ReactNode, useId, useRef, useState } from 'react';
 import { Scroll } from '@/components/Scroll';
 import { EmptyStatePanel, type EmptyStatePanelProps } from '@/components/EmptyStatePanel';
@@ -30,12 +30,10 @@ export type EntityListProps = {
   selectionActions?: ReactNode;
   /** Wraps each row, for example in a SwipableRow. */
   renderRow?: (item: EntityListItem, row: ReactNode) => ReactNode;
-  /** What shows when there are no items. Without a `kind` or `graphic` it draws a tray. */
+  /** What shows when there are no items. Without a `kind` or `graphic` it uses the `no-items` kind. */
   empty?: EmptyStatePanelProps;
   className?: string;
 };
-
-const EMPTY_GRAPHIC = { graphic: Tray, graphicClassName: 'size-12' } satisfies EmptyStatePanelProps;
 
 function groupItems(items: EntityListItem[]) {
   const groups = new Map<string | undefined, EntityListItem[]>();
@@ -107,7 +105,7 @@ export function EntityList({
   if (items.length === 0) {
     return (
       <div className={cn('flex min-h-0 flex-1 flex-col', className)}>
-        <EmptyStatePanel centered {...(empty.kind || empty.graphic ? {} : EMPTY_GRAPHIC)} {...empty} />
+        <EmptyStatePanel centered {...(empty.kind || empty.graphic ? {} : { kind: 'no-items' })} {...empty} />
       </div>
     );
   }
