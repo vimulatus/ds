@@ -34,7 +34,7 @@ export function ToastViewport() {
     <Base.Portal>
       <Base.Viewport
         className={cn(
-          'fixed right-4 bottom-4 z-toast flex w-90 flex-col-reverse gap-2 outline-none',
+          'fixed right-4 bottom-4 z-toast-region flex w-90 flex-col-reverse gap-2 outline-none',
           'touch:inset-x-3 touch:bottom-[max(env(safe-area-inset-bottom),0.75rem)] touch:w-auto'
         )}
       >

@@ -21,7 +21,7 @@ import { PHONE } from '../phone';
 /**
  * A list of actions or choices behind a trigger. The popup is glass on
  * `bg-menu-glass`, `rounded-lg`, and grows from the trigger with
- * `motion-pop`. Rows are 32px (40px in touch mode) with a `bg-hover`
+ * `menu-open-animation`. Rows are 32px (40px in touch mode) with a `bg-hover`
  * highlight. `MenuTrigger` takes the `Button` variants and sizes, and lights
  * while its menu is open.
  */

@@ -34,7 +34,7 @@ export const Surfaces: Story = {
         { name: 'bg-tooltip', className: 'bg-tooltip', note: 'Tooltips' },
         { name: 'bg-toast', className: 'bg-toast', note: 'Toasts' },
         { name: 'bg-chrome', className: 'bg-chrome', note: 'Window chrome' },
-        { name: 'bg-scrim', className: 'bg-scrim', note: 'Behind a dialog' },
+        { name: 'scrim-glass', className: 'scrim-glass', note: 'Behind a dialog' },
         { name: 'bg-skeleton', className: 'bg-skeleton', note: 'A loading placeholder' },
       ]}
     />
@@ -145,7 +145,7 @@ const STATUS = [
   { name: 'success', fill: 'bg-success', chip: 'bg-success-bg text-success-ink' },
   { name: 'failure', fill: 'bg-failure', chip: 'bg-failure-bg text-failure-ink' },
   { name: 'warning', fill: 'bg-warning', chip: 'bg-warning-bg text-warning-ink' },
-  { name: 'write', fill: 'bg-write', chip: 'bg-write-bg text-write-ink' },
+  { name: 'write', fill: 'bg-write', chip: 'bg-blue-bg text-blue-ink' },
 ];
 
 function HueGrid({ hues }: { hues: typeof HUES }) {

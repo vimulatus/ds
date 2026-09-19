@@ -17,7 +17,7 @@ import { PHONE } from '../phone';
 
 /**
  * A modal task. On desktop it is a `bg-dialog` panel, `rounded-xl`, over a
- * `bg-scrim` that fades in while the panel scales up with `motion-dialog`.
+ * `scrim-glass` that fades in while the panel scales up with `dialog-content-open-animation`.
  *
  * In touch mode the same parts render as the phone sheet (`Drawer`): flush
  * with the bottom and sides of the screen, rounded only on top, with a drag

@@ -1,10 +1,10 @@
-/* Layer 1 of 3: every raw color, and nothing else. Components never read
-   these. A theme (themes.css) assigns them to roles.
+/* Step 1 of 3: the palette. Every raw color the system uses, and nothing else.
+   Components never read these; a theme (themes.css) assembles them into roles.
 
-   A gray or accent step names its OKLCH lightness in per-mille:
-   --gray-280 is oklch(0.28 0 0). Each hue has two steps: -750 for dark
-   surfaces (fixed lightness and chroma, only the hue turns) and -500 for
-   light surfaces. */
+   Gray and periwinkle steps name their OKLCH lightness in per-mille:
+   --gray-280 is oklch(0.28 0 0). Hues come in two sets: -750 sits on dark
+   surfaces (lightness 0.75, chroma 0.2, only the hue turns), -500 is
+   Tailwind's 500 step for light surfaces. */
 :root {
   --gray-0: oklch(0 0 0);
   --gray-160: oklch(0.16 0 0);
@@ -28,29 +28,29 @@
   --periwinkle-600: oklch(0.6 0.15 255deg);
   --periwinkle-700: oklch(0.7 0.15 255deg);
 
-  --red-750: oklch(0.75 0.2 25deg);
-  --orange-750: oklch(0.75 0.2 48deg);
-  --amber-750: oklch(0.75 0.2 70deg);
-  --yellow-750: oklch(0.75 0.2 86deg);
-  --lime-750: oklch(0.75 0.2 131deg);
-  --green-750: oklch(0.75 0.2 150deg);
-  --teal-750: oklch(0.75 0.2 182deg);
-  --cyan-750: oklch(0.75 0.2 215deg);
-  --blue-750: oklch(0.75 0.2 260deg);
-  --violet-750: oklch(0.75 0.2 293deg);
-  --purple-750: oklch(0.75 0.2 304deg);
-  --pink-750: oklch(0.75 0.2 354deg);
+  --red-750: oklch(0.75 0.2 25.331deg);
+  --orange-750: oklch(0.75 0.2 47.604deg);
+  --amber-750: oklch(0.75 0.2 70.08deg);
+  --yellow-750: oklch(0.75 0.2 86.047deg);
+  --lime-750: oklch(0.75 0.2 130.85deg);
+  --green-750: oklch(0.75 0.2 149.579deg);
+  --teal-750: oklch(0.75 0.2 182.503deg);
+  --cyan-750: oklch(0.75 0.2 215.221deg);
+  --blue-750: oklch(0.75 0.2 259.815deg);
+  --violet-750: oklch(0.75 0.2 292.717deg);
+  --purple-750: oklch(0.75 0.2 303.9deg);
+  --pink-750: oklch(0.75 0.2 354.308deg);
 
-  --red-500: oklch(0.637 0.237 25deg);
-  --orange-500: oklch(0.705 0.213 48deg);
-  --amber-500: oklch(0.769 0.188 70deg);
-  --yellow-500: oklch(0.795 0.184 86deg);
-  --lime-500: oklch(0.768 0.233 131deg);
-  --green-500: oklch(0.723 0.219 150deg);
-  --teal-500: oklch(0.71 0.128 182deg);
-  --cyan-500: oklch(0.79 0.144 215deg);
-  --blue-500: oklch(0.623 0.214 260deg);
-  --violet-500: oklch(0.606 0.25 293deg);
-  --purple-500: oklch(0.627 0.265 304deg);
-  --pink-500: oklch(0.656 0.241 354deg);
+  --red-500: oklch(63.7% 0.237 25.331);
+  --orange-500: oklch(70.5% 0.213 47.604);
+  --amber-500: oklch(76.9% 0.188 70.08);
+  --yellow-500: oklch(79.5% 0.184 86.047);
+  --lime-500: oklch(76.8% 0.233 130.85);
+  --green-500: oklch(72.3% 0.219 149.579);
+  --teal-500: oklch(71.05% 0.1276 181.6);
+  --cyan-500: oklch(79.06% 0.1438 215.2);
+  --blue-500: oklch(62.3% 0.214 259.815);
+  --violet-500: oklch(60.6% 0.25 292.717);
+  --purple-500: oklch(62.7% 0.265 303.9);
+  --pink-500: oklch(65.6% 0.241 354.308);
 }

@@ -1,8 +1,8 @@
-/* Layer 2 of 3: the themes. A theme assigns palette colors to the roles that
-   differ between dark and light. tokens.css derives the rest (ink, hover,
-   tints) and maps every role to a utility.
+/* Step 2 of 3: the themes. Each theme assigns palette colors to the roles
+   that differ between light and dark. tokens.css maps these roles to the
+   `--color-*` utilities and derives everything else (ink, hover, `-bg` tints).
 
-   The theme lives on <html>: data-theme="dark" (the default) or "light". */
+   The theme is set on <html>: `data-theme="dark"` (the default) or "light". */
 :root,
 [data-theme='dark'] {
   color-scheme: dark;
@@ -21,7 +21,7 @@
   --edge-muted: var(--gray-250);
 
   --accent: var(--periwinkle-700);
-  --accent-contrast: var(--gray-160);
+  --accent-contrast: var(--gray-970);
 
   --red: var(--red-750);
   --orange: var(--orange-750);
@@ -39,12 +39,8 @@
   --dialog: var(--surface-2);
   --menu: var(--surface-2);
   --composer: var(--surface-2);
-  --tooltip: var(--surface-4);
   --warning: var(--amber);
   --chrome: color-mix(in oklch, var(--surface-0) 80%, var(--content-0));
-  /* Ink on a hue's own tint. Dark surfaces take the hue as is. */
-  --ink-shift: 0%;
-  --shadow-strength: 0.5;
 }
 
 [data-theme='light'] {
@@ -64,7 +60,7 @@
   --edge-muted: var(--gray-920);
 
   --accent: var(--periwinkle-600);
-  --accent-contrast: var(--gray-1000);
+  --accent-contrast: var(--gray-970);
 
   --red: var(--red-500);
   --orange: var(--orange-500);
@@ -82,10 +78,6 @@
   --dialog: var(--surface-3);
   --menu: var(--surface-3);
   --composer: var(--surface-4);
-  --tooltip: var(--surface-4);
   --warning: var(--yellow);
   --chrome: color-mix(in oklch, var(--surface-3) 98%, var(--content-0));
-  /* Light surfaces darken the ink a quarter toward black to keep contrast. */
-  --ink-shift: 25%;
-  --shadow-strength: 0.12;
 }

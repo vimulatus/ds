@@ -41,8 +41,8 @@ export type DrawerContentProps = Omit<ComponentProps<typeof Base.Popup>, 'classN
 export function DrawerContent({ className, children, ...props }: DrawerContentProps) {
   return (
     <Base.Portal>
-      <Base.Backdrop className="motion-fade fixed inset-0 z-dialog bg-scrim opacity-[calc(1-var(--drawer-swipe-progress,0))] data-swiping:duration-0" />
-      <Base.Viewport className="fixed inset-0 z-dialog flex items-end justify-center">
+      <Base.Backdrop className="dialog-overlay-open-animation fixed inset-0 z-modal-overlay scrim-glass opacity-[calc(1-var(--drawer-swipe-progress,0))] data-swiping:duration-0" />
+      <Base.Viewport className="fixed inset-0 z-modal flex items-end justify-center">
         <Base.Popup
           {...props}
           className={cn(

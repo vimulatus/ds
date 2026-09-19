@@ -1,15 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Button } from '@/components/Button';
 import { cn } from '@/lib/cn';
 import { SpecTable } from './Swatch';
 
 /**
- * Motion is short and does not ask for attention. A popup scales in from
- * 96% over 150ms, a dialog from 97% over 200ms, and a scrim fades over
- * 200ms, all on one fast-out curve. The `motion-*` utilities key off Base UI's
- * `data-starting-style` and `data-ending-style`. Under
- * `prefers-reduced-motion` every transition drops to 0ms.
+ * Motion is short and does not ask for attention. A menu grows in over
+ * 120ms, a dialog rises and settles over 160ms, and a scrim fades over
+ * 120ms, on one fast-out curve. Each utility plays a keyframe once when the
+ * element mounts. The phone sheet (`motion-sheet`) follows the finger with
+ * Base UI's drawer variables. Under `prefers-reduced-motion` the animations
+ * are off.
  */
 const meta = {
   title: 'Foundations/Motion',
@@ -23,30 +24,20 @@ export const Utilities: Story = {
     <SpecTable
       head={['Utility', 'Duration', 'From', 'Used for']}
       rows={[
-        ['motion-pop', '150ms', 'opacity 0, scale 0.96', 'Menus, popovers, tooltips'],
-        ['motion-dialog', '200ms', 'opacity 0, scale 0.97', 'Dialogs'],
-        ['motion-fade', '200ms', 'opacity 0', 'Scrims, toasts'],
+        ['menu-open-animation', '120ms', 'opacity 0, 2px up, scale 0.96', 'Menus, popovers, tooltips, selects'],
+        ['dialog-content-open-animation', '160ms', 'opacity 0, 4px down, scale 0.98', 'Dialogs'],
+        ['dialog-overlay-open-animation', '120ms', 'opacity 0', 'Scrims, field errors'],
+        ['dialog-fullscreen-open-animation', '160ms', 'opacity 0, 6px down', 'Full-screen dialogs'],
+        ['mobile-sheet-open-animation', '340ms', 'off the bottom edge', 'Phone sheets'],
+        ['motion-sheet', '400ms', 'off the bottom edge, then the finger', 'The Base UI phone sheet'],
       ]}
     />
   ),
 };
 
-/**
- * Mounts its child with `data-starting-style`, commits that style, then
- * clears it, as Base UI does on open.
- */
+/** Plays a mount animation: each replay mounts the element again. */
 function Enter({ className, children }: { className: string; children?: ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [starting, setStarting] = useState(true);
-  useEffect(() => {
-    ref.current?.getBoundingClientRect();
-    setStarting(false);
-  }, []);
-  return (
-    <div ref={ref} data-starting-style={starting ? '' : undefined} className={className}>
-      {children}
-    </div>
-  );
+  return <div className={className}>{children}</div>;
 }
 
 function Replay({ label, children }: { label: string; children: ReactNode }) {
@@ -67,8 +58,8 @@ function Replay({ label, children }: { label: string; children: ReactNode }) {
 export const Entrances: Story = {
   render: () => (
     <div className="flex flex-wrap gap-10">
-      <Replay label="motion-pop">
-        <Enter className="motion-pop glass w-44 rounded-xl border border-edge-muted bg-menu-glass p-1 text-sm [--transform-origin:top_left]">
+      <Replay label="menu-open-animation">
+        <Enter className="menu-open-animation glass w-44 rounded-xl border border-edge-muted bg-menu-glass p-1 text-sm [--transform-origin:top_left]">
           {['Rename', 'Duplicate', 'Move to folder'].map((item) => (
             <div key={item} className="rounded-md px-2 py-1.5 text-ink">
               {item}
@@ -76,13 +67,13 @@ export const Entrances: Story = {
           ))}
         </Enter>
       </Replay>
-      <Replay label="motion-dialog">
-        <Enter className="motion-dialog glass flex h-28 w-60 items-center justify-center rounded-xl border border-edge-muted bg-menu-glass text-sm text-ink">
+      <Replay label="dialog-content-open-animation">
+        <Enter className="dialog-content-open-animation glass flex h-28 w-60 items-center justify-center rounded-xl border border-edge-muted bg-menu-glass text-sm text-ink">
           Rename the launch plan
         </Enter>
       </Replay>
-      <Replay label="motion-fade">
-        <Enter className="motion-fade flex h-28 w-60 items-center justify-center rounded-xl border border-edge-muted bg-surface text-sm text-ink">
+      <Replay label="dialog-overlay-open-animation">
+        <Enter className="dialog-overlay-open-animation flex h-28 w-60 items-center justify-center rounded-xl border border-edge-muted bg-surface text-sm text-ink">
           Task created
         </Enter>
       </Replay>
@@ -91,8 +82,8 @@ export const Entrances: Story = {
 };
 
 const EASINGS = [
-  { name: 'ease-out', className: 'ease-out', curve: 'cubic-bezier(0.23, 1, 0.32, 1)', use: 'Anything that enters' },
-  { name: 'ease-in-out', className: 'ease-in-out', curve: 'cubic-bezier(0.77, 0, 0.175, 1)', use: 'A move on screen' },
+  { name: 'ease-[cubic-bezier(0.16,1,0.3,1)]', className: 'ease-[cubic-bezier(0.16,1,0.3,1)]', curve: 'cubic-bezier(0.16, 1, 0.3, 1)', use: 'Menus and dialogs as they open' },
+  { name: 'ease-out', className: 'ease-out', curve: 'cubic-bezier(0, 0, 0.2, 1)', use: 'Scrims and small state changes' },
   { name: 'ease-drawer', className: 'ease-drawer', curve: 'cubic-bezier(0.32, 0.72, 0, 1)', use: 'Sheets and drawers' },
 ];
 

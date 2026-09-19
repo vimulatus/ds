@@ -40,11 +40,11 @@ export function DialogContent({ className, children }: DialogContentProps) {
   if (touch) return <DrawerContent>{children}</DrawerContent>;
   return (
     <Base.Portal>
-      <Base.Backdrop className="motion-fade fixed inset-0 z-dialog bg-scrim" />
-      <Base.Viewport className="fixed inset-0 z-dialog grid place-items-center p-4">
+      <Base.Backdrop className="dialog-overlay-open-animation fixed inset-0 z-modal-overlay scrim-glass" />
+      <Base.Viewport className="fixed inset-0 z-modal grid place-items-center p-4">
         <Base.Popup
           className={cn(
-            'motion-dialog flex w-104 max-w-full flex-col gap-4 rounded-xl border border-edge-muted bg-dialog p-4 text-ink shadow-2xl outline-none',
+            'dialog-content-open-animation flex w-104 max-w-full flex-col gap-4 rounded-xl border border-edge-muted bg-dialog p-4 text-ink shadow-2xl outline-none',
             className
           )}
         >

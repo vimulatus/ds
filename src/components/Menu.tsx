@@ -62,8 +62,8 @@ export type MenuContentProps = Omit<ComponentProps<typeof Base.Popup>, 'classNam
 export function MenuContent({ side, align = 'start', className, ...props }: MenuContentProps) {
   return (
     <Base.Portal>
-      <Base.Positioner side={side} align={align} sideOffset={4} className="z-popover outline-none">
-        <Base.Popup {...props} className={cn(SURFACE, 'motion-pop min-w-44', className)} />
+      <Base.Positioner side={side} align={align} sideOffset={4} className="z-action-menu outline-none">
+        <Base.Popup {...props} className={cn(SURFACE, 'menu-open-animation min-w-44', className)} />
       </Base.Positioner>
     </Base.Portal>
   );
@@ -73,8 +73,8 @@ export function MenuContent({ side, align = 'start', className, ...props }: Menu
 export function MenuSubContent({ className, ...props }: Omit<MenuContentProps, 'side' | 'align'>) {
   return (
     <Base.Portal>
-      <Base.Positioner sideOffset={2} alignOffset={-4} className="z-popover outline-none">
-        <Base.Popup {...props} className={cn(SURFACE, 'motion-pop min-w-40', className)} />
+      <Base.Positioner sideOffset={2} alignOffset={-4} className="z-action-menu outline-none">
+        <Base.Popup {...props} className={cn(SURFACE, 'menu-open-animation min-w-40', className)} />
       </Base.Positioner>
     </Base.Portal>
   );

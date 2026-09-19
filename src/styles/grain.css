@@ -1,9 +1,13 @@
-/* Film grain for a panel. A 240px fractal-noise tile at 10% alpha blends
-   into the panel color with hard-light, so it lightens a dark panel and
-   darkens a light one. Cards on bg-surface stay clean on top. */
+/* Film grain on the panel background. One 240px noise tile, folded to grey at
+   alpha 0.1, rasterizes once and tiles as a second background layer blended
+   into the panel color inside the element's own paint: no extra layer, no
+   stacking context. Hard-light lightens a dark panel and darkens a light one,
+   so the same tile reads in every theme and the mean stays at the panel
+   color. Nested bg-panel surfaces (the sidebar) repaint the color, so they
+   take the grain too. Cards on bg-surface stay clean on top. */
 .grain.bg-panel,
 .grain .bg-panel {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0 0 0 0 0.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'240'%20height%3D'240'%3E%3Cfilter%20id%3D'n'%20color-interpolation-filters%3D'sRGB'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.8'%20numOctaves%3D'3'%20stitchTiles%3D'stitch'%2F%3E%3CfeColorMatrix%20values%3D'0.33%200.33%200.33%200%200%200.33%200.33%200.33%200%200%200.33%200.33%200.33%200%200%200%200%200%200%200.1'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%23n)'%2F%3E%3C%2Fsvg%3E");
   background-size: 240px;
   background-blend-mode: hard-light;
 }

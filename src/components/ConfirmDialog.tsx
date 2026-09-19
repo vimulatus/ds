@@ -100,9 +100,9 @@ export function ConfirmDialog({
   return (
     <AlertDialog.Root open={open} onOpenChange={setOpen} onOpenChangeComplete={onOpenChangeComplete}>
       <AlertDialog.Portal>
-        <AlertDialog.Backdrop className="motion-fade fixed inset-0 z-dialog bg-scrim" />
-        <AlertDialog.Viewport className="fixed inset-0 z-dialog grid place-items-center p-4">
-          <AlertDialog.Popup className="motion-dialog flex w-96 max-w-full flex-col gap-4 rounded-xl border border-edge-muted bg-dialog p-4 text-ink shadow-2xl outline-none">
+        <AlertDialog.Backdrop className="dialog-overlay-open-animation fixed inset-0 z-modal-overlay scrim-glass" />
+        <AlertDialog.Viewport className="fixed inset-0 z-modal grid place-items-center p-4">
+          <AlertDialog.Popup className="dialog-content-open-animation flex w-96 max-w-full flex-col gap-4 rounded-xl border border-edge-muted bg-dialog p-4 text-ink shadow-2xl outline-none">
             {text}
             <div className="flex justify-end gap-2">
               {cancel}

@@ -6,7 +6,7 @@ const VARIANTS: ButtonVariant[] = ['ghost', 'outlined', 'accent', 'danger', 'cta
 
 /**
  * Triggers an action. `variant` carries emphasis and `size` carries density.
- * Every variant except `ghost` is a pane: a hairline rim and a soft shadow.
+ * Every variant except `ghost` is glass: a specular rim and a soft shadow.
  */
 const meta = {
   title: 'Primitives/Button',

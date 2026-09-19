@@ -40,11 +40,11 @@ export const ControlHeights: Story = {
           </div>
         </div>
       ))}
-      <div data-touch="" className="grid grid-cols-[4rem_3rem_1fr] items-center gap-3">
+      <div className="grid grid-cols-[4rem_3rem_1fr] items-center gap-3">
         <span className="font-mono text-xs text-ink">touch</span>
         <span className="text-xs text-ink-subtle">40px</span>
         <div className="max-w-md">
-          <Input placeholder="Title" />
+          <Input placeholder="Title" className="h-10 text-base" />
         </div>
       </div>
     </div>

@@ -21,7 +21,7 @@ const HUES = {
 /**
  * Interactive content anchored to a trigger: a filter, a picker, a short
  * form. It paints the menu's surface: glass on `bg-menu-glass`, `rounded-lg`,
- * growing from the trigger with `motion-pop`. Use `Tooltip` for a label and
+ * growing from the trigger with `menu-open-animation`. Use `Tooltip` for a label and
  * `Menu` for a list of actions.
  */
 const meta = {

@@ -31,11 +31,11 @@ export type PopoverContentProps = Omit<ComponentProps<typeof Base.Popup>, 'class
 export function PopoverContent({ side, align = 'start', className, ...props }: PopoverContentProps) {
   return (
     <Base.Portal>
-      <Base.Positioner side={side} align={align} sideOffset={6} className="z-popover outline-none">
+      <Base.Positioner side={side} align={align} sideOffset={6} className="z-action-menu outline-none">
         <Base.Popup
           {...props}
           className={cn(
-            'motion-pop glass flex w-64 flex-col gap-3 rounded-lg border border-edge-muted bg-menu-glass p-3 text-sm text-ink outline-none',
+            'menu-open-animation glass flex w-64 flex-col gap-3 rounded-lg border border-edge-muted bg-menu-glass p-3 text-sm text-ink outline-none',
             className
           )}
         />

@@ -9,7 +9,7 @@ export type Depth = 0 | 1 | 2 | 3 | 4;
  */
 export function Layer({ depth, children }: { depth: Depth; children: ReactNode }) {
   return (
-    <div data-depth={depth} className="contents">
+    <div data-layer="" data-depth={depth} className="contents">
       {children}
     </div>
   );

@@ -43,10 +43,10 @@ export function Callout({ children, content, variant = 'default', side = 'right'
     <Popover.Root>
       <Popover.Trigger openOnHover delay={400} render={children} />
       <Popover.Portal>
-        <Popover.Positioner side={side} sideOffset={6} className="z-popover">
+        <Popover.Positioner side={side} sideOffset={6} className="z-action-menu">
           <Popover.Popup
             initialFocus={false}
-            className={cn(calloutClasses(variant), 'motion-pop outline-none')}
+            className={cn(calloutClasses(variant), 'menu-open-animation outline-none')}
           >
             {content}
           </Popover.Popup>
@@ -71,7 +71,7 @@ export type PinnedCalloutProps = ComponentProps<'div'> & {
  * A callout that stays while a state holds, such as a field error. It has
  * no trigger, moves no focus and never dismisses, so it never joins Base
  * UI's dismiss stack: Escape and a tap outside still reach the dialog
- * beneath it. It renders in place at `z-popover`, positioned with Floating
+ * beneath it. It renders in place at `z-action-menu`, positioned with Floating
  * UI, so an open menu or toast still covers it.
  */
 export function PinnedCallout({
@@ -106,7 +106,7 @@ export function PinnedCallout({
         if (typeof ref === 'function') ref(el);
         else if (ref) ref.current = el;
       }}
-      className={cn(calloutClasses(variant), 'z-popover', className)}
+      className={cn(calloutClasses(variant), 'z-action-menu', className)}
       style={{ ...floatingStyles, ...style }}
     />
   );

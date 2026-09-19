@@ -94,8 +94,8 @@ export function Select({
           </Base.Icon>
         </Base.Trigger>
         <Base.Portal>
-          <Base.Positioner alignItemWithTrigger={false} sideOffset={4} className="z-popover outline-none">
-            <Base.Popup className="motion-pop glass min-w-(--anchor-width) rounded-lg border border-edge-muted bg-menu-glass p-1 text-ink outline-none">
+          <Base.Positioner alignItemWithTrigger={false} sideOffset={4} className="z-action-menu outline-none">
+            <Base.Popup className="menu-open-animation glass min-w-(--anchor-width) rounded-lg border border-edge-muted bg-menu-glass p-1 text-ink outline-none">
               <Base.List className="max-h-(--available-height) overflow-y-auto">
                 {options.map((option) => (
                   <Base.Item

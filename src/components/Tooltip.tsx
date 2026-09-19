@@ -20,10 +20,10 @@ export function Tooltip({ children, content, shortcut, side = 'top', disabled }:
     <Base.Root disabled={disabled}>
       <Base.Trigger render={children} />
       <Base.Portal>
-        <Base.Positioner side={side} sideOffset={6} className="z-tooltip">
+        <Base.Positioner side={side} sideOffset={6} className="z-tool-tip">
           <Base.Popup
             className={cn(
-              'motion-pop flex items-center gap-2 rounded-md border border-edge-muted bg-tooltip px-2 py-1 text-xs text-ink shadow-lg',
+              'menu-open-animation flex items-center gap-2 rounded-md border border-edge-muted bg-tooltip px-2 py-1 text-xs text-ink shadow-lg',
               'data-instant:transition-none'
             )}
           >

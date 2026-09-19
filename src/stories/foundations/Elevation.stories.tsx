@@ -8,7 +8,7 @@ import { SpecTable } from './Swatch';
  * Depth comes from surface shades. A container sets a depth from 0 to 4
  * with `Layer`, and `bg-surface` inside it steps one shade toward the viewer.
  * Only what floats casts a shadow: menus, popovers, dialogs and toasts are
- * `glass`. A raised control is a `pane`.
+ * `glass`. A raised control is `glass` too.
  */
 const meta = {
   title: 'Foundations/Elevation',
@@ -72,15 +72,16 @@ export const Glass: Story = {
 };
 
 /**
- * A pane is a raised control: a hairline rim on top and a small shadow.
- * Every button variant except `ghost` is a pane; `ghost` stays flat.
+ * A raised control uses the same `glass` as a floating surface: a bright top
+ * edge, a dark bottom edge, a specular rim and a soft cast shadow. Every
+ * button variant except `ghost` is glass; `ghost` stays flat.
  */
-export const Pane: Story = {
+export const RaisedControls: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-4">
-        <div className="pane flex h-16 w-40 items-center justify-center rounded-md bg-surface text-sm text-ink-muted">
-          pane
+        <div className="glass flex h-16 w-40 items-center justify-center rounded-md bg-surface text-sm text-ink-muted">
+          glass
         </div>
         <div className="flex h-16 w-40 items-center justify-center rounded-md bg-surface text-sm text-ink-muted">
           flat
@@ -88,24 +89,29 @@ export const Pane: Story = {
       </div>
       <div className="flex gap-2">
         <Button variant="ghost">Ghost is flat</Button>
-        <Button variant="outlined">Outlined is a pane</Button>
+        <Button variant="outlined">Outlined is glass</Button>
       </div>
     </div>
   ),
 };
 
-/** One stacking order, lowest first. Use the named utility, never a raw z-index. */
+/**
+ * One stacking order, lowest first. Use the named utility; a raw z-index
+ * is only for layers inside a local stacking context.
+ */
 export const Stacking: Story = {
   render: () => (
     <SpecTable
       head={['Utility', 'z-index', 'Used for']}
       rows={[
-        ['z-sticky', 10, 'Sticky headers'],
-        ['z-action-menu', 30, 'Bars that float over content'],
-        ['z-popover', 50, 'Menus, popovers, selects'],
-        ['z-dialog', 60, 'Dialogs and sheets'],
-        ['z-toast', 70, 'Toasts'],
-        ['z-tooltip', 80, 'Tooltips'],
+        ['z-10', 10, 'Sticky headers, inside their own scroll area'],
+        ['z-split-panel-chrome', 30, 'In-page chrome over content'],
+        ['z-float', 90, 'Floating widgets over the page'],
+        ['z-modal-overlay', 100, 'The scrim behind a dialog'],
+        ['z-modal', 110, 'Dialogs and sheets'],
+        ['z-action-menu', 150, 'Menus, popovers, selects, the unsaved-changes bar'],
+        ['z-tool-tip', 200, 'Tooltips'],
+        ['z-toast-region', 250, 'Toasts'],
       ]}
     />
   ),

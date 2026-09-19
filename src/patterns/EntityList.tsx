@@ -132,7 +132,7 @@ export function EntityList({
                   id={`${headerId}-${groupIndex}`}
                   role="presentation"
                   className={cn(
-                    'sticky top-0 z-sticky bg-panel px-2 pb-1 text-xs font-medium text-ink-subtle touch:px-4 touch:text-sm',
+                    'sticky top-0 z-10 bg-panel px-2 pb-1 text-xs font-medium text-ink-subtle touch:px-4 touch:text-sm',
                     groupIndex === 0 ? 'pt-1' : 'pt-3'
                   )}
                 >

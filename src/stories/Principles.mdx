@@ -31,14 +31,15 @@ The document, the list and the record are what the user came for. Navigation, to
 
 ## 2. Depth comes from layers, not from a chosen color
 
-A surface nearer the user is one shade lighter. Page, panel, card and a card inside a card each step up once. You never choose a background color. You set the depth, and the surface follows.
+A surface nearer the user is one shade lighter. The window is the darkest step, the canvas the next, and a `Layer` at depth n paints `bg-surface` with step n. You never choose a background color. You set the depth, and the surface follows.
 
 **Why.** Hand-picked grays drift apart across screens and break in the other theme. A depth ladder stays consistent and flips correctly between Dark and Light.
 
 **How.**
 - `bg-page` is the window. `bg-panel` is the canvas.
-- `Layer depth={n}` sets the depth for everything inside it. `bg-surface`, `bg-hover` and `bg-input` follow the nearest depth.
-- `Card` sets depth 1 for you. A card inside it sets depth 2.
+- `Layer depth={n}` sets the depth for everything inside it. `bg-surface` and `bg-inset` follow the nearest depth.
+- `Card` sets depth 1, the same step as the canvas, so its hairline edge carries it. A card inside it can set depth 2.
+- `bg-hover` is a 3% wash of ink, so it works on any depth.
 
 <DepthLadder />
 
@@ -61,21 +62,22 @@ The twelve hues share one lightness and one chroma. Only the angle turns. A labe
 
 **How.**
 - `<hue>` is the fill, `<hue>-bg` the tint, `<hue>-ink` the readable text on that tint.
-- The light theme darkens the ink a quarter toward black to keep contrast. You do not write that. The token does it.
+- The hue swaps between the two themes: a bright step on dark surfaces, a deeper step on light ones. You do not write that. The theme does it.
 - A solid fill is for a dot or a small mark. The `cta` is the only solid button.
 
 <HueRow />
 
 ## 5. Things that float are glass
 
-Menus, popovers, selects, dialogs, sheets and toasts float above the page. They blur what is behind them, use a translucent fill and cast one soft shadow. Nothing that lives on the page is glass. A card or a region has a hairline edge and no shadow.
+Menus, popovers, selects, dialogs, sheets and toasts float above the page. They blur what is behind them, use a translucent fill and cast one soft shadow. A raised control, such as an outlined button, uses the same glass. Nothing else on the page is glass. A card or a region has a hairline edge and no shadow.
 
 **Why.** Glass tells the user "this is temporary and above your work". Flat hairlines tell them "this is part of the page". Mixing the two blurs that line.
 
 **How.**
 - A floating surface is `glass bg-menu-glass border border-edge-muted`.
-- A raised control, such as an outlined button, is a `pane`: a thin rim and a small shadow.
-- Stacking uses `z-sticky`, `z-action-menu`, `z-popover`, `z-dialog`, `z-toast`, `z-tooltip`, in that order.
+- Off touch, glass skips the blur and `bg-menu-glass` turns solid. The rim and the shadow stay.
+- Borders are 0.5px hairlines, 1px on iOS.
+- Stacking uses one scale: `z-modal-overlay` (100), `z-modal` (110), `z-action-menu` (150), `z-tool-tip` (200), `z-toast-region` (250). A raw `z-10` is only for a layer inside its own stacking context.
 
 <GlassSample />
 
@@ -111,8 +113,8 @@ Motion tells the user what changed and where it came from. A menu grows from its
 **Why.** Motion that performs makes the user wait. Motion that confirms makes the change easy to follow.
 
 **How.**
-- Popups use `motion-pop`, dialogs `motion-dialog`, scrims `motion-fade`, sheets `motion-sheet`.
-- They run 150 to 200ms on `ease-out`. Base UI sets the start and end states for you.
+- Popups use `menu-open-animation`, dialogs `dialog-content-open-animation`, scrims `dialog-overlay-open-animation`, the phone sheet `motion-sheet`.
+- They run 120 to 160ms on a fast-out curve and play once as the element mounts.
 - Reduced motion turns every transition off. See **Foundations / Motion** to replay each one.
 
 ## 9. Touch is a full form, not a smaller desktop
@@ -122,7 +124,7 @@ A phone gets its own form of each screen. Controls grow, dialogs become sheets t
 **Why.** A layout shrunk to fit a phone keeps desktop targets and hover menus that a thumb cannot use.
 
 **How.**
-- `<html data-touch>` turns on touch mode. Style it with the `touch:` and `not-touch:` variants, or read it with `useTouch()`.
+- `<html data-touch-device="true">` turns on touch mode. Style it with the `touch:` and `not-touch:` variants, or read it with `useTouch()`.
 - `md` controls grow to 40px and `sm` buttons to 32px.
 - `Dialog` and `ConfirmDialog` render as a `Drawer` sheet. Bars clear the safe area.
 - Check a screen at **iPhone 14** in the toolbar when it has a phone form.
@@ -148,7 +150,7 @@ For example, the lead detail screen uses `ResourceDetail` for its top bar, its a
 - The content is the strongest thing on the screen.
 - Every background comes from a depth, not a chosen gray.
 - Every hue means something.
-- Only floating surfaces are glass.
+- Only floating surfaces and raised controls are glass.
 - There is one `cta`.
 - Controls use `sm` or `md`, and rows align on their centers.
 - It reads in Dark and in Light.

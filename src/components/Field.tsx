@@ -66,7 +66,7 @@ export function Field({
             anchor={anchor}
             variant="danger"
             placement={errorPlacement}
-            className="motion-fade"
+            className="dialog-overlay-open-animation"
           />
         )}
       >

@@ -1,0 +1,34 @@
+/* Additions for Base UI, on top of the copied tokens. Base UI drives the
+   phone sheet's drag with CSS variables and marks enter and exit with
+   data-starting-style / data-ending-style. */
+@theme {
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* The phone sheet follows the finger, then settles or leaves. */
+@utility motion-sheet {
+  transform: translateY(var(--drawer-swipe-movement-y, 0px));
+  transition: translate 400ms var(--ease-drawer), transform 400ms var(--ease-drawer);
+  &[data-starting-style],
+  &[data-ending-style] {
+    translate: 0 100%;
+  }
+  &[data-ending-style] {
+    transition-duration: calc(var(--drawer-swipe-strength, 1) * 400ms);
+  }
+  &[data-swiping] {
+    transition-duration: 0ms;
+  }
+}
+
+/* A keyboard focus ring. The tokens clear the default outline. */
+@utility focus-ring {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+/* The copied menu animation grows from --kb-popper-content-transform-origin;
+   Base UI publishes the same origin as --transform-origin. */
+.menu-open-animation {
+  --kb-popper-content-transform-origin: var(--transform-origin);
+}

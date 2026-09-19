@@ -8,15 +8,15 @@ export type ButtonSize = 'sm' | 'md' | 'icon-sm' | 'icon-md';
 
 const VARIANT: Record<ButtonVariant, string> = {
   ghost: 'text-ink-muted hover:bg-hover hover:text-ink data-popup-open:bg-hover data-popup-open:text-ink',
-  outlined: 'pane border border-edge bg-surface text-ink hover:bg-hover data-popup-open:bg-hover',
-  accent: 'pane bg-accent-bg text-accent-ink hover:bg-accent/25',
-  danger: 'pane bg-failure-bg text-failure-ink hover:bg-failure/25',
-  cta: 'pane bg-accent text-accent-contrast hover:bg-accent/90',
+  outlined: 'glass bg-surface/70 text-ink-muted hover:bg-hover hover:text-ink data-popup-open:bg-hover',
+  accent: 'glass bg-accent-bg text-accent-ink hover:bg-accent/25',
+  danger: 'glass bg-failure-bg text-failure-ink hover:bg-failure/25',
+  cta: 'glass bg-accent text-accent-contrast hover:bg-accent/90',
 };
 
 const SIZE: Record<ButtonSize, string> = {
-  sm: 'h-6 gap-1 px-2 text-xs touch:h-8 touch:px-3 [&_svg]:size-3.5',
-  md: 'h-8 gap-1.5 px-3 text-sm touch:h-10 touch:px-4 [&_svg]:size-4',
+  sm: 'h-6 gap-1 px-2 text-xs touch:h-8 touch:px-3 [&_svg]:size-3',
+  md: 'h-8 gap-2 px-2 text-sm touch:h-10 touch:px-4 [&_svg]:size-3.5',
   'icon-sm': 'size-6 touch:size-8 [&_svg]:size-3.5',
   'icon-md': 'size-8 touch:size-10 [&_svg]:size-4',
 };
