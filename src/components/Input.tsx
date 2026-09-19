@@ -7,7 +7,7 @@ export type InputSize = 'sm' | 'md';
 
 const VARIANT: Record<InputVariant, string> = {
   outlined:
-    'border border-edge bg-input focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/20 data-invalid:border-failure data-invalid:ring-failure/20',
+    'border border-edge bg-input focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/20 data-invalid:border-failure data-invalid:ring-2 data-invalid:ring-failure/20 aria-invalid:border-failure aria-invalid:ring-2 aria-invalid:ring-failure/20',
   ghost:
     '-mx-1.5 bg-transparent hover:bg-hover focus-visible:bg-input focus-visible:ring-2 focus-visible:ring-edge-muted',
 };
@@ -16,6 +16,19 @@ const SIZE: Record<InputSize, string> = {
   sm: 'h-6 rounded-md px-1.5 text-sm',
   md: 'h-8 rounded-md px-2.5 text-sm touch:h-10 touch:text-base',
 };
+
+/** The classes of an input, for a control that must look like one: a select trigger, a textarea. */
+export function inputClasses({
+  variant = 'outlined',
+  size = 'md',
+}: { variant?: InputVariant; size?: InputSize } = {}) {
+  return cn(
+    'w-full min-w-0 text-ink outline-none transition-[background-color,border-color,box-shadow]',
+    'disabled:cursor-not-allowed disabled:text-ink-disabled data-disabled:cursor-not-allowed data-disabled:text-ink-disabled',
+    VARIANT[variant],
+    SIZE[size]
+  );
+}
 
 export type InputProps = Omit<ComponentProps<typeof Base>, 'className' | 'size'> & {
   className?: string;
@@ -29,16 +42,5 @@ export type InputProps = Omit<ComponentProps<typeof Base>, 'className' | 'size'>
  * description and validity.
  */
 export function Input({ variant = 'outlined', size = 'md', className, ...props }: InputProps) {
-  return (
-    <Base
-      {...props}
-      className={cn(
-        'w-full min-w-0 text-ink outline-none transition-[background-color,border-color,box-shadow]',
-        'disabled:cursor-not-allowed disabled:text-ink-disabled',
-        VARIANT[variant],
-        SIZE[size],
-        className
-      )}
-    />
-  );
+  return <Base {...props} className={cn(inputClasses({ variant, size }), className)} />;
 }

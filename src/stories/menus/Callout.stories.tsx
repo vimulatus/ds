@@ -1,0 +1,137 @@
+import { Dialog } from '@base-ui/react/dialog';
+import { Info } from '@phosphor-icons/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useRef, useState } from 'react';
+import { Button } from '@/components/Button';
+import { Callout, PinnedCallout } from '@/components/Callout';
+import { TextField } from '@/components/TextField';
+
+/**
+ * A short note anchored to a control. `default` paints the tooltip surface
+ * and opens on hover or tap, so a phone can reach it. `danger` paints the
+ * failure hue as a 15% tint over that surface. A pinned callout stays while
+ * a state holds: every field error is a pinned danger callout.
+ *
+ * A field error goes right when there is room, else under its control. It
+ * never covers the label above.
+ */
+const meta = {
+  title: 'Menus/Callout',
+  component: Callout,
+  parameters: { docs: { story: { inline: false, iframeHeight: 240 } } },
+} satisfies Meta<typeof Callout>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+/**
+ * Hover for 400ms or tap to open. Leaving, a tap away or Escape closes it.
+ * Focus stays on the trigger, and the trigger has no tooltip of its own.
+ */
+export const Default: Story = {
+  args: { children: <span />, content: '' },
+  render: () => (
+    <div className="flex items-center gap-2 p-8">
+      <span className="text-sm text-ink">Shared with the team</span>
+      <Callout content="Everyone on the team can open this file. Sharing settings live on the team page.">
+        <Button size="icon-sm" aria-label="Why">
+          <Info />
+        </Button>
+      </Callout>
+    </div>
+  ),
+};
+
+/**
+ * A field error pins a danger callout beside the input. Type a valid value
+ * to clear it. Narrow the viewport and the callout drops under the field.
+ */
+export const Danger: Story = {
+  args: { children: <span />, content: '' },
+  render: function Render() {
+    const [value, setValue] = useState('launch plan');
+    const valid = /^[A-Za-z0-9_-]+$/.test(value);
+    return (
+      <div className="p-8">
+        <TextField
+          fieldClassName="max-w-xs"
+          label="Tag"
+          description="Letters, numbers, dashes and underscores."
+          value={value}
+          onValueChange={setValue}
+          invalid={!valid}
+          error="Use letters, numbers, dashes and underscores."
+          spellCheck={false}
+        />
+      </div>
+    );
+  },
+};
+
+/** Pinned callouts around one anchor, one per side. */
+export const Placements: Story = {
+  args: { children: <span />, content: '' },
+  render: function Render() {
+    const anchor = useRef<HTMLDivElement>(null);
+    const [ready, setReady] = useState(false);
+    return (
+      <div className="flex items-center justify-center p-24">
+        <div
+          ref={(el) => {
+            anchor.current = el;
+            if (el && !ready) setReady(true);
+          }}
+          className="rounded-md border border-edge px-4 py-2 text-sm text-ink"
+        >
+          Anchor
+        </div>
+        {ready &&
+          (['top', 'right', 'bottom', 'left'] as const).map((side) => (
+            <PinnedCallout
+              key={side}
+              anchor={anchor}
+              placement={side}
+              variant={side === 'bottom' ? 'danger' : 'default'}
+            >
+              Placed {side}
+            </PinnedCallout>
+          ))}
+      </div>
+    );
+  },
+};
+
+/**
+ * A pinned callout never joins the dismiss stack, so Escape and a tap on
+ * the backdrop still close the dialog while a field is invalid.
+ */
+export const InADialog: Story = {
+  name: 'In a dialog',
+  args: { children: <span />, content: '' },
+  render: () => (
+    <div className="p-8">
+      <Dialog.Root>
+        <Dialog.Trigger render={<Button variant="outlined" />}>New tag</Dialog.Trigger>
+        <Dialog.Portal>
+          <Dialog.Backdrop className="motion-fade fixed inset-0 z-dialog bg-scrim" />
+          <Dialog.Popup className="motion-dialog fixed top-1/2 left-1/2 z-dialog flex w-96 max-w-[calc(100vw-2rem)] -translate-1/2 flex-col gap-4 rounded-xl border border-edge-muted bg-dialog p-4 shadow-lg">
+            <Dialog.Title className="text-sm font-semibold text-ink">New tag</Dialog.Title>
+            <TextField
+              label="Tag"
+              defaultValue="launch plan"
+              invalid
+              error="Use letters, numbers, dashes and underscores."
+              spellCheck={false}
+            />
+            <div className="flex justify-end gap-2">
+              <Dialog.Close render={<Button variant="ghost" />}>Cancel</Dialog.Close>
+              <Button variant="cta" disabled>
+                Save
+              </Button>
+            </div>
+          </Dialog.Popup>
+        </Dialog.Portal>
+      </Dialog.Root>
+    </div>
+  ),
+};
