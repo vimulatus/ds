@@ -1,13 +1,11 @@
 import { Popover } from '@base-ui/react/popover';
+import { autoUpdate, flip, offset, shift, useFloating } from '@floating-ui/react-dom';
 import {
   type ComponentProps,
-  type CSSProperties,
   type ReactElement,
   type ReactNode,
   type RefObject,
-  useId,
   useLayoutEffect,
-  useRef,
 } from 'react';
 import { cn } from '@/lib/cn';
 
@@ -58,7 +56,7 @@ export function Callout({ children, content, variant = 'default', side = 'right'
   );
 }
 
-export type PinnedCalloutProps = Omit<ComponentProps<'div'>, 'popover'> & {
+export type PinnedCalloutProps = ComponentProps<'div'> & {
   /** The element the callout points at. */
   anchor: RefObject<HTMLElement | null>;
   variant?: CalloutVariant;
@@ -69,28 +67,12 @@ export type PinnedCalloutProps = Omit<ComponentProps<'div'>, 'popover'> & {
   placement?: 'right' | 'bottom-start' | CalloutSide;
 };
 
-const AREA: Record<NonNullable<PinnedCalloutProps['placement']>, string> = {
-  right: 'right span-bottom',
-  'bottom-start': 'bottom span-right',
-  top: 'top',
-  bottom: 'bottom',
-  left: 'left',
-};
-
-const OFFSET: Record<NonNullable<PinnedCalloutProps['placement']>, string> = {
-  right: 'ms-1.5',
-  'bottom-start': 'mt-1.5',
-  top: 'mb-1.5',
-  bottom: 'mt-1.5',
-  left: 'me-1.5',
-};
-
 /**
  * A callout that stays while a state holds, such as a field error. It has
- * no trigger, moves no focus and never dismisses. It is a manual popover in
- * the top layer placed with CSS anchor positioning, so it never joins Base
+ * no trigger, moves no focus and never dismisses, so it never joins Base
  * UI's dismiss stack: Escape and a tap outside still reach the dialog
- * beneath it.
+ * beneath it. It renders in place at `z-popover`, positioned with Floating
+ * UI, so an open menu or toast still covers it.
  */
 export function PinnedCallout({
   anchor,
@@ -101,54 +83,31 @@ export function PinnedCallout({
   ref,
   ...props
 }: PinnedCalloutProps) {
-  const name = `--callout-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
-
-  useLayoutEffect(() => {
-    const target = anchor.current;
-    if (!target) return;
-    const names = () =>
-      (target.style.getPropertyValue('anchor-name') || '')
-        .split(',')
-        .map((n) => n.trim())
-        .filter((n) => n && n !== name);
-    target.style.setProperty('anchor-name', [...names(), name].join(', '));
-    return () => {
-      const rest = names();
-      if (rest.length) target.style.setProperty('anchor-name', rest.join(', '));
-      else target.style.removeProperty('anchor-name');
-    };
-  }, [anchor, name]);
-
-  const own = useRef<HTMLDivElement>(null);
-  useLayoutEffect(() => {
-    const el = own.current;
-    if (!el || el.matches(':popover-open')) return;
-    el.showPopover();
+  const { refs, floatingStyles } = useFloating({
+    placement,
+    strategy: 'fixed',
+    whileElementsMounted: autoUpdate,
+    middleware: [
+      offset(6),
+      placement === 'right' && flip({ fallbackPlacements: ['bottom-start'], crossAxis: false }),
+      shift({ padding: 8 }),
+    ],
   });
+
+  useLayoutEffect(() => {
+    refs.setReference(anchor.current);
+  }, [anchor, refs]);
 
   return (
     <div
       {...props}
       ref={(el) => {
-        own.current = el;
+        refs.setFloating(el);
         if (typeof ref === 'function') ref(el);
         else if (ref) ref.current = el;
       }}
-      popover="manual"
-      className={cn(
-        calloutClasses(variant),
-        'fixed inset-auto m-0 overflow-visible',
-        OFFSET[placement],
-        placement === 'right' && 'callout-fallback-bottom-start',
-        className
-      )}
-      style={
-        {
-          positionAnchor: name,
-          positionArea: AREA[placement],
-          ...style,
-        } as CSSProperties
-      }
+      className={cn(calloutClasses(variant), 'z-popover', className)}
+      style={{ ...floatingStyles, ...style }}
     />
   );
 }
