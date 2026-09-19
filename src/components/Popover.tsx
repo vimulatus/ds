@@ -1,57 +1,97 @@
 import { Popover as Base } from '@base-ui/react/popover';
-import type { ComponentProps, ReactNode } from 'react';
+import { type ComponentProps, createContext, type CSSProperties, useContext, useState } from 'react';
 import { cn } from '@/lib/cn';
-import { type ButtonSize, type ButtonVariant, buttonClasses } from './Button';
+import { fromPlacement, type Placement } from '@/lib/placement';
+import { type Depth, Layer } from './Layer';
+import { SURFACE_CLASS, surfaceStyle } from './Surface';
 
-/**
- * Interactive content anchored to a trigger: a filter, a picker, a short
- * form. It paints the menu's glass surface. Use `Tooltip` for a label and
- * `Menu` for a list of actions.
- */
-export const Popover = Base.Root;
-export const PopoverClose = Base.Close;
+type Classed<T> = Omit<T, 'className'> & { className?: string };
 
-export type PopoverTriggerProps = Omit<ComponentProps<typeof Base.Trigger>, 'className'> & {
-  className?: string;
-  variant?: ButtonVariant;
-  size?: ButtonSize;
+type Positioning = {
+  placement: Placement;
+  gutter: number;
+  anchor: HTMLElement | null;
+  setAnchor: (el: HTMLElement | null) => void;
 };
 
-/** Opens the popover. Styled as a `Button`, and lit while it is open. */
-export function PopoverTrigger({ variant = 'outlined', size = 'md', className, ...props }: PopoverTriggerProps) {
-  return <Base.Trigger {...props} className={cn(buttonClasses({ variant, size }), className)} />;
+const PositionContext = createContext<Positioning>({
+  placement: 'bottom',
+  gutter: 0,
+  anchor: null,
+  setAnchor: () => {},
+});
+
+export type PopoverProps = ComponentProps<typeof Base.Root> & {
+  /** Where the content opens against the trigger or `Popover.Anchor`. */
+  placement?: Placement;
+  /** Distance between the trigger and the content, in px. */
+  gutter?: number;
+};
+
+function PopoverRoot({ placement = 'bottom', gutter = 0, ...props }: PopoverProps) {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  return (
+    <PositionContext.Provider value={{ placement, gutter, anchor, setAnchor }}>
+      <Base.Root {...props} />
+    </PositionContext.Provider>
+  );
 }
 
-export type PopoverContentProps = Omit<ComponentProps<typeof Base.Popup>, 'className'> & {
-  className?: string;
-  side?: ComponentProps<typeof Base.Positioner>['side'];
-  align?: ComponentProps<typeof Base.Positioner>['align'];
+/** Positions the content against this element instead of the trigger. */
+function PopoverAnchor(props: ComponentProps<'div'>) {
+  const { setAnchor } = useContext(PositionContext);
+  return <div {...props} ref={setAnchor} />;
+}
+
+export type PopoverContentProps = Classed<ComponentProps<typeof Base.Popup>> & {
+  depth?: Depth;
 };
 
-export function PopoverContent({ side, align = 'start', className, ...props }: PopoverContentProps) {
+/**
+ * Anchored floating content, in the exact surface the dropdown menus paint:
+ * a glass pane on the menu color, depth 2, opening with the menu animation.
+ */
+function PopoverContent({ depth = 2, className, style, ...props }: PopoverContentProps) {
+  const { placement, gutter, anchor } = useContext(PositionContext);
   return (
     <Base.Portal>
-      <Base.Positioner side={side} align={align} sideOffset={6} className="z-action-menu outline-none">
-        <Base.Popup
-          {...props}
-          className={cn(
-            'menu-open-animation glass flex w-64 flex-col gap-3 rounded-lg border border-edge-muted bg-menu-glass p-3 text-sm text-ink outline-none',
-            className
-          )}
-        />
+      <Base.Positioner {...fromPlacement(placement)} sideOffset={gutter} anchor={anchor ?? undefined} className="z-action-menu">
+        <Layer depth={depth}>
+          <Base.Popup
+            {...props}
+            data-surface=""
+            style={surfaceStyle({ style: style as CSSProperties })}
+            className={cn(
+              SURFACE_CLASS,
+              'rounded-xl size-auto z-action-menu menu-open-animation glass bg-menu-glass text-sm [--color-surface:var(--color-menu)]',
+              'max-w-80 p-3 outline-none',
+              className
+            )}
+          />
+        </Layer>
       </Base.Positioner>
     </Base.Portal>
   );
 }
 
-type TextProps = { className?: string; children?: ReactNode };
-
-export function PopoverTitle({ className, children }: TextProps) {
-  return <Base.Title className={cn('text-sm font-medium text-ink', className)}>{children}</Base.Title>;
+function PopoverTitle({ className, ...props }: Classed<ComponentProps<typeof Base.Title>>) {
+  return <Base.Title {...props} className={cn('text-sm font-semibold text-ink', className)} />;
 }
 
-export function PopoverDescription({ className, children }: TextProps) {
-  return (
-    <Base.Description className={cn('text-sm text-ink-muted', className)}>{children}</Base.Description>
-  );
+function PopoverDescription({ className, ...props }: Classed<ComponentProps<typeof Base.Description>>) {
+  return <Base.Description {...props} className={cn('text-sm text-ink-muted', className)} />;
 }
+
+/**
+ * @do Use for rich, interactive content anchored to a trigger (filters, pickers).
+ * @do Use Tooltip for a short text hint; it has no interactive content.
+ * @dont Put a whole form in a popover; open a Dialog instead.
+ */
+export const Popover = Object.assign(PopoverRoot, {
+  Trigger: Base.Trigger,
+  Anchor: PopoverAnchor,
+  CloseButton: Base.Close,
+  Content: PopoverContent,
+  Title: PopoverTitle,
+  Description: PopoverDescription,
+});

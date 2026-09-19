@@ -1,14 +1,9 @@
 import { Funnel } from '@phosphor-icons/react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverTitle,
-  PopoverTrigger,
-} from '@/components/Popover';
+import { Button } from '@/components/Button';
+import { Popover } from '@/components/Popover';
 
-const HUES = {
+const PALETTE = {
   red: 'bg-red-bg text-red-ink',
   amber: 'bg-amber-bg text-amber-ink',
   green: 'bg-green-bg text-green-ink',
@@ -19,10 +14,9 @@ const HUES = {
 };
 
 /**
- * Interactive content anchored to a trigger: a filter, a picker, a short
- * form. It paints the menu's surface: glass on `bg-menu-glass`, `rounded-lg`,
- * growing from the trigger with `menu-open-animation`. Use `Tooltip` for a label and
- * `Menu` for a list of actions.
+ * Anchored, interactive floating content. It paints the menu surface:
+ * `glass` on `bg-menu-glass`, depth 2, radius `xl`, and the 120ms
+ * `menu-open` animation growing from the trigger.
  */
 const meta = {
   title: 'Primitives/Popover',
@@ -31,28 +25,28 @@ const meta = {
 } satisfies Meta<typeof Popover>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj;
 
 export const Default: Story = {
   render: () => (
-    <Popover>
-      <PopoverTrigger>
+    <Popover gutter={6} placement="bottom-start">
+      <Popover.Trigger render={<Button variant="outlined" />}>
         <Funnel />
         Filter
-      </PopoverTrigger>
-      <PopoverContent>
+      </Popover.Trigger>
+      <Popover.Content className="flex w-64 flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <PopoverTitle>Filter by label</PopoverTitle>
-          <PopoverDescription>Labels take a hue from the named palette.</PopoverDescription>
+          <Popover.Title>Filter by label</Popover.Title>
+          <Popover.Description>Labels take a hue from the named palette.</Popover.Description>
         </div>
         <div className="flex flex-wrap gap-1.5">
-          {Object.entries(HUES).map(([hue, classes]) => (
-            <span key={hue} className={`rounded-full px-2 py-0.5 text-xs font-medium ${classes}`}>
-              {hue}
+          {Object.entries(PALETTE).map(([color, classes]) => (
+            <span key={color} className={`rounded-full px-2 py-0.5 text-xs font-medium ${classes}`}>
+              {color}
             </span>
           ))}
         </div>
-      </PopoverContent>
+      </Popover.Content>
     </Popover>
   ),
 };

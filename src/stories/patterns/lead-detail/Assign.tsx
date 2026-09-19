@@ -2,7 +2,8 @@ import { Check } from '@phosphor-icons/react';
 import { useState } from 'react';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
-import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from '@/components/Popover';
+import { Button } from '@/components/Button';
+import { Popover } from '@/components/Popover';
 import { cn } from '@/lib/cn';
 import { HUE_CLASSES } from '@/lib/hue';
 import { PEOPLE, type Person, SOURCE_HUE, type Source } from './data';
@@ -45,12 +46,14 @@ export function AssignPopover({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger variant="ghost" size="sm" className="-mx-1.5 w-fit text-sm font-normal text-ink">
+    <Popover open={open} onOpenChange={setOpen} placement="bottom-start" gutter={6}>
+      <Popover.Trigger
+        render={<Button variant="ghost" size="sm" className="-mx-1.5 w-fit text-sm font-normal text-ink" />}
+      >
         <PersonLine person={person} />
-      </PopoverTrigger>
-      <PopoverContent className="w-60 gap-2 p-1.5">
-        <PopoverTitle className="px-1.5 pt-1 text-xs text-ink-muted">Assign lead</PopoverTitle>
+      </Popover.Trigger>
+      <Popover.Content className="flex w-60 flex-col gap-2 p-1.5">
+        <Popover.Title className="px-1.5 pt-1 text-xs text-ink-muted">Assign lead</Popover.Title>
         <div className="flex flex-col">
           {PEOPLE.map((candidate) => {
             const current = candidate.name === person.name;
@@ -77,7 +80,7 @@ export function AssignPopover({
             );
           })}
         </div>
-      </PopoverContent>
+      </Popover.Content>
     </Popover>
   );
 }
