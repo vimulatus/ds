@@ -2,6 +2,7 @@ import '@fontsource-variable/inter';
 import '@fontsource-variable/playfair-display';
 import '@fontsource-variable/roboto-mono';
 import '../src/styles/tokens.css';
+import './docs.css';
 import { DocsContainer, type DocsContainerProps } from '@storybook/addon-docs/blocks';
 import type { Decorator, Preview } from '@storybook/react-vite';
 import { useEffect, useState } from 'react';

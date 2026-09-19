@@ -1,0 +1,41 @@
+/* Docs pages paint with the active theme, so every swatch and story block
+   sits on the same page color the app uses. The prose rules skip story
+   previews and `sb-unstyled` examples, which style themselves. */
+.sbdocs-wrapper,
+.docs-story {
+  background: var(--color-page) !important;
+  color: var(--color-ink);
+}
+
+.sbdocs-content :is(h1, h2, h3, h4, p, li, td, th, strong):not(.docs-story *, .sb-unstyled *) {
+  color: var(--color-ink) !important;
+  font-family: var(--font-sans) !important;
+}
+
+.sbdocs-content :is(p, li, td):not(.docs-story *, .sb-unstyled *) {
+  color: var(--color-ink-muted) !important;
+}
+
+.sbdocs-content :is(table, tr, td, th, hr):not(.docs-story *, .sb-unstyled *),
+.sbdocs-content .docblock-source {
+  border-color: var(--color-edge-muted) !important;
+  background: transparent !important;
+}
+
+.sbdocs-content code:not(pre code, .docs-story *, .sb-unstyled *) {
+  background: var(--color-hover) !important;
+  border-color: var(--color-edge-muted) !important;
+  color: var(--color-ink) !important;
+}
+
+.sbdocs-content .sbdocs-preview {
+  background: var(--color-page) !important;
+  border-color: var(--color-edge-muted) !important;
+  box-shadow: none !important;
+}
+
+/* The syntax theme assumes a light page; keep code on the ink ramp. */
+.sbdocs-content pre,
+.sbdocs-content pre span {
+  color: var(--color-ink-muted) !important;
+}
