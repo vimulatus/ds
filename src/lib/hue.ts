@@ -34,9 +34,27 @@ export const HUE_CLASSES: Record<Hue, { fill: string; tint: string }> = {
   pink: { fill: 'bg-pink', tint: 'bg-pink-bg text-pink-ink' },
 };
 
-/** A stable hue for a string: the same name gets the same color everywhere, with nothing stored. */
-export function hashHue(seed: string): Hue {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) | 0;
-  return HUES[Math.abs(hash) % HUES.length] ?? 'blue';
+/** The hues in the stable order the hash indexes into. */
+export const PALETTE_COLORS = HUES;
+export type PaletteColor = Hue;
+
+/**
+ * A stable hue for a string (FNV-1a over its char codes): the same name gets
+ * the same color everywhere, with nothing stored.
+ */
+export function getHashedPaletteColor(value: string): PaletteColor;
+export function getHashedPaletteColor<const Color extends string>(
+  value: string,
+  options: { palette: readonly [Color, ...Color[]] }
+): Color;
+export function getHashedPaletteColor(value: string, options?: { palette: readonly string[] }): string {
+  const palette = options?.palette ?? PALETTE_COLORS;
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < value.length; i++) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return palette[(hash >>> 0) % palette.length] as string;
 }
+
+export const hashHue = (seed: string): Hue => getHashedPaletteColor(seed);

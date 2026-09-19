@@ -1,46 +1,64 @@
 import type { ComponentProps } from 'react';
+import { buttonClasses } from '@/components/Button';
 import { cn } from '@/lib/cn';
-import { HUE_CLASSES, type Hue } from '@/lib/hue';
 
 export type BadgeVariant = 'ghost' | 'outlined';
 export type BadgeSize = 'sm' | 'md';
+export type BadgeVariantProps = { variant?: BadgeVariant; size?: BadgeSize };
 
 const VARIANT: Record<BadgeVariant, string> = {
-  ghost: 'text-ink-muted',
-  outlined: 'border border-edge text-ink-muted',
+  ghost: 'bg-transparent text-ink-muted',
+  outlined: 'bg-transparent text-ink-muted border-edge-muted',
 };
 
+/** Button's control sizes, so a badge and a button of one size share a line. */
 const SIZE: Record<BadgeSize, string> = {
-  sm: 'h-5 min-w-5 gap-1 px-1.5 text-xs [&_svg]:size-3',
-  md: 'h-6 min-w-6 gap-1.5 px-2 text-xs [&_svg]:size-3.5',
+  sm: "h-6 gap-1 px-2 text-xs [&>svg:not([class*='size-'])]:size-3",
+  md: "h-8 gap-2 px-2 text-sm [&>svg:not([class*='size-'])]:size-3.5",
 };
 
-/** The classes of a badge, for a trigger that must look like one. */
-export function badgeClasses({
-  variant = 'outlined',
-  size = 'md',
-  hue,
-}: { variant?: BadgeVariant; size?: BadgeSize; hue?: Hue | 'accent' } = {}) {
+/** The badge's base and variant classes. */
+export function badgeVariants({ variant = 'ghost', size = 'md' }: BadgeVariantProps = {}) {
   return cn(
-    'inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md font-medium tabular-nums [&_svg]:shrink-0',
+    'inline-flex shrink-0 items-center justify-center whitespace-nowrap',
+    'rounded-full border border-transparent font-medium',
+    '[&_svg]:pointer-events-none [&_svg]:shrink-0',
     VARIANT[variant],
-    SIZE[size],
-    hue === 'accent' && 'border-transparent bg-accent-bg text-accent-ink',
-    hue && hue !== 'accent' && cn('border-transparent', HUE_CLASSES[hue].tint)
+    SIZE[size]
   );
 }
 
-export type BadgeProps = ComponentProps<'span'> & {
-  variant?: BadgeVariant;
-  size?: BadgeSize;
-  /** A tint for identity or state. A tinted badge drops its edge. */
-  hue?: Hue | 'accent';
-};
+export type BadgeClassOptions = BadgeVariantProps & { className?: string };
+
+/** The classes of a badge, for an element that must look like one. */
+export function badgeClasses({ variant, size, className }: BadgeClassOptions = {}) {
+  return cn(badgeVariants({ variant, size }), className, 'rounded-full');
+}
+
+/** Button's hover, press and focus states in a badge's shape, for a badge that is a trigger. */
+export function badgeTriggerClasses({ variant = 'ghost', size = 'md', className }: BadgeClassOptions = {}) {
+  return cn(
+    buttonClasses({ variant, size, noTouchResize: true, className }),
+    'focus-visible:ring-2 focus-visible:ring-accent/20',
+    'rounded-full'
+  );
+}
+
+export type BadgeProps = ComponentProps<'span'> & BadgeVariantProps;
 
 /**
- * A count or a short label: a word or two, never an action. `sm` and `md`
- * sit on the same line as a Button of the same size.
+ * A short, non-interactive label for a status, a count or a tag, on
+ * Button's size scale. For a badge that acts, put `badgeTriggerClasses` on
+ * a real button.
  */
-export function Badge({ variant, size, hue, className, ...props }: BadgeProps) {
-  return <span {...props} className={cn(badgeClasses({ variant, size, hue }), className)} />;
+export function Badge({ variant = 'ghost', size = 'md', className, ...props }: BadgeProps) {
+  return (
+    <span
+      data-slot="badge"
+      data-variant={variant}
+      data-size={size}
+      {...props}
+      className={badgeClasses({ variant, size, className })}
+    />
+  );
 }
