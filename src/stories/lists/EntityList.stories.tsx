@@ -65,7 +65,7 @@ function Demo({ initialSelected = [], items: initialItems = ROWS, ...props }: Li
         items={items.map((item) => ({ ...item, actions: ACTIONS }))}
         renderRow={(item, row) => (
           <SwipableRow
-            leading={{ label: 'Star', icon: <Star />, onAction: () => {} }}
+            leading={{ label: 'Star', icon: <Star />, tone: 'accent', onAction: () => {} }}
             trailing={[{ label: 'Delete', icon: <Trash />, tone: 'failure', dismiss: true, onAction: () => remove(item.id) }]}
           >
             {row}
