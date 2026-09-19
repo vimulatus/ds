@@ -38,7 +38,7 @@ A surface nearer the user is one shade lighter. The window is the darkest step, 
 **How.**
 - `bg-page` is the window. `bg-panel` is the canvas.
 - `Layer depth={n}` sets the depth for everything inside it. `bg-surface` and `bg-inset` follow the nearest depth.
-- `Card` sets depth 1, the same step as the canvas, so its hairline edge carries it. A card inside it can set depth 2.
+- `Card` takes the depth around it, and its hairline edge carries it. `Card variant="filled"` paints `bg-surface`; give it `depth` or `offset` to step it nearer.
 - `bg-hover` is a 3% wash of ink, so it works on any depth.
 
 <DepthLadder />
@@ -89,13 +89,13 @@ A screen has one next step. That step is the `cta`. Other actions step down: `ac
 
 **How.**
 - One `cta` per screen. A temporary bar, such as the unsaved-changes bar, may add a second while it is up.
-- Destructive actions are `danger` and ask first with `confirm()`.
+- Destructive actions are `danger` and ask first with `confirmDialog()`.
 
 <EmphasisLadder />
 
 ## 7. Things align on their centers
 
-Controls come in fixed heights: 24px for `sm`, 32px for `md`, 40px for `md` in touch mode. Icons, badges and avatars center on the same line as the text beside them. Spacing steps by 4px.
+Controls come in fixed heights: 24px for `sm` and 32px for `md`. In touch mode a button grows to at least 36px. Icons, badges and avatars center on the same line as the text beside them. Spacing steps by 4px.
 
 **Why.** Mixed sizes in one row look careless when their tops align and their centers do not. Fixed heights let any two controls sit side by side.
 
@@ -125,8 +125,9 @@ A phone gets its own form of each screen. Controls grow, dialogs become sheets t
 
 **How.**
 - `<html data-touch-device="true">` turns on touch mode. Style it with the `touch:` and `not-touch:` variants, or read it with `useTouch()`.
-- `md` controls grow to 40px and `sm` buttons to 32px.
-- `Dialog` and `ConfirmDialog` render as a `Drawer` sheet. Bars clear the safe area.
+- Buttons grow to at least 36px.
+- `Dialog` and `ConfirmDialog` render as a `MobileDrawer` sheet. Bars clear the safe area.
+- The rail renders as `BottomNav`, a bar of tabs under the floating canvas.
 - Check a screen at **iPhone 14** in the toolbar when it has a phone form.
 
 ## How a component is built
