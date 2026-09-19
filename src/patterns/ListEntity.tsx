@@ -2,7 +2,7 @@ import { DotsThree } from '@phosphor-icons/react';
 import { type ComponentProps, type KeyboardEvent, type ReactNode, useRef, useState } from 'react';
 import { Avatar, AvatarGroup } from '@/components/Avatar';
 import { Checkbox } from '@/components/Checkbox';
-import { Menu, MenuContent, MenuTrigger } from '@/components/Menu';
+import { Dropdown } from '@/components/Dropdown';
 import { cn } from '@/lib/cn';
 import { useTouch } from '@/lib/touch';
 import { EntityIcon, type EntityKind } from './EntityIcon';
@@ -32,7 +32,7 @@ export type ListEntityProps = Omit<ComponentProps<'div'>, 'title'> & {
   /** Some row in the list is selected, so every checkbox shows, touch included. */
   selecting?: boolean;
   onOpen?: () => void;
-  /** MenuItems for the row's actions menu. It opens from the trailing button, a right click, or Shift+F10. */
+  /** Dropdown groups for the row's actions menu. It opens from the trailing button, a right click, or Shift+F10. */
   actions?: ReactNode;
   density?: ListDensity;
 };
@@ -249,8 +249,8 @@ export function ListEntity({
           onClick={(event) => event.stopPropagation()}
           onKeyDown={(event) => event.stopPropagation()}
         >
-          <Menu open={menuOpen} onOpenChange={setMenuOpen}>
-            <MenuTrigger
+          <Dropdown open={menuOpen} onOpenChange={setMenuOpen} placement="bottom-end">
+            <Dropdown.Trigger
               variant="ghost"
               size="icon-sm"
               label="More actions"
@@ -258,9 +258,9 @@ export function ListEntity({
               className="-mr-1 opacity-0 group-hover/row:opacity-100 group-focus-visible/row:opacity-100 data-popup-open:opacity-100"
             >
               <DotsThree weight="bold" />
-            </MenuTrigger>
-            <MenuContent align="end" finalFocus={rowRef}>{actions}</MenuContent>
-          </Menu>
+            </Dropdown.Trigger>
+            <Dropdown.Content finalFocus={rowRef}>{actions}</Dropdown.Content>
+          </Dropdown>
         </span>
       )}
     </div>

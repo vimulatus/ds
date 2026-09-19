@@ -4,7 +4,7 @@ import { Button, buttonClasses } from '@/components/Button';
 import { EmptyStatePanel } from '@/components/EmptyStatePanel';
 import { Input } from '@/components/Input';
 import { MaskReveal } from '@/components/MaskReveal';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@/components/Menu';
+import { Dropdown } from '@/components/Dropdown';
 import { cn } from '@/lib/cn';
 import { EditableProperty, editablePropertyClasses, Property, PropertyGrid } from '@/patterns/PropertyGrid';
 import { ResourceDetail } from '@/patterns/ResourceDetail';
@@ -245,15 +245,23 @@ export function LeadDetail({ lead: initial = LEAD }: { lead?: Lead }) {
                   Schedule follow-up
                 </Button>
               )}
-              <Menu>
-                <MenuTrigger variant="ghost" size="icon-md" label="More actions">
+              <Dropdown placement="bottom-end">
+                <Dropdown.Trigger variant="ghost" size="icon-md" label="More actions">
                   <DotsThree />
-                </MenuTrigger>
-                <MenuContent align="end">
-                  <MenuItem icon={<PencilSimple />}>Edit lead</MenuItem>
-                  <MenuItem icon={<Link />}>Copy link</MenuItem>
-                </MenuContent>
-              </Menu>
+                </Dropdown.Trigger>
+                <Dropdown.Content>
+                  <Dropdown.Group>
+                    <Dropdown.Item>
+                      <PencilSimple className="size-3.5 text-ink-muted" />
+                      Edit lead
+                    </Dropdown.Item>
+                    <Dropdown.Item>
+                      <Link className="size-3.5 text-ink-muted" />
+                      Copy link
+                    </Dropdown.Item>
+                  </Dropdown.Group>
+                </Dropdown.Content>
+              </Dropdown>
             </>
           }
         />

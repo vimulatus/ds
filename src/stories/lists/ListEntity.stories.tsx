@@ -2,7 +2,8 @@ import { Copy, PencilSimple, Star, Trash } from '@phosphor-icons/react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { type ReactNode, useState } from 'react';
 import { Badge } from '@/components/Badge';
-import { MenuItem, MenuSeparator } from '@/components/Menu';
+import { Dropdown } from '@/components/Dropdown';
+import { Hotkey } from '@/components/Hotkey';
 import { TagDot } from '@/components/TagDot';
 import { ENTITY, ENTITY_KINDS } from '@/patterns/EntityIcon';
 import { ListEntity } from '@/patterns/ListEntity';
@@ -17,13 +18,27 @@ function Frame({ children }: { children: ReactNode }) {
 
 const ACTIONS = (
   <>
-    <MenuItem icon={<Star />}>Star</MenuItem>
-    <MenuItem icon={<PencilSimple />}>Rename</MenuItem>
-    <MenuItem icon={<Copy />} shortcut="⌘D">Duplicate</MenuItem>
-    <MenuSeparator />
-    <MenuItem icon={<Trash />} destructive>
-      Delete
-    </MenuItem>
+    <Dropdown.Group>
+      <Dropdown.Item>
+        <Star className="size-3.5 text-ink-muted" />
+        Star
+      </Dropdown.Item>
+      <Dropdown.Item>
+        <PencilSimple className="size-3.5 text-ink-muted" />
+        Rename
+      </Dropdown.Item>
+      <Dropdown.Item>
+        <Copy className="size-3.5 text-ink-muted" />
+        Duplicate
+        <Hotkey shortcut="⌘D" variant="inline" className="ml-auto" />
+      </Dropdown.Item>
+    </Dropdown.Group>
+    <Dropdown.Group>
+      <Dropdown.Item className="text-failure-ink">
+        <Trash className="size-3.5" />
+        Delete
+      </Dropdown.Item>
+    </Dropdown.Group>
   </>
 );
 

@@ -3,7 +3,7 @@ import { CaretRight, Plus, Prohibit, WhatsappLogo } from '@phosphor-icons/react'
 import { useState } from 'react';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
-import { Menu, MenuContent, MenuGroup, MenuItem, MenuLabel, MenuTrigger } from '@/components/Menu';
+import { Dropdown } from '@/components/Dropdown';
 import { cn } from '@/lib/cn';
 import { Property, PropertyGrid } from '@/patterns/PropertyGrid';
 import { type Enquiry, type Project, SOURCES, STAGE_LABEL, type Source } from './data';
@@ -35,22 +35,22 @@ function Description({ text }: { text: string }) {
 /** Opens an enquiry for the project, asking first where the lead came from. */
 function AddEnquiry({ onAdd }: { onAdd: (source: Source) => void }) {
   return (
-    <Menu>
-      <MenuTrigger variant="outlined" size="sm">
+    <Dropdown placement="bottom-end">
+      <Dropdown.Trigger variant="outlined" size="sm">
         <Plus />
         Add enquiry
-      </MenuTrigger>
-      <MenuContent align="end">
-        <MenuGroup>
-          <MenuLabel>Source</MenuLabel>
+      </Dropdown.Trigger>
+      <Dropdown.Content>
+        <Dropdown.Group>
+          <Dropdown.GroupLabel>Source</Dropdown.GroupLabel>
           {SOURCES.map((source) => (
-            <MenuItem key={source} onClick={() => onAdd(source)}>
+            <Dropdown.Item key={source} onClick={() => onAdd(source)}>
               {source}
-            </MenuItem>
+            </Dropdown.Item>
           ))}
-        </MenuGroup>
-      </MenuContent>
-    </Menu>
+        </Dropdown.Group>
+      </Dropdown.Content>
+    </Dropdown>
   );
 }
 

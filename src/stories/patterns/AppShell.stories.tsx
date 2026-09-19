@@ -19,7 +19,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { type ReactNode, useState } from 'react';
 import { Button } from '@/components/Button';
 import { EmptyStatePanel } from '@/components/EmptyStatePanel';
-import { MenuItem, MenuSeparator } from '@/components/Menu';
+import { Dropdown } from '@/components/Dropdown';
 import { AppShell } from '@/patterns/AppShell';
 import { ResourceDetail } from '@/patterns/ResourceDetail';
 import { RailAccount, RailButton, type RailItem, SidebarRail } from '@/patterns/SidebarRail';
@@ -66,10 +66,22 @@ function Rail({ initial }: { initial: string }) {
             <GearSix />
           </RailButton>
           <RailAccount name="Priya Shah">
-            <MenuItem icon={<UserCircle />}>Profile</MenuItem>
-            <MenuItem icon={<Keyboard />}>Keyboard shortcuts</MenuItem>
-            <MenuSeparator />
-            <MenuItem icon={<SignOut />}>Sign out</MenuItem>
+            <Dropdown.Group>
+              <Dropdown.Item>
+                <UserCircle className="size-3.5 text-ink-muted" />
+                Profile
+              </Dropdown.Item>
+              <Dropdown.Item>
+                <Keyboard className="size-3.5 text-ink-muted" />
+                Keyboard shortcuts
+              </Dropdown.Item>
+            </Dropdown.Group>
+            <Dropdown.Group>
+              <Dropdown.Item>
+                <SignOut className="size-3.5 text-ink-muted" />
+                Sign out
+              </Dropdown.Item>
+            </Dropdown.Group>
           </RailAccount>
         </>
       }

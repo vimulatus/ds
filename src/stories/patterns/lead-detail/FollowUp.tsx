@@ -1,7 +1,7 @@
 import { Check, Clock, WarningCircle } from '@phosphor-icons/react';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
-import { Menu, MenuContent, MenuGroup, MenuItem, MenuLabel, MenuTrigger } from '@/components/Menu';
+import { Dropdown } from '@/components/Dropdown';
 import type { FollowUp } from './data';
 import { TintRow } from './TintRow';
 
@@ -29,21 +29,21 @@ export function FollowUpRow({
       aria-label={missed ? 'Missed follow-up' : 'Next follow-up'}
       actions={
         <>
-          <Menu>
-            <MenuTrigger variant="ghost" size="sm">
+          <Dropdown placement="bottom-end">
+            <Dropdown.Trigger variant="ghost" size="sm">
               Move
-            </MenuTrigger>
-            <MenuContent align="end">
-              <MenuGroup>
-                <MenuLabel>Move to</MenuLabel>
+            </Dropdown.Trigger>
+            <Dropdown.Content>
+              <Dropdown.Group>
+                <Dropdown.GroupLabel>Move to</Dropdown.GroupLabel>
                 {MOVE_OPTIONS.map((when) => (
-                  <MenuItem key={when} onClick={() => onMove(when)}>
+                  <Dropdown.Item key={when} onClick={() => onMove(when)}>
                     {when}
-                  </MenuItem>
+                  </Dropdown.Item>
                 ))}
-              </MenuGroup>
-            </MenuContent>
-          </Menu>
+              </Dropdown.Group>
+            </Dropdown.Content>
+          </Dropdown>
           <Button variant="cta" size="sm" onClick={onDone}>
             <Check />
             Done

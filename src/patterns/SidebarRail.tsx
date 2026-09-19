@@ -3,7 +3,7 @@ import type { Icon } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
-import { Menu, MenuContent, MenuTrigger } from '@/components/Menu';
+import { Dropdown } from '@/components/Dropdown';
 import { cn } from '@/lib/cn';
 
 export type RailItem = {
@@ -31,19 +31,17 @@ export function RailButton(props: Omit<Parameters<typeof Button>[0], 'size' | 'v
  */
 export function RailAccount({ name, src, children }: { name: string; src?: string; children: ReactNode }) {
   return (
-    <Menu>
+    <Dropdown placement="right-end">
       <Toolbar.Button
-        render={<MenuTrigger variant="ghost" size="icon-md" label={name} tooltipSide="right" />}
+        render={<Dropdown.Trigger variant="ghost" size="icon-md" label={name} tooltipSide="right" />}
       >
         <Avatar aria-hidden>
           {src && <Avatar.Image src={src} alt="" />}
           <Avatar.Fallback>{name.split(' ').slice(0, 2).map((word) => word[0]).join('')}</Avatar.Fallback>
         </Avatar>
       </Toolbar.Button>
-      <MenuContent side="right" align="end">
-        {children}
-      </MenuContent>
-    </Menu>
+      <Dropdown.Content>{children}</Dropdown.Content>
+    </Dropdown>
   );
 }
 

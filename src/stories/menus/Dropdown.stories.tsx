@@ -1,60 +1,57 @@
-import { Copy, DotsThree, Funnel, Link, PencilSimple, Trash } from '@phosphor-icons/react';
+import { CaretRight, Copy, DotsThree, Funnel, Link, PencilSimple, Trash } from '@phosphor-icons/react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import {
-  Menu,
-  MenuCheckboxItem,
-  MenuContent,
-  MenuGroup,
-  MenuItem,
-  MenuLabel,
-  MenuRadioGroup,
-  MenuRadioItem,
-  MenuSeparator,
-  MenuSub,
-  MenuSubContent,
-  MenuSubTrigger,
-  MenuTrigger,
-} from '@/components/Menu';
-import { PHONE } from '../phone';
+import { Dropdown } from '@/components/Dropdown';
 
 /**
- * A list of actions or choices behind a trigger. The popup is glass on
- * `bg-menu-glass`, `rounded-lg`, and grows from the trigger with
- * `menu-open-animation`. Rows are 32px (40px in touch mode) with a `bg-hover`
- * highlight. `MenuTrigger` takes the `Button` variants and sizes, and lights
- * while its menu is open.
+ * The menu surface. `Dropdown.Content` paints `glass` on `bg-menu-glass` at
+ * depth 2, radius `xl`, with the 120ms `menu-open` animation. Each
+ * `Dropdown.Group` sits on `bg-menu`, and the content's hairline gap draws
+ * the rule between groups, so a menu needs no separators.
+ *
+ * Rows are `rounded-lg` with a `bg-ink/5` highlight. Text size comes from
+ * the content (`text-sm`), so a `text-*` class on the content resizes the
+ * whole menu. Ctrl+J/K/H/L move through the items like the arrows.
  */
 const meta = {
-  title: 'Menus/Menu',
-  component: Menu,
+  title: 'Menus/Dropdown',
+  component: Dropdown,
   parameters: { docs: { story: { inline: false, iframeHeight: 360 } } },
-} satisfies Meta<typeof Menu>;
+} satisfies Meta<typeof Dropdown>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj;
 
-/** A row menu: actions grouped by kind, the destructive one last, behind a rule. */
+/** A row menu: actions grouped by kind, the destructive one last. */
 export const Default: Story = {
   render: () => (
-    <Menu>
-      <MenuTrigger variant="ghost" size="icon-sm" label="More actions">
-        <DotsThree weight="bold" />
-      </MenuTrigger>
-      <MenuContent>
-        <MenuItem icon={<PencilSimple />} shortcut="⌘R">
-          Rename
-        </MenuItem>
-        <MenuItem icon={<Copy />} shortcut="⌘D">
-          Duplicate
-        </MenuItem>
-        <MenuItem icon={<Link />}>Copy link</MenuItem>
-        <MenuSeparator />
-        <MenuItem icon={<Trash />} destructive>
-          Delete
-        </MenuItem>
-      </MenuContent>
-    </Menu>
+    <Dropdown>
+      <Dropdown.Trigger variant="ghost" size="icon-sm" label="More actions">
+        <DotsThree />
+      </Dropdown.Trigger>
+      <Dropdown.Content className="min-w-48">
+        <Dropdown.Group>
+          <Dropdown.Item>
+            <PencilSimple className="size-3.5 text-ink-muted" />
+            Rename
+          </Dropdown.Item>
+          <Dropdown.Item>
+            <Copy className="size-3.5 text-ink-muted" />
+            Duplicate
+          </Dropdown.Item>
+          <Dropdown.Item>
+            <Link className="size-3.5 text-ink-muted" />
+            Copy link
+          </Dropdown.Item>
+        </Dropdown.Group>
+        <Dropdown.Group>
+          <Dropdown.Item className="text-failure-ink">
+            <Trash className="size-3.5" />
+            Delete
+          </Dropdown.Item>
+        </Dropdown.Group>
+      </Dropdown.Content>
+    </Dropdown>
   ),
 };
 
@@ -69,77 +66,86 @@ function ColumnsMenu() {
     setShown(next);
   };
   return (
-    <Menu>
-      <MenuTrigger>
+    <Dropdown>
+      <Dropdown.Trigger>
         <Funnel />
         Columns
-      </MenuTrigger>
-      <MenuContent>
-        <MenuGroup>
-          <MenuLabel>List columns</MenuLabel>
+      </Dropdown.Trigger>
+      <Dropdown.Content className="min-w-48">
+        <Dropdown.Group>
+          <Dropdown.GroupLabel>List columns</Dropdown.GroupLabel>
           {COLUMNS.map((column) => (
-            <MenuCheckboxItem
+            <Dropdown.CheckboxItem
               key={column}
               checked={shown.has(column)}
-              onCheckedChange={(checked) => toggle(column, checked)}
+              onChange={(checked) => toggle(column, checked)}
+              closeOnSelect={false}
             >
               {column}
-            </MenuCheckboxItem>
+            </Dropdown.CheckboxItem>
           ))}
-        </MenuGroup>
-      </MenuContent>
-    </Menu>
+        </Dropdown.Group>
+      </Dropdown.Content>
+    </Dropdown>
   );
 }
 
 /** Checkbox rows keep the menu open, so a person can toggle several. */
-export const Checkboxes: Story = { render: () => <ColumnsMenu /> };
+export const Checkboxes: Story = {
+  render: () => <ColumnsMenu />,
+};
 
 function SortMenu() {
   const [sort, setSort] = useState('Updated');
   return (
-    <Menu>
-      <MenuTrigger>Sort: {sort}</MenuTrigger>
-      <MenuContent>
-        <MenuRadioGroup value={sort} onValueChange={setSort}>
-          <MenuLabel>Sort by</MenuLabel>
-          {['Name', 'Updated', 'Created'].map((option) => (
-            <MenuRadioItem key={option} value={option}>
-              {option}
-            </MenuRadioItem>
-          ))}
-        </MenuRadioGroup>
-      </MenuContent>
-    </Menu>
+    <Dropdown>
+      <Dropdown.Trigger>Sort: {sort}</Dropdown.Trigger>
+      <Dropdown.Content className="min-w-48">
+        <Dropdown.Group>
+          <Dropdown.GroupLabel>Sort by</Dropdown.GroupLabel>
+          <Dropdown.RadioGroup value={sort} onChange={setSort}>
+            {['Name', 'Updated', 'Created'].map((option) => (
+              <Dropdown.RadioItem key={option} value={option} className="justify-between">
+                {option}
+                <Dropdown.ItemIndicator className="text-accent">•</Dropdown.ItemIndicator>
+              </Dropdown.RadioItem>
+            ))}
+          </Dropdown.RadioGroup>
+        </Dropdown.Group>
+      </Dropdown.Content>
+    </Dropdown>
   );
 }
 
-/** A radio group picks one value; the chosen row carries an accent dot. */
-export const Radio: Story = { render: () => <SortMenu /> };
+/** A radio group picks one value. `ItemIndicator` marks the chosen row. */
+export const Radio: Story = {
+  render: () => <SortMenu />,
+};
 
 /** A submenu opens beside its row, on the same glass surface. */
 export const Submenu: Story = {
   render: () => (
-    <Menu>
-      <MenuTrigger>Move</MenuTrigger>
-      <MenuContent>
-        <MenuItem>Pin to sidebar</MenuItem>
-        <MenuSub>
-          <MenuSubTrigger>Move to project</MenuSubTrigger>
-          <MenuSubContent>
-            {['Roadmap', 'Hiring', 'Launch'].map((project) => (
-              <MenuItem key={project}>{project}</MenuItem>
-            ))}
-          </MenuSubContent>
-        </MenuSub>
-        <MenuItem disabled>Archive</MenuItem>
-      </MenuContent>
-    </Menu>
+    <Dropdown>
+      <Dropdown.Trigger>Move</Dropdown.Trigger>
+      <Dropdown.Content className="min-w-48">
+        <Dropdown.Group>
+          <Dropdown.Item>Pin to sidebar</Dropdown.Item>
+          <Dropdown.Sub>
+            <Dropdown.SubTrigger>
+              <span className="flex-1">Move to project</span>
+              <CaretRight className="size-3 text-ink-muted" />
+            </Dropdown.SubTrigger>
+            <Dropdown.SubContent className="min-w-40">
+              <Dropdown.Group>
+                {['Roadmap', 'Hiring', 'Launch'].map((project) => (
+                  <Dropdown.Item key={project}>{project}</Dropdown.Item>
+                ))}
+              </Dropdown.Group>
+            </Dropdown.SubContent>
+          </Dropdown.Sub>
+          <Dropdown.Item disabled>Archive</Dropdown.Item>
+        </Dropdown.Group>
+      </Dropdown.Content>
+    </Dropdown>
   ),
-};
-
-/** In touch mode rows grow to 40px and 16px text, for a thumb. */
-export const Phone: Story = {
-  ...PHONE,
-  render: Default.render,
 };

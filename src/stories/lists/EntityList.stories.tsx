@@ -2,7 +2,7 @@ import { FolderSimple, PencilSimple, Star, Trash } from '@phosphor-icons/react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { type ComponentProps, type ReactNode, useState } from 'react';
 import { Button } from '@/components/Button';
-import { MenuItem, MenuSeparator } from '@/components/Menu';
+import { Dropdown } from '@/components/Dropdown';
 import { Toolbar } from '@/components/Toolbar';
 import { EntityList } from '@/patterns/EntityList';
 import { ROWS } from './sample';
@@ -13,13 +13,26 @@ function Column({ children }: { children: ReactNode }) {
 
 const ACTIONS = (
   <>
-    <MenuItem icon={<Star />}>Star</MenuItem>
-    <MenuItem icon={<PencilSimple />}>Rename</MenuItem>
-    <MenuItem icon={<FolderSimple />}>Move to…</MenuItem>
-    <MenuSeparator />
-    <MenuItem icon={<Trash />} destructive>
-      Delete
-    </MenuItem>
+    <Dropdown.Group>
+      <Dropdown.Item>
+        <Star className="size-3.5 text-ink-muted" />
+        Star
+      </Dropdown.Item>
+      <Dropdown.Item>
+        <PencilSimple className="size-3.5 text-ink-muted" />
+        Rename
+      </Dropdown.Item>
+      <Dropdown.Item>
+        <FolderSimple className="size-3.5 text-ink-muted" />
+        Move to…
+      </Dropdown.Item>
+    </Dropdown.Group>
+    <Dropdown.Group>
+      <Dropdown.Item className="text-failure-ink">
+        <Trash className="size-3.5" />
+        Delete
+      </Dropdown.Item>
+    </Dropdown.Group>
   </>
 );
 
