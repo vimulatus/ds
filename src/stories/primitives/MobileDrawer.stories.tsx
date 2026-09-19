@@ -2,84 +2,76 @@ import { ArrowSquareOut, Copy, PencilSimple, PushPin, Trash } from '@phosphor-ic
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { Button } from '@/components/Button';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerItem,
-  DrawerLabel,
-  DrawerSection,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/Drawer';
+import { MobileDrawer } from '@/components/MobileDrawer';
 import { PHONE } from '../phone';
 
 /**
- * The phone sheet, on Base UI's Drawer. It sits flush on the bottom and side
- * edges of the screen with a flat bottom edge, rounds only its top corners,
- * and is the same glass as a menu. It follows the finger: drag it down past
- * the threshold, or flick it, to dismiss. The bottom padding clears the home
- * indicator, and the body scrolls past 85% of the screen.
+ * The phone sheet, on Base UI's drawer. It sits flush on the bottom and side
+ * edges of the screen, rounds only its top corners (`mobile-sheet`), and is
+ * the same glass as a desktop menu. Parts: `Handle`, `Section` (a tinted
+ * group of rows), `Label` (the group's heading), `Item` (a 44px row) and
+ * `ScrollBody`, which scrolls when the content outgrows 80% of the screen.
  *
- * Parts: `DrawerSection` (a tinted group of rows), `DrawerLabel` (the
- * group's heading) and `DrawerItem` (a 44px row). `Dialog` and
- * `ConfirmDialog` render through this sheet in touch mode.
+ * `Dialog` and `ConfirmDialog` render through this on a phone.
  */
 const meta = {
-  title: 'Primitives/Drawer',
-  component: Drawer,
+  title: 'Primitives/MobileDrawer',
   parameters: { docs: { story: { inline: false, iframeHeight: 520 } } },
-} satisfies Meta<typeof Drawer>;
+} satisfies Meta;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj;
 
-function DocumentActions() {
+const ROW_ICON = 'size-5 text-ink-muted';
+
+function ActionSheetDemo() {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger render={<Button variant="outlined" />}>Document actions</DrawerTrigger>
-      <DrawerContent>
-        <DrawerTitle className="sr-only">Launch plan</DrawerTitle>
-        <DrawerSection>
-          <DrawerItem onClick={close}>
-            <ArrowSquareOut />
-            Open in new tab
-          </DrawerItem>
-          <DrawerItem onClick={close}>
-            <Copy />
-            Copy link
-          </DrawerItem>
-          <DrawerItem onClick={close}>
-            <PushPin />
-            Pin to sidebar
-          </DrawerItem>
-        </DrawerSection>
-        <div>
-          <DrawerLabel>Edit</DrawerLabel>
-          <DrawerSection>
-            <DrawerItem onClick={close}>
-              <PencilSimple />
-              Rename
-            </DrawerItem>
-            <DrawerItem destructive onClick={close}>
-              <Trash />
-              Move to Trash
-            </DrawerItem>
-          </DrawerSection>
-        </div>
-      </DrawerContent>
-    </Drawer>
+    <MobileDrawer open={open} onOpenChange={setOpen} side="bottom">
+      <MobileDrawer.Trigger render={<Button variant="outlined" />}>Document actions</MobileDrawer.Trigger>
+      <MobileDrawer.Portal>
+        <MobileDrawer.Overlay />
+        <MobileDrawer.Content>
+          <MobileDrawer.Handle />
+          <MobileDrawer.Title className="sr-only">Launch plan</MobileDrawer.Title>
+          <MobileDrawer.ScrollBody className="gap-4">
+            <MobileDrawer.Section>
+              <MobileDrawer.Item onClick={close}>
+                <ArrowSquareOut className={ROW_ICON} />
+                Open in new tab
+              </MobileDrawer.Item>
+              <MobileDrawer.Item onClick={close}>
+                <Copy className={ROW_ICON} />
+                Copy link
+              </MobileDrawer.Item>
+              <MobileDrawer.Item onClick={close}>
+                <PushPin className={ROW_ICON} />
+                Pin to sidebar
+              </MobileDrawer.Item>
+            </MobileDrawer.Section>
+            <div>
+              <MobileDrawer.Label>Edit</MobileDrawer.Label>
+              <MobileDrawer.Section>
+                <MobileDrawer.Item onClick={close}>
+                  <PencilSimple className={ROW_ICON} />
+                  Rename
+                </MobileDrawer.Item>
+                <MobileDrawer.Item className="text-failure" onClick={close}>
+                  <Trash className="size-5" />
+                  Move to Trash
+                </MobileDrawer.Item>
+              </MobileDrawer.Section>
+            </div>
+          </MobileDrawer.ScrollBody>
+        </MobileDrawer.Content>
+      </MobileDrawer.Portal>
+    </MobileDrawer>
   );
 }
 
 /** A document's action sheet: two groups of rows, the destructive one last. */
 export const ActionSheet: Story = {
   ...PHONE,
-  render: () => <DocumentActions />,
-};
-
-/** The sheet works with a mouse too: drag it down to dismiss. */
-export const Desktop: Story = {
-  render: () => <DocumentActions />,
+  render: () => <ActionSheetDemo />,
 };

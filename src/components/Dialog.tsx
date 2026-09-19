@@ -1,108 +1,190 @@
 import { Dialog as Base } from '@base-ui/react/dialog';
-import { X } from '@phosphor-icons/react';
-import type { ReactNode } from 'react';
+import { Drawer } from '@base-ui/react/drawer';
+import { type ComponentProps, createContext, type ReactNode, type Ref, useContext, useEffect, useState } from 'react';
 import { cn } from '@/lib/cn';
-import { useTouch } from '@/lib/touch';
-import { buttonClasses } from './Button';
-import { Drawer, DrawerContent } from './Drawer';
+import { useMobile } from '@/lib/mobile';
+import { MobileDrawer } from './MobileDrawer';
+
+// A dialog that opens within this window of another closing skips its entry
+// animation, so hand-offs (cmd+k -> create) read as one surface.
+const DIALOG_HANDOFF_WINDOW_MS = 180;
+
+let openDialogCount = 0;
+let lastAllDialogsClosedAt = Number.NEGATIVE_INFINITY;
+
+/** Set inside the phone sheet, where the dialog's parts render as the drawer's. */
+const DrawerContext = createContext(false);
 
 export type DialogProps = {
-  open?: boolean;
-  defaultOpen?: boolean;
+  onEscapeKeyDown?: (event: KeyboardEvent) => void;
+  onCloseAutoFocus?: (event: Event) => void;
+  onOpenAutoFocus?: (event: Event) => void;
   onOpenChange?: (open: boolean) => void;
-  /** Runs after the open or close animation finishes. */
-  onOpenChangeComplete?: (open: boolean) => void;
-  /** Keeps the dialog open on a click outside it. */
-  disablePointerDismissal?: boolean;
-  children?: ReactNode;
+  contentRef?: Ref<HTMLDivElement>;
+  position?: 'top' | 'center';
+  /** Edge-to-edge takeover: fills the viewport with no gutter or centering. */
+  fullscreen?: boolean;
+  children: ReactNode;
+  className?: string;
+  open: boolean;
+  /** Desktop opening animation; mobile drawers own their transitions. */
+  animate?: boolean;
 };
 
-/**
- * A modal task: a centered panel over a scrim. In touch mode the same parts
- * render as a bottom sheet, so a phone gets a thumb-reachable surface that
- * swipes away. Compose `DialogContent` from `DialogHeader`, `DialogBody` and
- * `DialogFooter`.
- */
-export function Dialog(props: DialogProps) {
-  const touch = useTouch();
-  if (touch) return <Drawer {...props} />;
-  return <Base.Root {...props} />;
+/** Runs an old-style focus callback; `preventDefault()` in it keeps focus where it is. */
+function focusHandler(callback?: (event: Event) => void) {
+  if (!callback) return undefined;
+  return () => {
+    const event = new Event('focus', { cancelable: true });
+    callback(event);
+    return !event.defaultPrevented;
+  };
 }
 
-export const DialogTrigger = Base.Trigger;
-export const DialogClose = Base.Close;
+/**
+ * The modal. Floating dialogs are a pane of glass over an accent-tinted
+ * scrim; `fullscreen` drops the glass because nothing shows through.
+ * On a phone it renders as a bottom drawer instead.
+ */
+function DialogRoot(props: DialogProps) {
+  const mobile = useMobile();
+  if (mobile && !props.fullscreen) return <DialogDrawer {...props} />;
+  return <DesktopDialog {...props} />;
+}
 
-export type DialogContentProps = { className?: string; children?: ReactNode };
-
-/** The panel: `bg-dialog`, `rounded-xl`, 26rem wide unless `className` says otherwise. */
-export function DialogContent({ className, children }: DialogContentProps) {
-  const touch = useTouch();
-  if (touch) return <DrawerContent>{children}</DrawerContent>;
+function DialogDrawer(props: DialogProps) {
   return (
-    <Base.Portal>
-      <Base.Backdrop className="dialog-overlay-open-animation fixed inset-0 z-modal-overlay scrim-glass" />
-      <Base.Viewport className="fixed inset-0 z-modal grid place-items-center p-4">
-        <Base.Popup
+    <DrawerContext.Provider value>
+      <MobileDrawer
+        side="bottom"
+        open={props.open}
+        onOpenChange={(open) => props.onOpenChange?.(open)}
+        onEscapeKeyDown={props.onEscapeKeyDown}
+        noOutsidePointerEvents
+      >
+        <MobileDrawer.Portal>
+          <MobileDrawer.Overlay />
+          <MobileDrawer.Content
+            ref={props.contentRef}
+            maxHeight={100}
+            initialFocus={focusHandler(props.onOpenAutoFocus)}
+            finalFocus={focusHandler(props.onCloseAutoFocus)}
+            className={cn('max-w-full', props.className)}
+          >
+            <MobileDrawer.Handle aria-hidden="true" />
+            <MobileDrawer.ScrollBody>
+              {/* Give desktop surfaces their natural height so their size-full
+                  and overflow-clip styles cannot clip the drawer's scroll body. */}
+              <div className="shrink-0 [&>[data-layer]>[data-surface]]:border-0! [&>[data-layer]>[data-surface]]:rounded-none [&>[data-layer]>[data-surface]]:bg-transparent">
+                {props.children}
+              </div>
+            </MobileDrawer.ScrollBody>
+          </MobileDrawer.Content>
+        </MobileDrawer.Portal>
+      </MobileDrawer>
+    </DrawerContext.Provider>
+  );
+}
+
+/** Whether this dialog animates in: only when asked, and not when it takes over from another dialog. */
+function useAnimateOnOpen(open: boolean, animate: boolean | undefined) {
+  const [animateOnOpen, setAnimateOnOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const handoff = openDialogCount > 0 || performance.now() - lastAllDialogsClosedAt < DIALOG_HANDOFF_WINDOW_MS;
+    setAnimateOnOpen(!handoff && Boolean(animate));
+    openDialogCount += 1;
+    return () => {
+      setAnimateOnOpen(false);
+      openDialogCount = Math.max(0, openDialogCount - 1);
+      if (openDialogCount === 0) lastAllDialogsClosedAt = performance.now();
+    };
+    // `animate` is read when the dialog opens, not tracked while it is open.
+  }, [open]);
+
+  return animateOnOpen;
+}
+
+function DesktopDialog(props: DialogProps) {
+  const animateOnOpen = useAnimateOnOpen(props.open, props.animate);
+
+  return (
+    <Base.Root
+      open={props.open}
+      modal
+      onOpenChange={(open, details) => {
+        if (details.reason === 'escape-key') {
+          props.onEscapeKeyDown?.(details.event);
+          if (details.event.defaultPrevented) {
+            details.cancel();
+            return;
+          }
+        }
+        props.onOpenChange?.(open);
+      }}
+    >
+      <Base.Portal>
+        <Base.Backdrop
           className={cn(
-            'dialog-content-open-animation flex w-104 max-w-full flex-col gap-4 rounded-xl border border-edge-muted bg-dialog p-4 text-ink shadow-2xl outline-none',
-            className
+            // Every floating dialog dims the page behind it with the accent sheen.
+            'fixed inset-0 z-modal scrim-glass',
+            animateOnOpen && 'dialog-overlay-open-animation'
+          )}
+        />
+        <Base.Viewport
+          className={cn(
+            'fixed top-0 bottom-(--virtual-keyboard-height,0) inset-x-0 z-modal flex',
+            props.fullscreen
+              ? 'inset-0'
+              : cn('justify-center px-2', props.position === 'center' ? 'items-center' : 'items-start pt-[10vh]')
           )}
         >
-          {children}
-        </Base.Popup>
-      </Base.Viewport>
-    </Base.Portal>
+          <Base.Popup
+            ref={props.contentRef}
+            initialFocus={focusHandler(props.onOpenAutoFocus)}
+            finalFocus={focusHandler(props.onCloseAutoFocus)}
+            className={cn(
+              'portal-scope isolate rounded-xl bg-dialog',
+              // Floating dialogs get the glass treatment; fullscreen fills the
+              // viewport, so translucency and a cast shadow would just bleed the
+              // page through the content. --color-dialog goes translucent inside
+              // so nested bg-dialog chrome reads as the same pane.
+              props.fullscreen
+                ? 'size-full'
+                : 'w-200 max-w-[calc(100vw-16px)] glass bg-menu-glass [--color-dialog:var(--color-menu-glass)] [&>[data-layer]>[data-surface]]:border-0!',
+              animateOnOpen &&
+                (props.fullscreen ? 'dialog-fullscreen-open-animation' : 'dialog-content-open-animation'),
+              props.className
+            )}
+          >
+            {props.children}
+          </Base.Popup>
+        </Base.Viewport>
+      </Base.Portal>
+    </Base.Root>
   );
 }
 
-type PartProps = { className?: string; children?: ReactNode };
+type Classed<T> = Omit<T, 'className'> & { className?: string };
 
-/**
- * The title block. On desktop it carries a close button in its corner; a
- * sheet drops it, because a swipe or a tap on the scrim closes the sheet.
- */
-export function DialogHeader({ className, children }: PartProps) {
-  const touch = useTouch();
-  return (
-    <div className={cn('flex items-start gap-3', className)}>
-      <div className="flex min-w-0 flex-1 flex-col gap-1">{children}</div>
-      {!touch && (
-        <Base.Close aria-label="Close" className={cn(buttonClasses({ size: 'icon-sm' }), '-mt-0.5 -mr-1')}>
-          <X />
-        </Base.Close>
-      )}
-    </div>
-  );
+/** Closes the dialog. Renders nothing in the phone sheet, where a swipe or the scrim closes it. */
+function DialogCloseButton(props: Classed<ComponentProps<typeof Base.Close>>) {
+  if (useContext(DrawerContext)) return null;
+  return <Base.Close {...props} />;
 }
 
-export function DialogTitle({ className, children }: PartProps) {
-  return (
-    <Base.Title className={cn('text-sm font-semibold text-ink touch:text-base', className)}>
-      {children}
-    </Base.Title>
-  );
+function DialogTitle(props: Classed<ComponentProps<typeof Base.Title>>) {
+  if (useContext(DrawerContext)) return <Drawer.Title {...props} />;
+  return <Base.Title {...props} />;
 }
 
-export function DialogDescription({ className, children }: PartProps) {
-  return (
-    <Base.Description className={cn('text-sm text-ink-muted', className)}>
-      {children}
-    </Base.Description>
-  );
+function DialogDescription(props: Classed<ComponentProps<typeof Base.Description>>) {
+  if (useContext(DrawerContext)) return <Drawer.Description {...props} />;
+  return <Base.Description {...props} />;
 }
 
-export function DialogBody({ className, children }: PartProps) {
-  return <div className={cn('flex flex-col gap-3', className)}>{children}</div>;
-}
-
-/**
- * The actions row, right-aligned: the dismissive action first, the commit
- * last. In touch mode its buttons grow to 40px for a thumb.
- */
-export function DialogFooter({ className, children }: PartProps) {
-  return (
-    <div className={cn('flex justify-end gap-2 touch:[&>*]:h-10 touch:[&>*]:px-4 touch:[&>*]:text-base', className)}>
-      {children}
-    </div>
-  );
-}
+export const Dialog = Object.assign(DialogRoot, {
+  CloseButton: DialogCloseButton,
+  Description: DialogDescription,
+  Title: DialogTitle,
+});

@@ -12,10 +12,12 @@ import type { ReactNode } from 'react';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
-import { ConfirmHost, confirm } from '@/components/ConfirmDialog';
+import { confirmDialog } from '@/components/ConfirmDialog';
+import { ImperativeDialogHost } from '@/components/ImperativeDialog';
 import { EmptyStatePanel } from '@/components/EmptyStatePanel';
 import { Layer } from '@/components/Layer';
-import { ToastProvider, ToastViewport, toast } from '@/components/Toast';
+import { toast } from '@/components/Toast';
+import { ToastRegion } from '@/components/ToastRegion';
 import { cn } from '@/lib/cn';
 import { HUE_CLASSES, HUES } from '@/lib/hue';
 
@@ -273,7 +275,7 @@ export function EmptyStates() {
 
 export function Toasts() {
   return (
-    <ToastProvider>
+    <>
       <Example caption="Press each button. A success toast is past tense and short; a failure names the action and the fix.">
         <Button variant="outlined" onClick={() => toast.success('Task created')}>
           Success
@@ -282,15 +284,15 @@ export function Toasts() {
           variant="outlined"
           onClick={() =>
             toast.failure('Could not move the file', {
-              description: 'The folder was deleted. Choose another folder.',
+              subtext: 'The folder was deleted. Choose another folder.',
             })
           }
         >
           Failure
         </Button>
       </Example>
-      <ToastViewport />
-    </ToastProvider>
+      <ToastRegion />
+    </>
   );
 }
 
@@ -300,17 +302,17 @@ export function Confirmation() {
       <Button
         variant="danger"
         onClick={() =>
-          confirm({
+          confirmDialog({
             title: 'Delete "Q4 launch"?',
-            description: 'This deletes the folder and its 12 files. You cannot undo this.',
+            body: 'This deletes the folder and its 12 files. You cannot undo this.',
             confirmLabel: 'Delete folder',
-            destructive: true,
+            tone: 'danger',
           })
         }
       >
         Delete folder
       </Button>
-      <ConfirmHost />
+      <ImperativeDialogHost />
     </Example>
   );
 }

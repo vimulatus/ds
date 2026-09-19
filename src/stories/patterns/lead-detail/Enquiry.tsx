@@ -1,14 +1,6 @@
 import { Button } from '@/components/Button';
-import { confirm } from '@/components/ConfirmDialog';
-import {
-  Menu,
-  MenuContent,
-  MenuGroup,
-  MenuLabel,
-  MenuRadioGroup,
-  MenuRadioItem,
-  MenuTrigger,
-} from '@/components/Menu';
+import { confirmDialog } from '@/components/ConfirmDialog';
+import { Dropdown } from '@/components/Dropdown';
 import { Progress } from '@/components/Progress';
 import { cn } from '@/lib/cn';
 import { PersonLine, SourceBadge } from './Assign';
@@ -20,31 +12,31 @@ const STEPS = STAGES.map((stage) => ({ value: stage, label: STAGE_LABEL[stage] }
 function StageMenu({ enquiry, onMove }: { enquiry: Enquiry; onMove: (stage: Stage) => void }) {
   const move = async (stage: Stage) => {
     if (stage === enquiry.stage) return;
-    const ok = await confirm({
+    const ok = await confirmDialog({
       title: `Move ${enquiry.project} to ${STAGE_LABEL[stage]}?`,
-      description: `The stage moves from ${STAGE_LABEL[enquiry.stage]}. The timeline records the change.`,
+      body: `The stage moves from ${STAGE_LABEL[enquiry.stage]}. The timeline records the change.`,
       confirmLabel: 'Move',
     });
     if (ok) onMove(stage);
   };
   return (
-    <Menu>
-      <MenuTrigger variant="outlined" size="sm">
+    <Dropdown placement="bottom-end">
+      <Dropdown.Trigger variant="outlined" size="sm">
         {STAGE_LABEL[enquiry.stage]}
-      </MenuTrigger>
-      <MenuContent align="end">
-        <MenuGroup>
-          <MenuLabel>Move to</MenuLabel>
-          <MenuRadioGroup value={enquiry.stage} onValueChange={(value) => void move(value as Stage)}>
+      </Dropdown.Trigger>
+      <Dropdown.Content>
+        <Dropdown.Group>
+          <Dropdown.GroupLabel>Move to</Dropdown.GroupLabel>
+          <Dropdown.RadioGroup value={enquiry.stage} onChange={(value) => void move(value as Stage)}>
             {STAGES.map((stage) => (
-              <MenuRadioItem key={stage} value={stage} closeOnClick>
+              <Dropdown.RadioItem key={stage} value={stage} closeOnSelect>
                 {STAGE_LABEL[stage]}
-              </MenuRadioItem>
+              </Dropdown.RadioItem>
             ))}
-          </MenuRadioGroup>
-        </MenuGroup>
-      </MenuContent>
-    </Menu>
+          </Dropdown.RadioGroup>
+        </Dropdown.Group>
+      </Dropdown.Content>
+    </Dropdown>
   );
 }
 
@@ -63,11 +55,11 @@ export function EnquiryRow({
   const units = PROJECTS.find((project) => project.name === enquiry.project)?.units ?? [];
 
   const notInterested = async () => {
-    const ok = await confirm({
+    const ok = await confirmDialog({
       title: `Mark ${enquiry.project} not interested?`,
-      description: 'The enquiry closes at its current stage. The lead and its other enquiries stay open.',
+      body: 'The enquiry closes at its current stage. The lead and its other enquiries stay open.',
       confirmLabel: 'Mark not interested',
-      destructive: true,
+      tone: 'danger',
     });
     if (ok) onChange({ ...enquiry, closed: { on: 'Today', reason: 'Other' } });
   };

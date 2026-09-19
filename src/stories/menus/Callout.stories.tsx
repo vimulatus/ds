@@ -3,15 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import { Button } from '@/components/Button';
 import { Callout, PinnedCallout } from '@/components/Callout';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/Dialog';
+import { Dialog } from '@/components/Dialog';
 import { TextField } from '@/components/TextField';
 
 /**
@@ -113,16 +105,16 @@ export const Placements: Story = {
  * A pinned callout never joins the dismiss stack, so Escape and a tap on
  * the backdrop still close the dialog while a field is invalid.
  */
-export const InADialog: Story = {
-  name: 'In a dialog',
-  render: () => (
+function NewTagDialog() {
+  const [open, setOpen] = useState(false);
+  return (
     <div className="p-8">
-      <Dialog>
-        <DialogTrigger render={<Button variant="outlined" />}>New tag</DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>New tag</DialogTitle>
-          </DialogHeader>
+      <Button variant="outlined" onClick={() => setOpen(true)}>
+        New tag
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen} className="w-104">
+        <div className="flex flex-col gap-4 p-4">
+          <Dialog.Title className="text-sm font-semibold text-ink">New tag</Dialog.Title>
           <TextField
             label="Tag"
             defaultValue="launch plan"
@@ -130,14 +122,21 @@ export const InADialog: Story = {
             error="Use letters, numbers, dashes and underscores."
             spellCheck={false}
           />
-          <DialogFooter>
-            <DialogClose render={<Button variant="ghost" />}>Cancel</DialogClose>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
             <Button variant="cta" disabled>
               Save
             </Button>
-          </DialogFooter>
-        </DialogContent>
+          </div>
+        </div>
       </Dialog>
     </div>
-  ),
+  );
+}
+
+export const InADialog: Story = {
+  name: 'In a dialog',
+  render: () => <NewTagDialog />,
 };

@@ -1,174 +1,136 @@
-import { AlertDialog } from '@base-ui/react/alert-dialog';
-import { useSyncExternalStore } from 'react';
-import { useTouch } from '@/lib/touch';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/cn';
+import { isMobile, useMobile } from '@/lib/mobile';
 import { Button } from './Button';
-import { Drawer, DrawerContent } from './Drawer';
+import { ConfirmDrawer } from './ConfirmDrawer';
+import { Dialog, type DialogProps } from './Dialog';
+import { type ManagedDialogProps, type OpenDialogOptions, openDialog, type PropsSource } from './ImperativeDialog';
+import { Surface } from './Surface';
 
-export type ConfirmDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
-  /** Runs after the dialog finishes animating out. */
-  onClosed?: () => void;
-  title: string;
-  description?: string;
-  confirmLabel: string;
-  cancelLabel?: string;
-  /** The confirm button turns `danger`, for work that removes something. */
-  destructive?: boolean;
-  /** Both buttons disable and the dialog ignores dismissal while work runs. */
-  pending?: boolean;
+/** Presentation options for the shared confirmation dialog. */
+export type ConfirmDialogDisplayProps = {
+  title: ReactNode;
+  /** Dialog copy. `children` is used when `body` is omitted. */
+  body?: ReactNode;
+  children?: ReactNode;
+  confirmLabel?: ReactNode;
+  cancelLabel?: ReactNode;
+  tone?: 'default' | 'danger' | 'success';
+  /** Dialog presentation only; the mobile drawer ignores it. */
+  position?: DialogProps['position'];
+  /** Dialog presentation only; the mobile drawer ignores it. */
+  className?: string;
 };
 
-/**
- * A yes-or-no question before an action that is hard to take back. The
- * confirm button is the `cta`, or `danger` when the action destroys
- * something. In touch mode it is a bottom sheet with full-width buttons,
- * confirm on top.
- */
-export function ConfirmDialog({
-  open,
-  onOpenChange,
-  onConfirm,
-  onClosed,
-  title,
-  description,
-  confirmLabel,
-  cancelLabel = 'Cancel',
-  destructive,
-  pending,
-}: ConfirmDialogProps) {
-  const touch = useTouch();
-  const setOpen = (next: boolean) => {
-    if (!pending) onOpenChange(next);
-  };
-  const onOpenChangeComplete = (next: boolean) => {
-    if (!next) onClosed?.();
-  };
-  const confirm = (
-    <Button
-      variant={destructive ? 'danger' : 'cta'}
-      disabled={pending}
-      onClick={onConfirm}
-      className="touch:h-11 touch:w-full touch:rounded-xl touch:text-base"
-    >
-      {confirmLabel}
-    </Button>
-  );
-  const cancel = (
-    <Button
-      variant={touch ? 'outlined' : 'ghost'}
-      disabled={pending}
-      onClick={() => setOpen(false)}
-      className="touch:h-11 touch:w-full touch:rounded-xl touch:text-base"
-    >
-      {cancelLabel}
-    </Button>
-  );
-  const text = (
-    <div className="flex flex-col gap-1">
-      <AlertDialog.Title className="text-sm font-semibold text-ink touch:text-base">
-        {title}
-      </AlertDialog.Title>
-      {description && (
-        <AlertDialog.Description className="text-sm text-ink-muted">
-          {description}
-        </AlertDialog.Description>
-      )}
-    </div>
-  );
+const TONE_VARIANT = {
+  default: 'accent',
+  danger: 'danger',
+  success: 'cta',
+} as const;
 
-  if (touch) {
-    return (
-      <Drawer
-        open={open}
-        onOpenChange={setOpen}
-        onOpenChangeComplete={onOpenChangeComplete}
-        disablePointerDismissal={pending}
-      >
-        <DrawerContent role="alertdialog">
-          {text}
-          <div className="flex flex-col gap-2">
-            {confirm}
-            {cancel}
-          </div>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
+export type ConfirmDialogProps = ManagedDialogProps &
+  ConfirmDialogDisplayProps & {
+    onConfirm: () => void;
+    pending?: boolean;
+  };
 
+/** Controlled confirmation UI: a dialog on desktop, a drawer on mobile. */
+export function ConfirmDialog(props: ConfirmDialogProps) {
+  const mobile = useMobile();
+  if (mobile) return <ConfirmDrawer {...props} />;
   return (
-    <AlertDialog.Root open={open} onOpenChange={setOpen} onOpenChangeComplete={onOpenChangeComplete}>
-      <AlertDialog.Portal>
-        <AlertDialog.Backdrop className="dialog-overlay-open-animation fixed inset-0 z-modal-overlay scrim-glass" />
-        <AlertDialog.Viewport className="fixed inset-0 z-modal grid place-items-center p-4">
-          <AlertDialog.Popup className="dialog-content-open-animation flex w-96 max-w-full flex-col gap-4 rounded-xl border border-edge-muted bg-dialog p-4 text-ink shadow-2xl outline-none">
-            {text}
-            <div className="flex justify-end gap-2">
-              {cancel}
-              {confirm}
-            </div>
-          </AlertDialog.Popup>
-        </AlertDialog.Viewport>
-      </AlertDialog.Portal>
-    </AlertDialog.Root>
+    <Dialog
+      open={props.open}
+      onOpenChange={(open) => !props.pending && props.onOpenChange(open)}
+      position={props.position}
+      className={cn('w-[90%] max-w-120', props.className)}
+    >
+      <Surface depth={2} className="rounded-xl text-ink">
+        <div className="flex flex-col gap-1 px-5 py-4">
+          <Dialog.Title className="text-base font-semibold">{props.title}</Dialog.Title>
+          <Dialog.Description render={<div />} className="text-sm leading-5 text-ink-muted">
+            {props.body ?? props.children}
+          </Dialog.Description>
+        </div>
+        <div className="flex items-center justify-end gap-2 px-5 py-3">
+          <Button
+            type="button"
+            variant="ghost"
+            className="rounded-lg"
+            disabled={props.pending}
+            onClick={() => props.onOpenChange(false)}
+          >
+            {props.cancelLabel ?? 'Cancel'}
+          </Button>
+          <Button
+            type="button"
+            variant={TONE_VARIANT[props.tone ?? 'default']}
+            className="rounded-lg"
+            disabled={props.pending}
+            onClick={props.onConfirm}
+          >
+            {props.confirmLabel ?? 'Confirm'}
+          </Button>
+        </div>
+      </Surface>
+    </Dialog>
   );
 }
 
-export type ConfirmOptions = {
-  title: string;
-  description?: string;
-  confirmLabel: string;
-  cancelLabel?: string;
-  destructive?: boolean;
-};
+/** Slide-out length; keep at least the sheet's 200ms transition. */
+const CLOSE_MS = 250;
 
-type Request = ConfirmOptions & { resolve: (ok: boolean) => void };
-type State = { request?: Request; open: boolean; ok?: boolean };
+type ManagedConfirmProps = ManagedDialogProps & ConfirmDialogDisplayProps & { onChoice: (confirmed: boolean) => void };
 
-let state: State = { open: false };
-const listeners = new Set<() => void>();
-const setState = (next: State) => {
-  state = next;
-  listeners.forEach((listener) => listener());
-};
-const subscribe = (listener: () => void) => {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-};
+/** The confirm dialog under the imperative host: it closes itself, then hands dismissal back. */
+function ManagedConfirm({ onChoice, open: managedOpen, onOpenChange, ...display }: ManagedConfirmProps) {
+  const [open, setOpen] = useState(true);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
 
-const settle = (ok: boolean) => setState({ ...state, open: false, ok });
+  const close = (choice: boolean) => {
+    if (!open) return;
+    setOpen(false);
+    const finalize = () => {
+      onChoice(choice);
+      onOpenChange(false);
+    };
+    // The host unmounts at once. Let the phone sheet slide away first.
+    if (isMobile()) timer.current = setTimeout(finalize, CLOSE_MS);
+    else finalize();
+  };
 
-function finish() {
-  state.request?.resolve(state.ok ?? false);
-  setState({ open: false });
-}
-
-/**
- * Asks a yes-or-no question from an event handler. Resolves `true` on
- * confirm and `false` on cancel or dismiss, once the dialog has finished
- * animating out, so the caller can open the next overlay cleanly. Needs
- * `<ConfirmHost />` mounted once.
- */
-export function confirm(options: ConfirmOptions): Promise<boolean> {
-  if (state.request) finish();
-  return new Promise((resolve) => setState({ request: { ...options, resolve }, open: true }));
-}
-
-/** Renders the dialog that `confirm()` opens. Mount it once, near the root. */
-export function ConfirmHost() {
-  const { request, open } = useSyncExternalStore(subscribe, () => state, () => state);
-  if (!request) return null;
-  const { resolve: _, ...options } = request;
   return (
     <ConfirmDialog
-      {...options}
-      open={open}
-      onOpenChange={(next) => {
-        if (!next) settle(false);
-      }}
-      onConfirm={() => settle(true)}
-      onClosed={finish}
+      {...display}
+      open={managedOpen && open}
+      onOpenChange={(next) => !next && close(false)}
+      onConfirm={() => close(true)}
     />
   );
+}
+
+/**
+ * Opens the shared confirmation UI and resolves with the person's choice:
+ * this dialog on desktop, a bottom drawer (`ConfirmDrawer`) on a phone.
+ * Needs `<ImperativeDialogHost />` mounted once.
+ */
+export async function confirmDialog(
+  props: PropsSource<ConfirmDialogDisplayProps>,
+  options?: OpenDialogOptions
+): Promise<boolean> {
+  let confirmed = false;
+  const display = typeof props === 'function' ? props : () => props;
+  const handle = openDialog(
+    ManagedConfirm,
+    () => ({
+      ...display(),
+      onChoice: (choice: boolean) => {
+        confirmed = choice;
+      },
+    }),
+    options
+  );
+  await handle.closed;
+  return confirmed;
 }

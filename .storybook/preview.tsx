@@ -9,9 +9,7 @@ import { useEffect, useState } from 'react';
 import { GLOBALS_UPDATED } from 'storybook/internal/core-events';
 import { themes } from 'storybook/theming';
 import { INITIAL_VIEWPORTS, MINIMAL_VIEWPORTS, type ViewportMap } from 'storybook/viewport';
-import { ConfirmHost } from '../src/components/ConfirmDialog';
-import { ToastProvider, ToastViewport } from '../src/components/Toast';
-import { TooltipProvider } from '../src/components/Tooltip';
+import { ImperativeDialogHost } from '../src/components/ImperativeDialog';
 import { setTouch } from '../src/lib/touch';
 
 const VIEWPORTS: ViewportMap = {
@@ -33,14 +31,12 @@ const withTheme: Decorator = (Story, context) => {
   return <Story />;
 };
 
-const withProviders: Decorator = (Story) => (
-  <ToastProvider>
-    <TooltipProvider delay={400}>
-      <Story />
-      <ConfirmHost />
-      <ToastViewport />
-    </TooltipProvider>
-  </ToastProvider>
+/** Hosts dialogs opened with `confirmDialog()` and `openDialog()`, as an app root does. */
+const withDialogHost: Decorator = (Story) => (
+  <>
+    <Story />
+    <ImperativeDialogHost />
+  </>
 );
 
 type Theme = 'dark' | 'light';
@@ -63,7 +59,7 @@ function ThemedDocs(props: DocsContainerProps) {
 }
 
 export default {
-  decorators: [withProviders, withTheme, withDevice],
+  decorators: [withDialogHost, withTheme, withDevice],
   tags: ['autodocs'],
   globalTypes: {
     theme: {

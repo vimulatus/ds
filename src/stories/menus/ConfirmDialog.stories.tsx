@@ -1,17 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { Button } from '@/components/Button';
-import { ConfirmDialog, confirm } from '@/components/ConfirmDialog';
+import { ConfirmDialog, confirmDialog } from '@/components/ConfirmDialog';
 import { PHONE } from '../phone';
 
 /**
- * A yes-or-no question before an action that is hard to take back, on Base
- * UI's AlertDialog. The confirm button is the `cta`, or `danger` with
- * `destructive`. While `pending`, both buttons disable and the dialog
- * ignores Escape and the scrim.
+ * The shared yes-or-no dialog. It sits on the modal's glass, a depth-2
+ * surface inside. `tone` sets the confirm button's variant: `accent` by
+ * default, `danger` for destructive work, and `success` (a `cta` button) for
+ * a positive commit. While `pending`, both buttons disable and the dialog
+ * ignores dismissal.
  *
- * In touch mode the same props render the phone sheet with full-width
- * buttons, confirm on top. `confirm()` opens either one from code and
+ * On a phone the same props render `ConfirmDrawer`, a bottom sheet with two
+ * full-width pill buttons. `confirmDialog()` opens either one from code and
  * resolves with the choice.
  */
 const meta = {
@@ -23,20 +24,18 @@ const meta = {
 export default meta;
 type Story = StoryObj;
 
-type DemoProps = {
+function Demo(props: {
   trigger: string;
+  tone?: 'default' | 'danger' | 'success';
   title: string;
-  description: string;
+  body: string;
   confirmLabel: string;
-  destructive?: boolean;
   slow?: boolean;
-};
-
-function Demo({ trigger, slow, ...props }: DemoProps) {
+}) {
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
-  const onConfirm = () => {
-    if (!slow) return setOpen(false);
+  const confirm = () => {
+    if (!props.slow) return setOpen(false);
     setPending(true);
     setTimeout(() => {
       setPending(false);
@@ -46,9 +45,18 @@ function Demo({ trigger, slow, ...props }: DemoProps) {
   return (
     <>
       <Button variant="outlined" onClick={() => setOpen(true)}>
-        {trigger}
+        {props.trigger}
       </Button>
-      <ConfirmDialog {...props} open={open} onOpenChange={setOpen} onConfirm={onConfirm} pending={pending} />
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        onConfirm={confirm}
+        pending={pending}
+        tone={props.tone}
+        title={props.title}
+        body={props.body}
+        confirmLabel={props.confirmLabel}
+      />
     </>
   );
 }
@@ -56,23 +64,22 @@ function Demo({ trigger, slow, ...props }: DemoProps) {
 export const Default: Story = {
   render: () => (
     <Demo
-      trigger="Leave team"
+      trigger="Leave workspace"
       title="Leave Design?"
-      description="You lose access to its documents until someone invites you back."
+      body="You lose access to its documents until someone invites you back."
       confirmLabel="Leave"
     />
   ),
 };
 
-/** `destructive` turns the confirm button `danger`. */
-export const Destructive: Story = {
+export const Danger: Story = {
   render: () => (
     <Demo
       trigger="Delete document"
+      tone="danger"
       title="Delete Launch plan?"
-      description="This can't be undone."
+      body="This can't be undone."
       confirmLabel="Delete"
-      destructive
     />
   ),
 };
@@ -82,20 +89,21 @@ export const Pending: Story = {
   render: () => (
     <Demo
       trigger="Publish"
+      tone="success"
       title="Publish to the web?"
-      description="Anyone with the link can read it."
+      body="Anyone with the link can read it."
       confirmLabel="Publish"
       slow
     />
   ),
 };
 
-function Imperative() {
+function ImperativeDemo() {
   const [result, setResult] = useState<string>();
   const archive = async () => {
-    const ok = await confirm({
+    const ok = await confirmDialog({
       title: 'Archive 3 tasks?',
-      description: 'They leave your list. You can find them in Archive.',
+      body: 'They leave your list. You can find them in Archive.',
       confirmLabel: 'Archive',
     });
     setResult(ok ? 'Archived' : 'Cancelled');
@@ -111,28 +119,31 @@ function Imperative() {
 }
 
 /**
- * `confirm()` opens the dialog from an event handler and resolves `true` or
- * `false` once it has animated out. It needs `<ConfirmHost />` mounted once;
- * this Storybook mounts it in the preview.
+ * `confirmDialog()` opens the dialog from an event handler and resolves
+ * `true` or `false`. It needs `ImperativeDialogHost` mounted once; an app
+ * mounts it at the root, and so does this Storybook.
  */
-export const FromCode: Story = { render: () => <Imperative /> };
+export const Imperative: Story = {
+  render: () => <ImperativeDemo />,
+};
 
-/** The phone sheet: stacked full-width buttons, confirm on top. */
+/** The phone sheet. The tone tints the confirm pill instead of filling it. */
 export const Phone: Story = {
   ...PHONE,
   render: () => (
     <div className="flex flex-col items-start gap-2">
       <Demo
         trigger="Delete document"
+        tone="danger"
         title="Delete Launch plan?"
-        description="This can't be undone."
+        body="This can't be undone."
         confirmLabel="Delete"
-        destructive
       />
       <Demo
         trigger="Publish"
+        tone="success"
         title="Publish to the web?"
-        description="Anyone with the link can read it."
+        body="Anyone with the link can read it."
         confirmLabel="Publish"
         slow
       />
@@ -140,8 +151,8 @@ export const Phone: Story = {
   ),
 };
 
-/** `confirm()` on a phone resolves after the sheet slides away. */
-export const PhoneFromCode: Story = {
+/** `confirmDialog()` on a phone waits for the sheet to slide away before it resolves. */
+export const PhoneImperative: Story = {
   ...PHONE,
-  render: () => <Imperative />,
+  render: () => <ImperativeDemo />,
 };
