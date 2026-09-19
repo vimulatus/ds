@@ -21,7 +21,7 @@
   --edge-muted: var(--gray-250);
 
   --accent: var(--periwinkle-700);
-  --accent-contrast: var(--gray-970);
+  --accent-contrast: var(--gray-160);
 
   --red: var(--red-750);
   --orange: var(--orange-750);
@@ -60,7 +60,7 @@
   --edge-muted: var(--gray-920);
 
   --accent: var(--periwinkle-600);
-  --accent-contrast: var(--gray-970);
+  --accent-contrast: var(--gray-160);
 
   --red: var(--red-500);
   --orange: var(--orange-500);
