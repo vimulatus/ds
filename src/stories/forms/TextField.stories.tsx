@@ -1,99 +1,85 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { TextField } from '@/components/TextField';
-import { PHONE } from '../phone';
 
 /**
- * A labelled text control. The field wires the label, the description and
- * the error to the input, so no manual `id` or `aria-describedby` is
- * needed. The error is a danger Callout pinned beside the input.
+ * An accessible, slot-based text input and textarea. Base UI connects labels,
+ * descriptions, and errors while the controls use the app's layer-aware
+ * tokens. The error message is a pinned danger `Callout`.
  *
  * **Do**
- * - Give every field a `label`, even a short one.
- * - Pass `invalid` and `error` together for a check the browser cannot
- *   run; `required`, `type` and `pattern` show the browser's message.
- * - Use `multiline` for text longer than a line; it grows as the user types.
+ * - Put `TextField.Label`, the control, and any description or error inside
+ *   the same root so Base UI wires their accessible relationships.
+ * - Set `validationState="invalid"` on the root; `TextField.Input` and
+ *   `TextField.TextArea` receive `aria-invalid` automatically.
+ * - Use `TextField.TextArea autoResize` for growing multiline input.
  *
  * **Don't**
- * - Use a TextField for a fixed set of values: that is a Select.
+ * - Add manual `id`, `for`, or `aria-describedby` attributes when the slots
+ *   share a root.
+ * - Use TextField for search with suggestions or fixed-choice values; use the
+ *   appropriate combobox or Select primitive.
  */
 const meta = {
   title: 'Forms/TextField',
   component: TextField,
-  args: { label: 'Project name', placeholder: 'Quarterly planning', size: 'md' },
-  argTypes: { size: { control: 'select', options: ['sm', 'md'] } },
-  decorators: [(Story) => <div className="max-w-sm">{Story()}</div>],
 } satisfies Meta<typeof TextField>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** The label sits above, the description below. */
-export const Basic: Story = {
-  args: { description: 'A short name teammates will recognize.', required: true },
-};
-
-/** `multiline` renders a textarea that grows with its content. */
-export const Multiline: Story = {
-  args: {
-    label: 'Notes',
-    placeholder: 'Add context for your teammates…',
-    description: 'This field grows as you type.',
-    multiline: true,
-  },
-};
-
 /**
- * A disabled field dims its label and control. An invalid one turns the
- * hairline and ring to failure, and pins the error to the right, or under
- * the field when there is no room. The error stays in `aria-describedby`.
+ * The root owns value state and automatically connects the label and
+ * description to the input.
  */
-export const DisabledAndInvalid: Story = {
-  name: 'Disabled and invalid',
-  render: () => (
-    <div className="flex flex-col gap-5">
-      <TextField
-        label="Account email"
-        type="email"
-        disabled
-        defaultValue="ana@example.com"
-        description="Managed by your team admin."
-      />
-      <TextField
-        label="Team URL"
-        defaultValue="northwind"
-        invalid
-        error="Enter the full team URL."
-      />
-    </div>
-  ),
-};
-
-/** Type a space and the error appears; remove it and the error goes. */
-export const LiveValidation: Story = {
-  name: 'Live validation',
+export const Basic: Story = {
   render: function Render() {
-    const [value, setValue] = useState('launch-plan');
+    const [value, setValue] = useState('');
     return (
-      <TextField
-        label="Tag"
-        value={value}
-        onValueChange={setValue}
-        invalid={/\s/.test(value)}
-        error="Tags have no spaces."
-        spellCheck={false}
-      />
+      <TextField className="w-full max-w-sm" value={value} onChange={setValue} required>
+        <TextField.Label>Project name</TextField.Label>
+        <TextField.Input placeholder="Quarterly planning" />
+        <TextField.Description>A short name teammates will recognize.</TextField.Description>
+      </TextField>
     );
   },
 };
 
-/** On a phone the control grows to 40px and 16px text, and the error drops under the field. */
-export const Phone: Story = {
-  ...PHONE,
+/**
+ * `TextField.TextArea` shares the same root API. `autoResize` grows it with
+ * its content.
+ */
+export const Textarea: Story = {
   render: () => (
-    <div className="flex flex-col gap-5">
-      <TextField label="Project name" placeholder="Quarterly planning" />
-      <TextField label="Team URL" defaultValue="northwind" invalid error="Enter the full team URL." />
+    <TextField className="w-full max-w-sm" defaultValue="">
+      <TextField.Label>Notes</TextField.Label>
+      <TextField.TextArea autoResize placeholder="Add context for your teammates…" />
+      <TextField.Description>This field grows as you type.</TextField.Description>
+    </TextField>
+  ),
+};
+
+/**
+ * Root state flows to every slot. Invalid controls receive `aria-invalid`,
+ * and the error message is included in `aria-describedby`. The message is a
+ * danger `Callout` pinned beside the input: right when there is room, else
+ * under the field.
+ */
+export const DisabledAndInvalid: Story = {
+  name: 'Disabled and invalid',
+  render: () => (
+    <div className="flex w-full max-w-sm flex-col gap-5">
+      <TextField disabled defaultValue="you@example.com">
+        <TextField.Label>Account email</TextField.Label>
+        <TextField.Input type="email" />
+        <TextField.Description>Managed by your workspace administrator.</TextField.Description>
+      </TextField>
+
+      <TextField validationState="invalid" defaultValue="acme">
+        <TextField.Label>Workspace URL</TextField.Label>
+        <TextField.Input />
+        <TextField.ErrorMessage>Enter the full workspace URL.</TextField.ErrorMessage>
+      </TextField>
     </div>
   ),
 };
