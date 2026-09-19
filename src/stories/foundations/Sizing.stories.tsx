@@ -5,8 +5,8 @@ import { Input } from '@/components/Input';
 import { cn } from '@/lib/cn';
 
 /**
- * Sizes are few and shared. Buttons and inputs use one control scale, so
- * anything on a toolbar lines up. Radius grows with the size of the thing.
+ * Controls come in two heights, and every control reads the same scale.
+ * A bigger box gets a bigger radius.
  */
 const meta = {
   title: 'Foundations/Sizing',
@@ -16,8 +16,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * `sm` is 24px and `md` is 32px. A Button and an Input of one size share a
- * height, so they sit on one line. In touch mode an `md` field grows to 40px.
+ * `sm` is 24px and `md` is 32px. Pick one size for a row of controls and
+ * their tops and bottoms match. In touch mode an `md` field is 40px tall.
  */
 export const ControlHeights: Story = {
   render: () => (
@@ -59,7 +59,7 @@ const RADII = [
   { name: 'rounded-full', className: 'rounded-full', px: 9999, use: 'Pills, avatars' },
 ];
 
-/** A row inside a menu is 6px; the menu around it is 12px. */
+/** Nested corners step up: `rounded-md` for a row, `rounded-xl` for its container. */
 export const Radius: Story = {
   render: () => (
     <div className="flex flex-wrap gap-4">

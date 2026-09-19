@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 /**
- * Spacing is Tailwind's 4px step, in rem so it tracks the reader's text
- * size. Components use a short run of it: 4 to 12px inside a control or a
- * card, and 16 to 32px between regions.
+ * Every gap and padding is a multiple of 0.25rem (4px at the default text
+ * size). Inside a control or a card the steps run from 4 to 12px; between
+ * regions they run from 16 to 32px.
  */
 const meta = {
   title: 'Foundations/Spacing',

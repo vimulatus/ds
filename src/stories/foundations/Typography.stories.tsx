@@ -67,8 +67,9 @@ export const Scale: Story = {
 };
 
 /**
- * Rank comes from ink before size or weight. A title uses `font-semibold`;
- * a section label is `text-xs font-medium text-ink-muted`.
+ * The page title is the only `font-semibold` line. A section label is
+ * `text-xs font-medium text-ink-muted`, and facts under the title drop to
+ * `text-ink-muted`.
  */
 export const Hierarchy: Story = {
   render: () => (

@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Principles
 
-These rules decide how a screen looks. Each rule names what the system does. When two rules conflict, the earlier rule wins.
+These rules decide how a screen looks. Each rule names what the system does.
 
 ## 1. Content comes before chrome
 
@@ -32,8 +32,8 @@ The `cta` is the next step for the user. One screen has one `cta` at most. Other
 
 ## 7. Put ink on its own tint
 
-A colored label uses the hue's ink on the same hue's tint, for example `text-green-ink` on `bg-green-bg`. Do not put white text on a saturated fill.
+A colored label uses the hue's ink on the same hue's tint, for example `text-green-ink` on `bg-green-bg`. Only the `cta` uses a solid fill.
 
 ## 8. Treat touch mode as a full form
 
-A phone is not a smaller desktop. In touch mode, controls grow, sheets replace popovers, and hover states do not carry meaning. Design and check the touch form of every screen that has one.
+A phone is not a smaller desktop. In touch mode, fields grow to 40px, floating bars clear the safe area, and hover states do not carry meaning. Design and check the touch form of every screen that has one.

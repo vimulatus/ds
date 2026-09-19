@@ -5,7 +5,7 @@ import { type Depth, Layer } from '@/components/Layer';
 import { SpecTable } from './Swatch';
 
 /**
- * Elevation is a shade, not a shadow. A container sets a depth from 0 to 4
+ * Depth comes from surface shades. A container sets a depth from 0 to 4
  * with `Layer`, and `bg-surface` inside it steps one shade toward the viewer.
  * Only what floats casts a shadow: menus, popovers, dialogs and toasts are
  * `glass`. A raised control is a `pane`.

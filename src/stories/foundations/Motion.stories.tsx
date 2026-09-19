@@ -5,9 +5,9 @@ import { cn } from '@/lib/cn';
 import { SpecTable } from './Swatch';
 
 /**
- * Motion gets out of the way. A popup scales in from 96% over 150ms, a
- * dialog from 97% over 200ms, and a scrim fades over 200ms, all on one
- * fast-out curve. The `motion-*` utilities key off Base UI's
+ * Motion is short and does not ask for attention. A popup scales in from
+ * 96% over 150ms, a dialog from 97% over 200ms, and a scrim fades over
+ * 200ms, all on one fast-out curve. The `motion-*` utilities key off Base UI's
  * `data-starting-style` and `data-ending-style`. Under
  * `prefers-reduced-motion` every transition drops to 0ms.
  */
@@ -63,7 +63,7 @@ function Replay({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-/** Each utility's entrance. Press Replay to see it again. */
+/** Each utility as it opens. Replay runs it again. */
 export const Entrances: Story = {
   render: () => (
     <div className="flex flex-wrap gap-10">

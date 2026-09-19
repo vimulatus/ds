@@ -72,7 +72,7 @@ const INKS = [
   { name: 'text-ink-disabled', className: 'text-ink-disabled', note: 'A disabled control' },
 ];
 
-/** Six ink steps. Rank comes from ink first, then from size or weight. */
+/** Six ink steps, strongest first. Use a lighter ink to demote text before you shrink it. */
 export const Ink: Story = {
   render: () => (
     <div className="flex max-w-2xl flex-col gap-3">
@@ -168,8 +168,8 @@ function HueGrid({ hues }: { hues: typeof HUES }) {
 
 /**
  * Twelve hues at one lightness and chroma, so no hue shouts. Each has a
- * `-bg` tint at 15% and an `-ink` that stays legible on it. A chip is ink on
- * its own tint, never white on a saturated fill.
+ * `-bg` tint at 15% and an `-ink` for text on that tint. A label pairs the
+ * two: `text-<hue>-ink` on `bg-<hue>-bg`.
  */
 export const Hues: Story = {
   render: () => <HueGrid hues={HUES} />,
