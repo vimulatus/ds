@@ -122,6 +122,7 @@ function Popup({
   style,
   children,
   onKeyDown,
+  ref,
   ...props
 }: DropdownContentProps & { sub?: boolean }) {
   const { placement, gutter, shift } = useContext(PositionContext);
@@ -138,7 +139,11 @@ function Popup({
           <Layer depth={depth}>
             <Base.Popup
               {...props}
-              ref={popupRef}
+              ref={(el: HTMLDivElement | null) => {
+                popupRef.current = el;
+                if (typeof ref === 'function') ref(el);
+                else if (ref) ref.current = el;
+              }}
               data-surface=""
               style={surfaceStyle({ style: style as React.CSSProperties })}
               className={cn(SURFACE_CLASS, CONTENT_CLASS, className)}
