@@ -195,6 +195,23 @@
   }
 }
 
+/* A bottom sheet slides up from the screen edge and follows the finger:
+   Base UI's Drawer sets the swipe offset and the release strength. */
+@utility motion-sheet {
+  transform: translateY(var(--drawer-swipe-movement-y, 0px));
+  transition: translate 400ms var(--ease-drawer), transform 400ms var(--ease-drawer);
+  &[data-starting-style],
+  &[data-ending-style] {
+    translate: 0 100%;
+  }
+  &[data-ending-style] {
+    transition-duration: calc(var(--drawer-swipe-strength, 1) * 400ms);
+  }
+  &[data-swiping] {
+    transition-duration: 0ms;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
