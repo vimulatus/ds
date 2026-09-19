@@ -1,136 +1,182 @@
-import { Checkbox as Base } from '@base-ui/react/checkbox';
-import { CheckboxGroup as BaseGroup } from '@base-ui/react/checkbox-group';
-import { Fieldset } from '@base-ui/react/fieldset';
+import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
+import { Field } from '@base-ui/react/field';
 import { Check, Minus } from '@phosphor-icons/react';
-import type { ComponentProps, ReactNode } from 'react';
+import { type ComponentProps, createContext, useContext } from 'react';
 import { cn } from '@/lib/cn';
-import { Field } from './Field';
+import { createFieldErrorMessage, FieldInvalidContext } from './FieldError';
 
-export type CheckboxSize = 'sm' | 'md';
+/*
+<Checkbox checked={...} onChange={...}>
+  <Checkbox.Control />
+</Checkbox>
 
-const BOX: Record<CheckboxSize, string> = {
-  sm: 'size-3.5 rounded-[3px] [&_svg]:size-2.5',
-  md: 'size-4 rounded-[4px] [&_svg]:size-3 touch:size-5 touch:[&_svg]:size-3.5',
+A bare <Checkbox.Control /> renders its own <Checkbox.Indicator /> with a
+check (or minus for indeterminate). Override by passing children:
+
+<Checkbox.Control>
+  <Checkbox.Indicator>
+    <CustomGlyph />
+  </Checkbox.Indicator>
+</Checkbox.Control>
+*/
+
+type CheckboxState = {
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onChange?: (checked: boolean) => void;
+  indeterminate?: boolean;
+  disabled?: boolean;
+  readOnly?: boolean;
+  required?: boolean;
+  value?: string;
 };
 
-const BOX_BASE =
-  'flex shrink-0 items-center justify-center border border-edge bg-input text-accent-contrast transition-colors';
-const BOX_ON = 'border-accent bg-accent';
+export type CheckboxProps = Omit<ComponentProps<'div'>, 'onChange' | 'defaultChecked'> &
+  CheckboxState & {
+    name?: string;
+    validationState?: 'valid' | 'invalid';
+  };
+type ControlProps = Omit<ComponentProps<typeof BaseCheckbox.Root>, 'className'> & { className?: string };
+type IndicatorProps = Omit<ComponentProps<typeof BaseCheckbox.Indicator>, 'className'> & { className?: string };
+type LabelProps = Omit<ComponentProps<typeof Field.Label>, 'className'> & { className?: string };
 
-export type CheckboxProps = Omit<ComponentProps<typeof Base.Root>, 'className'> & {
-  className?: string;
-  label?: ReactNode;
-  description?: ReactNode;
-  size?: CheckboxSize;
-};
+const CONTROL_CLASS = cn(
+  'inline-flex items-center justify-center size-4 shrink-0 rounded-sm text-surface',
+  'bg-surface border-1 border-edge',
+  'data-checked:bg-accent data-checked:border-accent',
+  'data-indeterminate:bg-accent data-indeterminate:border-accent',
+  'data-disabled:opacity-50 data-disabled:cursor-not-allowed',
+  'data-invalid:border-failure',
+  // Base UI focuses the control itself; there is no peer input.
+  'focus-visible:ring-2 focus-visible:ring-accent'
+);
 
-/**
- * A choice the user confirms later, such as a setting saved with a form.
- * An immediate on/off is a Switch. `indeterminate` shows a dash, for a
- * parent whose children are partly checked. The label is part of the hit
- * target.
- */
-export function Checkbox({ label, description, size = 'md', className, ...props }: CheckboxProps) {
-  const box = (
-    <Base.Root
+const CheckboxContext = createContext<CheckboxState>({});
+
+function CheckboxIndicator({ className, children, ...props }: IndicatorProps) {
+  return (
+    <BaseCheckbox.Indicator
       {...props}
-      className={cn(
-        BOX_BASE,
-        BOX[size],
-        'outline-none focus-visible:focus-ring',
-        'not-touch:hover:border-accent data-checked:border-accent data-checked:bg-accent data-indeterminate:border-accent data-indeterminate:bg-accent',
-        'data-invalid:border-failure data-invalid:ring-2 data-invalid:ring-failure/20',
-        'data-disabled:cursor-not-allowed data-disabled:opacity-50',
-        !label && className
-      )}
+      className={cn('group inline-flex items-center justify-center', className)}
     >
-      <Base.Indicator
-        render={(indicatorProps, state) => (
-          <span {...indicatorProps}>
-            {state.indeterminate ? <Minus weight="bold" /> : <Check weight="bold" />}
-          </span>
-        )}
-        className="flex"
-      />
-    </Base.Root>
-  );
-  if (!label) return box;
-  return (
-    <label
-      className={cn(
-        'flex items-start gap-2 text-sm text-ink has-data-disabled:cursor-not-allowed has-data-disabled:text-ink-disabled',
-        className
+      {children ?? (
+        <>
+          <Check className="size-3 group-data-indeterminate:hidden" />
+          <Minus className="size-3 hidden group-data-indeterminate:block" />
+        </>
       )}
-    >
-      <span className="flex h-5 items-center">{box}</span>
-      <span className="flex flex-col gap-0.5">
-        {label}
-        {description && <span className="text-xs text-ink-subtle">{description}</span>}
-      </span>
-    </label>
+    </BaseCheckbox.Indicator>
   );
 }
 
-export type CheckboxGroupProps = Omit<ComponentProps<typeof BaseGroup>, 'className'> & {
-  className?: string;
-  /** The group's name, rendered as a legend. */
-  label?: ReactNode;
-  description?: ReactNode;
-  /** Pins under the group while it is invalid. */
-  error?: ReactNode;
-  invalid?: boolean;
-  name?: string;
-};
-
-/**
- * A set of Checkboxes under one legend, with one value: the checked
- * values. A child Checkbox takes `value`; a Checkbox with `parent` checks
- * them all.
- */
-export function CheckboxGroup({
-  label,
-  description,
-  error,
-  invalid,
-  name,
-  disabled,
-  className,
-  children,
-  ...props
-}: CheckboxGroupProps) {
+function CheckboxControl({ className, children, ...props }: ControlProps) {
+  const { checked, defaultChecked, onChange, indeterminate, disabled, readOnly, required, value } =
+    useContext(CheckboxContext);
   return (
-    <Field
-      description={description}
-      error={error}
-      invalid={invalid}
-      name={name}
+    <BaseCheckbox.Root
+      checked={checked}
+      defaultChecked={defaultChecked}
+      onCheckedChange={(next) => onChange?.(next)}
+      indeterminate={indeterminate}
       disabled={disabled}
-      errorPlacement="bottom-start"
-      className={className}
+      readOnly={readOnly}
+      required={required}
+      value={value}
+      {...props}
+      className={cn(CONTROL_CLASS, className)}
     >
-      <Fieldset.Root
-        render={<BaseGroup {...props} disabled={disabled} />}
-        className="flex flex-col gap-2"
+      {children ?? <CheckboxIndicator />}
+    </BaseCheckbox.Root>
+  );
+}
+
+function CheckboxLabel({ className, ...props }: LabelProps) {
+  return <Field.Label {...props} className={cn(className)} />;
+}
+
+function CheckboxDescription({ className, ...props }: ComponentProps<typeof Field.Description> & { className?: string }) {
+  return <Field.Description {...props} render={<div />} className={className} />;
+}
+
+/** Base UI renders the checkbox's input with its control; kept so old markup still compiles. */
+function CheckboxInput(_props: { className?: string }) {
+  return null;
+}
+
+function CheckboxRoot({
+  checked,
+  defaultChecked,
+  onChange,
+  indeterminate,
+  disabled,
+  readOnly,
+  required,
+  value,
+  name,
+  validationState,
+  className,
+  ...props
+}: CheckboxProps) {
+  const invalid = validationState === 'invalid';
+  return (
+    <FieldInvalidContext.Provider value={invalid}>
+      <CheckboxContext.Provider
+        value={{ checked, defaultChecked, onChange, indeterminate, disabled, readOnly, required, value }}
       >
-        {label && (
-          <Fieldset.Legend className="mb-0.5 text-xs font-medium text-ink-muted">
-            {label}
-          </Fieldset.Legend>
-        )}
-        {children}
-      </Fieldset.Root>
-    </Field>
+        <Field.Root
+          {...props}
+          name={name}
+          disabled={disabled}
+          invalid={invalid || undefined}
+          className={cn('inline-flex items-center gap-2', className)}
+        />
+      </CheckboxContext.Provider>
+    </FieldInvalidContext.Provider>
   );
 }
 
 /**
- * A check for a row that is itself the hit target, in a multi-select list.
- * Visual only: the row handles input and carries the checked state.
+ * A Base UI checkbox with the app's control styling, composed from slots so
+ * the label, description, and error message are yours to place.
+ *
+ * @do Always render a `Checkbox.Label`, even when the visible text sits
+ *   elsewhere.
+ * @do Use `indeterminate` on a select-all that only covers part of its group.
+ * @do Use `InlineCheckbox` when the whole row is already clickable.
+ * @dont Do not use a checkbox for an immediate action — that is a ToggleSwitch
+ *   or a Button.
+ * @dont Do not add `Checkbox.Input` yourself; `Checkbox.Control` already
+ *   renders one.
  */
-export function InlineCheckbox({ checked, size = 'md' }: { checked: boolean; size?: CheckboxSize }) {
-  return (
-    <span aria-hidden className={cn(BOX_BASE, BOX[size], checked && BOX_ON)}>
-      {checked && <Check weight="bold" />}
-    </span>
-  );
-}
+export const Checkbox = Object.assign(CheckboxRoot, {
+  ErrorMessage: createFieldErrorMessage(Field.Error, {
+    placement: 'bottom-start',
+    flip: true,
+  }),
+  Description: CheckboxDescription,
+  Input: CheckboxInput,
+  Indicator: CheckboxIndicator,
+  Control: CheckboxControl,
+  Label: CheckboxLabel,
+});
+
+export const SingleSelectCheck = ({ active }: { active: boolean }) => (
+  <Check className={cn('size-3 text-accent shrink-0', !active && 'hidden')} />
+);
+
+/**
+ * Inline checkbox affordance — a small square that fills accent when checked
+ * and shows an outlined empty box when not. Matches the menu checkbox
+ * pattern. Visual-only; pair with a clickable parent for the actual toggle.
+ */
+export const InlineCheckbox = ({ checked }: { checked: boolean }) => (
+  <span
+    aria-hidden
+    className={cn(
+      'inline-flex items-center justify-center size-3.5 shrink-0 rounded-sm',
+      checked ? 'bg-accent text-surface' : 'bg-transparent border-1 border-edge-muted text-transparent'
+    )}
+  >
+    <Check className="size-2.5" />
+  </span>
+);

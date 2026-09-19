@@ -181,16 +181,19 @@ export function ListEntity({
         {selectable && (
           <Checkbox
             checked={selected}
-            onCheckedChange={(next) => onSelectedChange(next)}
-            onClick={(event) => event.stopPropagation()}
-            onPointerDown={(event) => event.stopPropagation()}
-            tabIndex={-1}
-            aria-label="Select"
+            onChange={(next) => onSelectedChange(next)}
             className={cn(
               'absolute',
               !showCheck && 'invisible not-touch:group-hover/row:visible group-focus-visible/row:visible'
             )}
-          />
+          >
+            <Checkbox.Control
+              onClick={(event) => event.stopPropagation()}
+              onPointerDown={(event) => event.stopPropagation()}
+              tabIndex={-1}
+              aria-label="Select"
+            />
+          </Checkbox>
         )}
       </span>
 

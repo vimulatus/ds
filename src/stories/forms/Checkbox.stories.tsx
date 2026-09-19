@@ -1,133 +1,112 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import { Checkbox, CheckboxGroup, InlineCheckbox } from '@/components/Checkbox';
-import { Field } from '@/components/Field';
-import { PHONE } from '../phone';
+import { Checkbox, InlineCheckbox, SingleSelectCheck } from '@/components/Checkbox';
 
 /**
- * A choice the user confirms later. The label is part of the hit target.
+ * A Base UI checkbox with the app's control styling. Composed from slots, so
+ * the label, description, and error message are yours to place.
  *
  * **Do**
- * - Give every checkbox a `label`, or an `aria-label` when the text sits
+ * - Always render a `Checkbox.Label`, even when the visible text sits
  *   elsewhere.
- * - Use `indeterminate` on a select-all that covers part of its group.
- * - Use `InlineCheckbox` when the whole row is already the hit target.
+ * - Use `indeterminate` on a select-all that only covers part of its group.
+ * - Use `InlineCheckbox` when the whole row is already clickable.
  *
  * **Don't**
- * - Use a checkbox for an immediate action: that is a Switch or a Button.
+ * - Use a checkbox for an immediate action — that is a ToggleSwitch or a
+ *   Button.
+ * - Add `Checkbox.Input` yourself; `Checkbox.Control` already renders one.
  */
 const meta = {
   title: 'Forms/Checkbox',
   component: Checkbox,
-  args: { label: 'Notify me about replies', size: 'md' },
-  argTypes: { size: { control: 'select', options: ['sm', 'md'] } },
 } satisfies Meta<typeof Checkbox>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Pass `checked` and `onCheckedChange` to control it, or `defaultChecked`. */
+/**
+ * Pass `checked` and `onChange` for a controlled checkbox, or
+ * `defaultChecked` to let it manage itself. `Checkbox.Control` renders the
+ * hidden input as well as the box.
+ */
 export const Basic: Story = {
-  render: function Render(args) {
+  render: function Render() {
     const [checked, setChecked] = useState(true);
     return (
       <div className="flex flex-col gap-3">
-        <Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
-        <Checkbox
-          label="Weekly digest"
-          description="A summary of the week's activity, every Monday."
-        />
+        <Checkbox checked={checked} onChange={setChecked}>
+          <Checkbox.Control />
+          <Checkbox.Label className="text-sm text-ink">Notify me about replies</Checkbox.Label>
+        </Checkbox>
+        <Checkbox defaultChecked={false}>
+          <Checkbox.Control />
+          <Checkbox.Label className="text-sm text-ink">Unchecked</Checkbox.Label>
+        </Checkbox>
       </div>
     );
   },
 };
 
-/** Checked, indeterminate, disabled, and both sizes. */
+/**
+ * `indeterminate` shows a dash instead of a check — use it for a parent whose
+ * children are partially selected.
+ */
 export const States: Story = {
   render: () => (
     <div className="flex flex-col gap-3">
-      <Checkbox label="Indeterminate" indeterminate />
-      <Checkbox label="Disabled, checked" disabled defaultChecked />
-      <Checkbox label="Disabled" disabled />
-      <Checkbox label="Small" size="sm" defaultChecked />
+      <Checkbox indeterminate>
+        <Checkbox.Control />
+        <Checkbox.Label className="text-sm text-ink">Indeterminate</Checkbox.Label>
+      </Checkbox>
+      <Checkbox disabled defaultChecked>
+        <Checkbox.Control />
+        <Checkbox.Label className="text-sm text-ink-disabled">Disabled, checked</Checkbox.Label>
+      </Checkbox>
+      <Checkbox disabled>
+        <Checkbox.Control />
+        <Checkbox.Label className="text-sm text-ink-disabled">Disabled</Checkbox.Label>
+      </Checkbox>
     </div>
   ),
 };
 
-const CHANNELS = ['email', 'push', 'sms'];
-
-/** A parent checkbox checks the group, and turns indeterminate when only some are checked. */
-export const Group: Story = {
+/**
+ * Two visual-only helpers for rows that are themselves the hit target:
+ * `SingleSelectCheck` for pick-one menus, `InlineCheckbox` for multi-select
+ * lists. Neither handles input — the row does.
+ */
+export const ListAffordances: Story = {
   render: function Render() {
-    const [value, setValue] = useState(['email']);
+    const [selected, setSelected] = useState('Inbox');
+    const rows = ['Inbox', 'Drafts', 'Sent'];
     return (
-      <CheckboxGroup
-        label="Notify me by"
-        value={value}
-        onValueChange={setValue}
-        allValues={CHANNELS}
-      >
-        <Checkbox parent label="All channels" />
-        <div className="flex flex-col gap-2 ps-6">
-          <Checkbox value="email" label="Email" />
-          <Checkbox value="push" label="Push" />
-          <Checkbox value="sms" label="Text message" />
-        </div>
-      </CheckboxGroup>
-    );
-  },
-};
-
-/** An error pins under the control, start aligned: a checkbox has no room to its right. */
-export const Invalid: Story = {
-  render: () => (
-    <div className="flex flex-col gap-16">
-      <Field invalid error="Accept the terms to continue." errorPlacement="bottom-start">
-        <Checkbox label="I accept the terms" />
-      </Field>
-      <CheckboxGroup label="Notify me by" invalid error="Pick at least one channel.">
-        <Checkbox value="email" label="Email" />
-        <Checkbox value="push" label="Push" />
-      </CheckboxGroup>
-    </div>
-  ),
-};
-
-/** For a row that is itself the hit target. Visual only: the row handles input. */
-export const ListAffordance: Story = {
-  name: 'List affordance',
-  render: function Render() {
-    const [picked, setPicked] = useState(['Roadmap', 'Launch notes']);
-    const rows = ['Roadmap', 'Launch notes', 'Budget'];
-    return (
-      <div className="flex max-w-xs flex-col">
-        {rows.map((row) => {
-          const on = picked.includes(row);
-          return (
+      <div className="flex w-full max-w-sm flex-col gap-4">
+        <div className="flex flex-col">
+          <span className="mb-1 font-mono text-xs text-ink-subtle">SingleSelectCheck</span>
+          {rows.map((row) => (
             <button
               key={row}
               type="button"
-              aria-pressed={on}
-              onClick={() => setPicked(on ? picked.filter((r) => r !== row) : [...picked, row])}
-              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-ink hover:bg-hover"
+              className="flex items-center justify-between rounded-sm px-2 py-1.5 text-sm text-ink hover:bg-hover"
+              onClick={() => setSelected(row)}
             >
-              <InlineCheckbox checked={on} />
               {row}
+              <SingleSelectCheck active={selected === row} />
             </button>
-          );
-        })}
+          ))}
+        </div>
+
+        <div className="flex flex-col">
+          <span className="mb-1 font-mono text-xs text-ink-subtle">InlineCheckbox</span>
+          {rows.map((row) => (
+            <div key={row} className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-ink">
+              <InlineCheckbox checked={row !== 'Sent'} />
+              {row}
+            </div>
+          ))}
+        </div>
       </div>
     );
   },
-};
-
-/** On a phone the box grows to 20px. */
-export const Phone: Story = {
-  ...PHONE,
-  render: () => (
-    <div className="flex flex-col gap-4">
-      <Checkbox label="Notify me about replies" defaultChecked />
-      <Checkbox label="Weekly digest" />
-    </div>
-  ),
 };
