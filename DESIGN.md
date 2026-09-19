@@ -71,7 +71,8 @@ properties. It draws no layout of its own.
   and RERA number, then a share button and "Add enquiry". "Add enquiry" asks
   for the source and opens the enquiry in place, so the pitch continues on
   the same call. A project the lead turned down keeps its row with a `red`
-  "Not interested" badge. Open, it shows a `red` outcome row with the reason,
+  "Not interested" badge, which adds the reason when the article is at least
+  560px wide. Open, it shows a `red` outcome row with the reason,
   the date, who closed it and the last stage, and offers "Reopen enquiry"
   in place of "Add enquiry".
 - **Edit in place.** Budget, location and custom fields are ghost inputs in
