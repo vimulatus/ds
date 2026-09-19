@@ -27,7 +27,7 @@ src/styles/     palette.css (raw colors) -> themes.css (roles per theme) -> toke
                 motion, touch), copied as is from the prototype; base-ui.css adds what Base UI needs
 src/lib/        cn (clsx + tailwind-merge), touch (data-touch-device, useTouch)
 src/components/ one file per component. Base UI parts styled with Tailwind, or plain elements
-src/patterns/   compositions of components: ResourceDetail, PropertyGrid, AppShell (SidebarRail, Canvas),
+src/patterns/   compositions of components: ResourceDetail, PropertyGrid, AppShell (SidebarRail, BottomNav, Canvas),
                 EntityList, ListEntity, EntityIcon, SwipableRow
 src/stories/    one folder per Storybook section; a pattern story composes src/patterns
                 (patterns/lead-detail/ is the lead's domain, composed on ResourceDetail)
