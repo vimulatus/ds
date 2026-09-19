@@ -1,5 +1,5 @@
 import { Tabs as Base } from '@base-ui/react/tabs';
-import { type ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
 export type TabItem = {
@@ -37,16 +37,11 @@ export function Tabs({
   fullWidth,
   'aria-label': ariaLabel,
 }: TabsProps) {
-  const [uncontrolled, setUncontrolled] = useState(defaultValue ?? list[0]?.value);
-  const current = value ?? uncontrolled;
-
   return (
     <Base.Root
-      value={current}
-      onValueChange={(next) => {
-        setUncontrolled(String(next));
-        onChange?.(String(next));
-      }}
+      value={value}
+      defaultValue={defaultValue ?? list[0]?.value}
+      onValueChange={(next) => onChange?.(String(next))}
       className="contents"
     >
       <Base.List
@@ -61,16 +56,15 @@ export function Tabs({
             value={item.value}
             disabled={disabled}
             className={cn(
-              'relative z-1 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent/20',
+              'relative z-1 rounded-full focus-visible:ring-2 focus-visible:ring-accent/20',
               fullWidth && 'flex-1',
               itemClass
             )}
           >
             <span
-              data-checked={item.value === current ? '' : undefined}
               className={cn(
                 'flex h-8 items-center px-4 text-xs font-medium rounded-full select-none',
-                'text-ink-extra-muted hover:text-ink data-checked:text-ink',
+                'text-ink-extra-muted hover:text-ink in-data-active:text-ink',
                 fullWidth && 'w-full justify-center',
                 labelClass
               )}
