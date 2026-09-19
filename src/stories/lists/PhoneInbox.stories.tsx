@@ -41,6 +41,7 @@ function Inbox({ initialSelected = [] }: { initialSelected?: string[] }) {
             leading={{
               label: item.unread ? 'Read' : 'Unread',
               icon: item.unread ? <EnvelopeSimpleOpen /> : <EnvelopeSimple />,
+              tone: 'accent',
               onAction: () => toggleUnread(item.id),
             }}
             trailing={[
@@ -70,8 +71,8 @@ function Inbox({ initialSelected = [] }: { initialSelected?: string[] }) {
  * The list on a phone: 56px full-bleed rows, the icon on a round tile, the
  * secondary line under the title and a hairline from the text edge. Nothing
  * hides behind hover. A row swipes instead: left reveals Done and Delete,
- * right toggles unread. The swipe paints the row, grey unless the action has
- * a color, and shows each action's icon alone.
+ * right toggles unread. Each action is a soft tint of its color, with its
+ * icon over its label.
  */
 const meta = {
   title: 'Lists/Phone inbox',
