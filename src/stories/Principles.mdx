@@ -141,7 +141,7 @@ A phone gets its own form of each screen. Controls grow, dialogs become sheets t
 | Story | sample data and the composition, nothing else | `src/stories/*` |
 
 - A component wraps Base UI when Base UI has the behavior. It does not rebuild focus traps or keyboard handling.
-- Variants are `ghost`, `outlined`, `accent`, `danger`, `cta`. Sizes are `sm` and `md`, with `icon-sm` and `icon-md`.
+- Button variants are `ghost`, `outlined`, `accent`, `danger`, `cta`. Sizes are `sm` and `md`, with `icon-sm` and `icon-md`.
 - A pattern is built from components, and a screen is built from patterns. If a part lacks something, add a prop or a slot to it. Do not redraw it.
 
 For example, the lead detail screen uses `ResourceDetail` for its top bar, its article column, its property aside, its fold below 1224px and its unsaved-changes bar. It adds only the lead's own sections.
