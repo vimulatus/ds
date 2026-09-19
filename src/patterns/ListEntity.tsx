@@ -48,6 +48,10 @@ export type ListEntityProps = Omit<ComponentProps<'div'>, 'title'> & {
  * time stay. On touch it grows to 56px, puts the icon on a round tile, stacks
  * the secondary line and keeps nothing behind hover: long press selects, and
  * the actions live in a SwipableRow.
+ *
+ * A selected or active row is painted (`data-painted`). Where two painted
+ * rows touch, or a hovered row touches a painted one, tokens.css squares
+ * their shared corners, so the run reads as one block.
  */
 export function ListEntity({
   kind,
@@ -93,6 +97,8 @@ export function ListEntity({
       aria-current={active || undefined}
       data-active={active || undefined}
       data-selected={selected || undefined}
+      data-list-row=""
+      data-painted={selected || (active && !touch) ? '' : undefined}
       {...props}
       ref={(node) => {
         rowRef.current = node;
