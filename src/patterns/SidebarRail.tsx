@@ -1,10 +1,14 @@
+import { Menu } from '@base-ui/react/menu';
 import { Toolbar } from '@base-ui/react/toolbar';
 import type { Icon } from '@phosphor-icons/react';
-import type { ReactNode } from 'react';
+import { type ReactNode, useContext } from 'react';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
+import { MobileDrawer } from '@/components/MobileDrawer';
 import { cn } from '@/lib/cn';
+import { useTouch } from '@/lib/touch';
+import { BottomNav, RailFormContext } from './BottomNav';
 
 export type RailItem = {
   id: string;
@@ -16,8 +20,19 @@ export type RailItem = {
   unread?: boolean;
 };
 
-/** A glyph in the rail's footer: settings, help. It joins the rail's arrow-key order. */
+/**
+ * A glyph in the rail's footer: settings, help. It joins the rail's arrow-key
+ * order. In the phone's More sheet it is a row: the glyph, then its label.
+ */
 export function RailButton(props: Omit<Parameters<typeof Button>[0], 'size' | 'variant' | 'tooltipPlacement'>) {
+  if (useContext(RailFormContext) === 'sheet') {
+    return (
+      <MobileDrawer.Item onClick={props.onClick} className="[&_svg]:size-5 [&_svg]:text-ink-muted">
+        {props.children}
+        {props.label}
+      </MobileDrawer.Item>
+    );
+  }
   return (
     <Toolbar.Button
       render={<Button {...props} variant="ghost" size="icon-md" tooltipPlacement="right" />}
@@ -27,18 +42,33 @@ export function RailButton(props: Omit<Parameters<typeof Button>[0], 'size' | 'v
 
 /**
  * The account at the foot of the rail: the person's avatar, opening a menu
- * to its right. `children` are the menu's rows.
+ * to its right. `children` are the menu's rows. In the phone's More sheet it
+ * is a row with the name, opening the menu above it.
  */
 export function RailAccount({ name, src, children }: { name: string; src?: string; children: ReactNode }) {
+  const avatar = (
+    <Avatar aria-hidden>
+      {src && <Avatar.Image src={src} alt="" />}
+      <Avatar.Fallback>{name.split(' ').slice(0, 2).map((word) => word[0]).join('')}</Avatar.Fallback>
+    </Avatar>
+  );
+  if (useContext(RailFormContext) === 'sheet') {
+    return (
+      <Dropdown placement="top-start">
+        <Menu.Trigger render={<MobileDrawer.Item />}>
+          {avatar}
+          {name}
+        </Menu.Trigger>
+        <Dropdown.Content portalScope="local">{children}</Dropdown.Content>
+      </Dropdown>
+    );
+  }
   return (
     <Dropdown placement="right-end">
       <Toolbar.Button
         render={<Dropdown.Trigger variant="ghost" size="icon-md" label={name} tooltipPlacement="right" />}
       >
-        <Avatar aria-hidden>
-          {src && <Avatar.Image src={src} alt="" />}
-          <Avatar.Fallback>{name.split(' ').slice(0, 2).map((word) => word[0]).join('')}</Avatar.Fallback>
-        </Avatar>
+        {avatar}
       </Toolbar.Button>
       <Dropdown.Content>{children}</Dropdown.Content>
     </Dropdown>
@@ -60,14 +90,16 @@ export type SidebarRailProps = {
  * The app's one navigation: a narrow column of glyphs on the page
  * background, left of the canvas. Labels live in tooltips on the right; the
  * active view fills its glyph in accent with a marker flush to the edge.
- * Arrow keys move between glyphs. On touch the rail sheds and the canvas
- * takes the screen.
+ * Arrow keys move between glyphs. On touch the same items become a
+ * `BottomNav` along the bottom of the screen.
  */
 export function SidebarRail({ items, activeId, onSelect, mark, footer, className }: SidebarRailProps) {
+  const touch = useTouch();
+  if (touch) return <BottomNav items={items} activeId={activeId} onSelect={onSelect} mark={mark} footer={footer} />;
   return (
     <nav
       aria-label="Main"
-      className={cn('flex h-full w-14 shrink-0 flex-col bg-page touch:hidden', className)}
+      className={cn('flex h-full w-14 shrink-0 flex-col bg-page', className)}
     >
       {mark && (
         <div className="flex h-12 shrink-0 items-center justify-center [&_svg]:size-6">{mark}</div>
