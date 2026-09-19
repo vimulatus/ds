@@ -47,7 +47,8 @@ right.
 - **Changes.** A glass bar at the bottom. It appears when an edit differs from
   the saved resource, and it counts the unsaved changes. Save is the page's
   one `cta` while the bar is up. Discard sits beside it. In touch mode the bar
-  clears the safe area.
+  clears the safe area, and inside `AppShell` it floats 16px above the bottom
+  bar, which the shell publishes as `--bottom-nav-height`.
 - **Grain.** `Root grain` adds film grain to the panel. Cards on top stay
   clean.
 
