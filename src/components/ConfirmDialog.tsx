@@ -56,6 +56,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
           <Button
             type="button"
             variant="ghost"
+            depth={2}
             className="rounded-lg"
             disabled={props.pending}
             onClick={() => props.onOpenChange(false)}
@@ -65,6 +66,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
           <Button
             type="button"
             variant={TONE_VARIANT[props.tone ?? 'default']}
+            depth={2}
             className="rounded-lg"
             disabled={props.pending}
             onClick={props.onConfirm}

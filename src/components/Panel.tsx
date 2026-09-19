@@ -1,57 +1,27 @@
-import type { ComponentProps, CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
-import { type Depth, Layer } from './Layer';
 import { Scroll } from './Scroll';
+import { Surface, type SurfaceProps } from './Surface';
 
-// The root is a Surface. Surface lands with the overlays work; until then the
-// panel draws the same box: a layer, a hairline edge, and an optional ring.
-export type PanelProps = Omit<ComponentProps<'div'>, 'style'> & {
-  depth?: Depth;
-  style?: CSSProperties;
-  edgeColor?: string;
-  highlightColor?: string;
-  active?: boolean;
-  solid?: boolean;
-  hideBorder?: boolean;
-};
+export type PanelProps = SurfaceProps;
 
 type SlotProps = { className?: string; children?: ReactNode };
 type BodyProps = SlotProps & { scroll?: boolean };
 
 const hasContent = (children: ReactNode) => children !== undefined && children !== null && children !== false;
 
-function Root({
-  depth,
-  edgeColor,
-  highlightColor,
-  active,
-  solid: _solid,
-  hideBorder,
-  className,
-  style,
-  children,
-  ...props
-}: PanelProps) {
+function Root({ style, className, ...props }: PanelProps) {
   return (
-    <Layer depth={depth ?? 0}>
-      <div
-        {...props}
-        data-surface=""
-        style={{
-          ...(hideBorder ? {} : { border: `var(--app-border-width, 0.5px) solid ${edgeColor ?? 'var(--color-edge)'}` }),
-          ...(active
-            ? { boxShadow: `0 0 0 2px color-mix(in srgb, ${highlightColor ?? 'var(--color-edge)'} 60%, transparent)` }
-            : {}),
-          gridTemplateAreas: '"header" "toolbar" "body" "footer"',
-          gridTemplateRows: 'auto auto minmax(0, 1fr) auto',
-          gridTemplateColumns: 'minmax(0, 1fr)',
-          ...style,
-        }}
-        className={cn('relative rounded-md overflow-clip min-h-0 size-full bg-surface', 'grid min-h-0 min-w-0 bg-panel', className)}
-      >
-        {children}
-      </div>
-    </Layer>
+    <Surface
+      {...props}
+      style={{
+        gridTemplateAreas: '"header" "toolbar" "body" "footer"',
+        gridTemplateRows: 'auto auto minmax(0, 1fr) auto',
+        gridTemplateColumns: 'minmax(0, 1fr)',
+        ...style,
+      }}
+      className={cn('grid min-h-0 min-w-0 bg-panel', className)}
+    />
   );
 }
 

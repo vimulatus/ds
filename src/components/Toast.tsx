@@ -283,6 +283,7 @@ function ActionButtons({ actions, mobile }: { actions: ToastAction[]; mobile?: b
         onClick={action.onClick}
         variant="outlined"
         className="px-2 py-1 bg-surface"
+        depth={4}
       >
         {Icon && <Icon className="size-[1em] touch:min-h-0! touch:min-w-0!" />}
         {action.label}

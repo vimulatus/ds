@@ -33,7 +33,7 @@ export function RailAccount({ name, src, children }: { name: string; src?: strin
   return (
     <Dropdown placement="right-end">
       <Toolbar.Button
-        render={<Dropdown.Trigger variant="ghost" size="icon-md" label={name} tooltipSide="right" />}
+        render={<Dropdown.Trigger variant="ghost" size="icon-md" label={name} tooltipPlacement="right" />}
       >
         <Avatar aria-hidden>
           {src && <Avatar.Image src={src} alt="" />}
