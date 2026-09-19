@@ -1,7 +1,7 @@
 # Design decisions
 
 The rules live in Storybook. `src/stories/Principles.mdx` holds the design
-principles. `src/stories/Writing.mdx` holds the rules for copy. This file
+principles. `src/stories/Copy.mdx` holds the rules for copy. This file
 records the decisions for each pattern.
 
 ## Resource detail

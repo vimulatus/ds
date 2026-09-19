@@ -1,0 +1,166 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import {
+  Badges,
+  ButtonLabels,
+  Confirmation,
+  EmptyStates,
+  IconLabels,
+  Toasts,
+} from './docs-examples';
+
+<Meta title="Copy" />
+
+# Copy
+
+Copy is every string a user reads: labels, menus, titles, empty states, errors, toasts, tooltips and help text. The user came to finish a task. Each string tells them what this is, what state it is in, or what to do next. Then it gets out of the way.
+
+The examples take the theme from the toolbar and respond to clicks.
+
+## Voice
+
+The interface speaks like a calm colleague who knows the product. It is direct, plain and brief. It does not sell, joke or apologize.
+
+- Speak to the user as "you". Say "Share with your team", not "Share with the user's team".
+- Use the present tense and the active voice. Say "Priya moved this to review", not "This was moved to review".
+- Say one thing in each sentence. Keep a sentence under 20 words.
+- Name the thing the user sees. Never name the thing you built: no table names, flags, versions, vendors or error layers.
+- Give a reason only when it changes what the user does next. The user is blocked, will think the product is broken, or is about to lose something.
+
+| Do | Do not |
+|---|---|
+| Your upload is still processing. The link works when it finishes. | Upload queued in the media pipeline (job 4812). |
+| You don't have access to this folder. Ask the owner to share it. | 403 Forbidden |
+| Deleting the workspace deletes its 412 files. You cannot undo this. | Are you sure? |
+
+## Case and punctuation
+
+- Use sentence case everywhere: buttons, menu items, tabs, titles, headings and badges. Capitalize the first word and proper nouns only.
+- Do not end a label, a title, a button or a badge with a period. End a full sentence in a description or a message with a period.
+- Do not use exclamation marks. Do not use dashes to join clauses. Use a period or a comma.
+- Use straight quotes around a name the user gave: Delete "Q4 launch"?
+- Use an ellipsis (…) only on an action that opens more input before it runs, such as "Rename…" in a menu, and in a progress label such as "Saving…".
+
+## Buttons, menu items and tabs
+
+A button says what happens when the user presses it. Start with a verb, then the object when the verb alone is vague. Keep it to one to three words.
+
+- A button that confirms a dialog repeats the verb of the dialog: "Delete folder", not "OK" or "Yes".
+- A cancel button says "Cancel". It never says "No" or "Go back".
+- A menu item is the same as a button: "Move to folder", "Copy link", "Delete".
+- A tab is a noun for the view it shows: "Timeline", "Notes", "Follow-ups". Add a count after a middle dot: "Notes · 2".
+
+<ButtonLabels />
+
+## Titles and headings
+
+A title names the thing or the task, not the screen. "Launch plan", not "Document details". "New tag", not "Create a new tag dialog". A section heading inside a page is a short noun in quiet type: "Properties", "Activity", "Enquiries".
+
+## Empty and filtered states
+
+An empty state says what goes here and gives the one action that puts it there. A filtered list that shows nothing says the filter hides the items and offers to clear it.
+
+| State | Title | Description | Action |
+|---|---|---|---|
+| Nothing yet | No files yet | Upload a file or drop one here. | Upload file |
+| Filtered to nothing | No matching files | Your filters hide every file. | Clear filters |
+| Search found nothing | No results for "roadmap" | Check the spelling or search all folders. | Search all folders |
+| Done | You're all caught up | New tasks show here. | none |
+
+<EmptyStates />
+
+## Errors
+
+An error says what failed, in the user's words, then what they can do. It does not blame the user. It does not show a code without words.
+
+- Name the action: "Could not save the file", "Could not move the task".
+- Give the fix when the user has one: "Check your connection and try again", "Choose another folder".
+- A field error sits beside its field and says how to fix the value: "Use letters, numbers, dashes and underscores." It does not repeat the label, and it does not say "Invalid".
+
+| Do | Do not |
+|---|---|
+| Could not save the file. Check your connection and try again. | Error 500 |
+| This name is taken. Choose another name. | Invalid input |
+| Enter the full team URL. | URL field is invalid! |
+
+## Toasts
+
+A toast confirms something that already happened, or reports a failure the user did not see.
+
+- A success toast is short and in the past tense: "Task created", "Link copied", "3 files moved".
+- A failure toast follows the error rule: what failed, then the fix.
+- A toast that can be reversed has one action: "Undo".
+- Do not toast what the screen already shows. A row that disappears after "Delete" needs only the "Undo" toast.
+
+<Toasts />
+
+## Confirmations
+
+Ask before an action that is hard to take back. Do not ask before one that is easy to undo. Offer "Undo" there instead.
+
+- The title is a question that names the action and the object: Delete "Q4 launch"?
+- The description names what goes away and says when it cannot be undone.
+- The confirm button repeats the verb: "Delete folder".
+
+<Confirmation />
+
+## Tooltips and icon-only controls
+
+An icon-only control still has a name. The name is its tooltip and its accessible label, and they are the same words. A tooltip says what the control does, in the same form as a button label. It can show the shortcut.
+
+- "Search ⌘K", "New document", "Delete".
+- A tooltip is never the only place for information the user must read. On a phone there is no hover. Use a `Callout` for that.
+
+<IconLabels />
+
+## Badges and states
+
+A badge is a state or a category in one or two words: "In review", "Done", "Overdue", "Draft". It is never a sentence and never a count that the tab already shows.
+
+<Badges />
+
+## Numbers, dates and times
+
+- Write numbers as numerals, also at the start of a label: "3 files", "12 people".
+- Match the noun to the count: "1 change", "2 changes".
+- Recent times are relative: "Just now", "2m", "1h", "Yesterday". Older times are dates: "Sep 14", then "Sep 14, 2025" in another year.
+- Times use the user's clock: "4:30 pm". Ranges use "to": "10 am to 12 pm".
+- Money and sizes use the unit the user knows: "₹85 L", "2.4 MB".
+
+## Words to avoid
+
+| Avoid | Use |
+|---|---|
+| Please, sorry, oops, uh-oh | nothing, then the fact |
+| Simply, just, easily | nothing |
+| Successfully (as in "Successfully saved") | the past tense alone: "Saved" |
+| Utilize, leverage, ensure | use, use, make sure |
+| Click here | the name of the action |
+| Invalid, illegal, fatal | what is wrong and how to fix it |
+| Users (when you mean the reader) | you |
+| Item, entity, object (when the thing has a name) | its name: file, task, folder |
+
+## Terms
+
+Use one word for one thing, everywhere.
+
+| Use | Do not use | Note |
+|---|---|---|
+| Create, New | Add new, make | "New document" on a button, "Create" as the confirm verb. |
+| Delete | Trash, erase | "Delete" is final. Use "Remove" only when the item stays elsewhere, such as removing a person from a project. |
+| Rename | Edit name | Names the exact action. |
+| Move to | Transfer, relocate | Short and specific. |
+| Share | Send, invite (for access) | "Invite" is for adding people to the workspace. |
+| Sign in, Sign out | Log in, login, log out | One pair for the account flow. |
+| Settings | Preferences, options | One home for configuration. |
+| People | Users, members | Plain and human. |
+| Search | Find, look up | Matches the search field. |
+
+## Before you ship a string
+
+- It names what the user sees or does.
+- It is in sentence case, with no exclamation mark.
+- A button starts with a verb, and a confirm button repeats the dialog's verb.
+- An error says what failed and how to fix it.
+- An empty state gives the next action.
+- It names no table, flag, vendor or error layer.
+- It uses the terms above.

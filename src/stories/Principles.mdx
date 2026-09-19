@@ -1,39 +1,156 @@
 import { Meta } from '@storybook/addon-docs/blocks';
+import {
+  CenterLine,
+  DepthLadder,
+  EmphasisLadder,
+  GlassSample,
+  HueRow,
+  QuietChrome,
+} from './docs-examples';
 
 <Meta title="Principles" />
 
 # Principles
 
-These rules decide how a screen looks. Each rule names what the system does.
+This system is for tools that people use all day. They read, write and decide in it for hours. So the interface stays calm, and the work stays in front.
 
-## 1. Content comes before chrome
+Nine rules decide how a screen looks and behaves. Each rule has a reason, the tokens and components that carry it, and a live example. The examples take the theme from the toolbar. Switch between Dark and Light to see both.
 
-The user came for the content. Give it the centre and the space. Put navigation, actions and properties at the edges.
+## 1. Content is loud, chrome is quiet
 
-## 2. Keep the chrome quiet
+The document, the list and the record are what the user came for. Navigation, toolbars and properties sit at the edges in muted ink and ghost controls. A control gets louder only when the user points at it, focuses it or opens it.
 
-Chrome uses muted ink, `ghost` buttons and no fills. A control gets louder only when the user points at it or opens it.
+**Why.** Chrome that competes with content makes every screen feel busy. A quiet frame lets the one strong element on the screen be the content.
 
-## 3. Use layered shades for depth
+**How.**
+- Chrome text is `text-ink-muted` or `text-ink-subtle`. Content text is `text-ink`.
+- Toolbar and rail actions are `ghost` buttons. Only the icon shows until hover.
+- The canvas is one `bg-panel` pane. The window around it is `bg-page`.
 
-A surface nearer the user is one shade lighter. Set the depth with `Layer`, and `bg-surface` follows. Do not pick a background color by hand.
+<QuietChrome />
 
-## 4. Use hairline edges, not shadows
+## 2. Depth comes from layers, not from a chosen color
 
-A card or a region has a hairline border and no shadow. A raised control is a `pane`, with a thin rim and a small shadow. Only floating surfaces cast a real shadow.
+A surface nearer the user is one shade lighter. Page, panel, card and a card inside a card each step up once. You never choose a background color. You set the depth, and the surface follows.
 
-## 5. Use glass for floating surfaces only
+**Why.** Hand-picked grays drift apart across screens and break in the other theme. A depth ladder stays consistent and flips correctly between Dark and Light.
 
-Menus, popovers, dialogs and toasts are glass: a blur, a translucent fill and one soft shadow. Nothing on the page itself is glass.
+**How.**
+- `bg-page` is the window. `bg-panel` is the canvas.
+- `Layer depth={n}` sets the depth for everything inside it. `bg-surface`, `bg-hover` and `bg-input` follow the nearest depth.
+- `Card` sets depth 1 for you. A card inside it sets depth 2.
 
-## 6. Give a screen one `cta`
+<DepthLadder />
 
-The `cta` is the next step for the user. One screen has one `cta` at most. Other actions use `outlined`, `ghost`, `accent` or `danger`.
+## 3. Color is a system, not a choice
 
-## 7. Put ink on its own tint
+Neutral roles carry the interface: `ink`, `edge`, `surface`, `accent`. A hue appears only when it means something. It can mean a status, a kind of item, a source, or one person across the whole product.
 
-A colored label uses the hue's ink on the same hue's tint, for example `text-green-ink` on `bg-green-bg`. Only the `cta` uses a solid fill.
+**Why.** When color always means something, the user can read a screen before they read the words. Decorative color spends that signal.
 
-## 8. Treat touch mode as a full form
+**How.**
+- Use role utilities only, never a palette step such as `--gray-280`.
+- Status has its own names: `success`, `failure`, `warning`. A document is `write`.
+- A person or a label gets a stable hue from its name with `hashHue()` in `src/lib/hue.ts`. The same name gets the same color everywhere, with nothing stored.
 
-A phone is not a smaller desktop. In touch mode, `md` fields and buttons grow to 40px, floating bars clear the safe area, and hover states do not carry meaning. Design and check the touch form of every screen that has one.
+## 4. Every hue carries the same weight
+
+The twelve hues share one lightness and one chroma. Only the angle turns. A label puts the hue's ink on a 15% tint of the same hue. No hue shouts over another.
+
+**Why.** Even hues let a list of tags read as a set. A saturated red next to a pale teal would rank the tags by accident.
+
+**How.**
+- `<hue>` is the fill, `<hue>-bg` the tint, `<hue>-ink` the readable text on that tint.
+- The light theme darkens the ink a quarter toward black to keep contrast. You do not write that. The token does it.
+- A solid fill is for a dot or a small mark. The `cta` is the only solid button.
+
+<HueRow />
+
+## 5. Things that float are glass
+
+Menus, popovers, selects, dialogs, sheets and toasts float above the page. They blur what is behind them, use a translucent fill and cast one soft shadow. Nothing that lives on the page is glass. A card or a region has a hairline edge and no shadow.
+
+**Why.** Glass tells the user "this is temporary and above your work". Flat hairlines tell them "this is part of the page". Mixing the two blurs that line.
+
+**How.**
+- A floating surface is `glass bg-menu-glass border border-edge-muted`.
+- A raised control, such as an outlined button, is a `pane`: a thin rim and a small shadow.
+- Stacking uses `z-sticky`, `z-action-menu`, `z-popover`, `z-dialog`, `z-toast`, `z-tooltip`, in that order.
+
+<GlassSample />
+
+## 6. Emphasis is rationed
+
+A screen has one next step. That step is the `cta`. Other actions step down: `accent` for a positive secondary action, `outlined` for a normal one, `ghost` for chrome, `danger` for an action that removes something.
+
+**Why.** Two loud buttons make the user stop and compare. One loud button makes the choice for them.
+
+**How.**
+- One `cta` per screen. A temporary bar, such as the unsaved-changes bar, may add a second while it is up.
+- Destructive actions are `danger` and ask first with `confirm()`.
+
+<EmphasisLadder />
+
+## 7. Things align on their centers
+
+Controls come in fixed heights: 24px for `sm`, 32px for `md`, 40px for `md` in touch mode. Icons, badges and avatars center on the same line as the text beside them. Spacing steps by 4px.
+
+**Why.** Mixed sizes in one row look careless when their tops align and their centers do not. Fixed heights let any two controls sit side by side.
+
+**How.**
+- Use `size="sm"` or `size="md"`. Do not set a height by hand.
+- A component sizes its icons with `[&_svg]:size-*`, so an icon in a button always fits.
+- Use `items-center` on a row of mixed parts.
+
+<CenterLine />
+
+## 8. Motion confirms, it never performs
+
+Motion tells the user what changed and where it came from. A menu grows from its trigger. A dialog fades in and settles. A sheet slides up from the edge. Nothing bounces, and nothing takes longer than a quarter of a second.
+
+**Why.** Motion that performs makes the user wait. Motion that confirms makes the change easy to follow.
+
+**How.**
+- Popups use `motion-pop`, dialogs `motion-dialog`, scrims `motion-fade`, sheets `motion-sheet`.
+- They run 150 to 200ms on `ease-out`. Base UI sets the start and end states for you.
+- Reduced motion turns every transition off. See **Foundations / Motion** to replay each one.
+
+## 9. Touch is a full form, not a smaller desktop
+
+A phone gets its own form of each screen. Controls grow, dialogs become sheets that swipe away, rows get swipe actions, and nothing depends on hover.
+
+**Why.** A layout shrunk to fit a phone keeps desktop targets and hover menus that a thumb cannot use.
+
+**How.**
+- `<html data-touch>` turns on touch mode. Style it with the `touch:` and `not-touch:` variants, or read it with `useTouch()`.
+- `md` controls grow to 40px and `sm` buttons to 32px.
+- `Dialog` and `ConfirmDialog` render as a `Drawer` sheet. Bars clear the safe area.
+- Check a screen at **iPhone 14** in the toolbar when it has a phone form.
+
+## How a component is built
+
+| Layer | Owns | Where |
+|---|---|---|
+| Base UI | behavior: focus, keyboard, dismissal, positioning, accessibility | `@base-ui/react/*` |
+| Tokens | every color, shadow, layer, motion and the touch variant | `src/styles/tokens.css` |
+| Component | the look, the variants and the sizes, in one file | `src/components/*` |
+| Pattern | a composition of components for one kind of screen | `src/patterns/*` |
+| Story | sample data and the composition, nothing else | `src/stories/*` |
+
+- A component wraps Base UI when Base UI has the behavior. It does not rebuild focus traps or keyboard handling.
+- Variants are `ghost`, `outlined`, `accent`, `danger`, `cta`. Sizes are `sm` and `md`, with `icon-sm` and `icon-md`.
+- A pattern is built from components, and a screen is built from patterns. If a part lacks something, add a prop or a slot to it. Do not redraw it.
+
+For example, the lead detail screen uses `ResourceDetail` for its top bar, its article column, its property aside, its fold below 1224px and its unsaved-changes bar. It adds only the lead's own sections.
+
+## Before you ship a screen
+
+- The content is the strongest thing on the screen.
+- Every background comes from a depth, not a chosen gray.
+- Every hue means something.
+- Only floating surfaces are glass.
+- There is one `cta`.
+- Controls use `sm` or `md`, and rows align on their centers.
+- It reads in Dark and in Light.
+- It works at iPhone 14 when it has a phone form.
+- Every string follows **Copy**.
