@@ -1,0 +1,91 @@
+/* Layer 2 of 3: the themes. A theme assigns palette colors to the roles that
+   differ between dark and light. tokens.css derives the rest (ink, hover,
+   tints) and maps every role to a utility.
+
+   The theme lives on <html>: data-theme="dark" (the default) or "light". */
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --surface-0: var(--gray-0);
+  --surface-1: var(--gray-180);
+  --surface-2: var(--gray-230);
+  --surface-3: var(--gray-250);
+  --surface-4: var(--gray-280);
+  --content-0: var(--gray-1000);
+  --content-1: var(--gray-830);
+  --content-2: var(--gray-750);
+  --content-3: var(--gray-630);
+  --content-4: var(--gray-550);
+  --edge: var(--gray-280);
+  --edge-muted: var(--gray-250);
+
+  --accent: var(--periwinkle-700);
+  --accent-contrast: var(--gray-160);
+
+  --red: var(--red-750);
+  --orange: var(--orange-750);
+  --amber: var(--amber-750);
+  --yellow: var(--yellow-750);
+  --lime: var(--lime-750);
+  --green: var(--green-750);
+  --teal: var(--teal-750);
+  --cyan: var(--cyan-750);
+  --blue: var(--blue-750);
+  --violet: var(--violet-750);
+  --purple: var(--purple-750);
+  --pink: var(--pink-750);
+
+  --dialog: var(--surface-2);
+  --menu: var(--surface-2);
+  --composer: var(--surface-2);
+  --tooltip: var(--surface-4);
+  --warning: var(--amber);
+  --chrome: color-mix(in oklch, var(--surface-0) 80%, var(--content-0));
+  /* Ink on a hue's own tint. Dark surfaces take the hue as is. */
+  --ink-shift: 0%;
+  --shadow-strength: 0.5;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  --surface-0: var(--gray-964);
+  --surface-1: color-mix(in srgb, var(--surface-0) 30%, var(--surface-4));
+  --surface-2: color-mix(in srgb, var(--surface-0) 15%, var(--surface-4));
+  --surface-3: color-mix(in srgb, var(--surface-0) 7%, var(--surface-4));
+  --surface-4: var(--gray-1000);
+  --content-0: var(--gray-160);
+  --content-1: var(--gray-400);
+  --content-2: var(--gray-450);
+  --content-3: var(--gray-550);
+  --content-4: var(--gray-700);
+  --edge: var(--gray-910);
+  --edge-muted: var(--gray-920);
+
+  --accent: var(--periwinkle-600);
+  --accent-contrast: var(--gray-1000);
+
+  --red: var(--red-500);
+  --orange: var(--orange-500);
+  --amber: var(--amber-500);
+  --yellow: var(--yellow-500);
+  --lime: var(--lime-500);
+  --green: var(--green-500);
+  --teal: var(--teal-500);
+  --cyan: var(--cyan-500);
+  --blue: var(--blue-500);
+  --violet: var(--violet-500);
+  --purple: var(--purple-500);
+  --pink: var(--pink-500);
+
+  --dialog: var(--surface-3);
+  --menu: var(--surface-3);
+  --composer: var(--surface-4);
+  --tooltip: var(--surface-4);
+  --warning: var(--yellow);
+  --chrome: color-mix(in oklch, var(--surface-3) 98%, var(--content-0));
+  /* Light surfaces darken the ink a quarter toward black to keep contrast. */
+  --ink-shift: 25%;
+  --shadow-strength: 0.12;
+}

@@ -1,0 +1,56 @@
+/* Layer 1 of 3: every raw color, and nothing else. Components never read
+   these. A theme (themes.css) assigns them to roles.
+
+   A gray or accent step names its OKLCH lightness in per-mille:
+   --gray-280 is oklch(0.28 0 0). Each hue has two steps: -750 for dark
+   surfaces (fixed lightness and chroma, only the hue turns) and -500 for
+   light surfaces. */
+:root {
+  --gray-0: oklch(0 0 0);
+  --gray-160: oklch(0.16 0 0);
+  --gray-180: oklch(0.18 0 0);
+  --gray-230: oklch(0.23 0 0);
+  --gray-250: oklch(0.25 0 0);
+  --gray-280: oklch(0.28 0 0);
+  --gray-400: oklch(0.4 0 0);
+  --gray-450: oklch(0.45 0 0);
+  --gray-550: oklch(0.55 0 0);
+  --gray-630: oklch(0.63 0 0);
+  --gray-700: oklch(0.7 0 0);
+  --gray-750: oklch(0.75 0 0);
+  --gray-830: oklch(0.83 0 0);
+  --gray-910: oklch(0.91 0 0);
+  --gray-920: oklch(0.92 0 0);
+  --gray-964: oklch(0.964 0 0);
+  --gray-970: oklch(0.97 0 0);
+  --gray-1000: oklch(1 0 0);
+
+  --periwinkle-600: oklch(0.6 0.15 255deg);
+  --periwinkle-700: oklch(0.7 0.15 255deg);
+
+  --red-750: oklch(0.75 0.2 25deg);
+  --orange-750: oklch(0.75 0.2 48deg);
+  --amber-750: oklch(0.75 0.2 70deg);
+  --yellow-750: oklch(0.75 0.2 86deg);
+  --lime-750: oklch(0.75 0.2 131deg);
+  --green-750: oklch(0.75 0.2 150deg);
+  --teal-750: oklch(0.75 0.2 182deg);
+  --cyan-750: oklch(0.75 0.2 215deg);
+  --blue-750: oklch(0.75 0.2 260deg);
+  --violet-750: oklch(0.75 0.2 293deg);
+  --purple-750: oklch(0.75 0.2 304deg);
+  --pink-750: oklch(0.75 0.2 354deg);
+
+  --red-500: oklch(0.637 0.237 25deg);
+  --orange-500: oklch(0.705 0.213 48deg);
+  --amber-500: oklch(0.769 0.188 70deg);
+  --yellow-500: oklch(0.795 0.184 86deg);
+  --lime-500: oklch(0.768 0.233 131deg);
+  --green-500: oklch(0.723 0.219 150deg);
+  --teal-500: oklch(0.71 0.128 182deg);
+  --cyan-500: oklch(0.79 0.144 215deg);
+  --blue-500: oklch(0.623 0.214 260deg);
+  --violet-500: oklch(0.606 0.25 293deg);
+  --purple-500: oklch(0.627 0.265 304deg);
+  --pink-500: oklch(0.656 0.241 354deg);
+}

@@ -1,0 +1,229 @@
+/* Layer 3 of 3: tokens. Maps theme roles to Tailwind utilities, derives
+   the tints and ink, and defines layers, glass, motion and touch mode. */
+@import 'tailwindcss';
+@import './palette.css';
+@import './themes.css';
+@import './grain.css';
+
+/* Touch mode: <html data-touch>. Set from `pointer: coarse`, or by the
+   Storybook viewport. */
+@custom-variant touch (&:where([data-touch], [data-touch] *));
+@custom-variant not-touch (&:where(:root:not([data-touch]) *));
+
+@theme inline {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Playfair Display Variable', ui-serif, Georgia, serif;
+  --font-mono: 'Roboto Mono Variable', ui-monospace, monospace;
+  --text-xxs: 0.625rem;
+  --text-xxs--line-height: 0.875rem;
+
+  --color-page: var(--surface-0);
+  --color-panel: var(--surface-1);
+  --color-surface: var(--layer-surface);
+  --color-hover: var(--layer-hover);
+  --color-input: var(--layer-input);
+  --color-menu: var(--menu);
+  --color-menu-glass: color-mix(in oklch, var(--menu) 78%, transparent);
+  --color-dialog: var(--dialog);
+  --color-composer: var(--composer);
+  --color-tooltip: var(--tooltip);
+  --color-tooltip-failure: color-mix(in oklch, var(--red) 15%, var(--tooltip));
+  --color-toast: var(--menu);
+  --color-chrome: var(--chrome);
+  --color-scrim: color-mix(in oklch, var(--gray-0) 50%, transparent);
+  --color-skeleton: var(--edge-muted);
+
+  --color-ink: var(--content-0);
+  --color-ink-muted: var(--content-1);
+  --color-ink-subtle: var(--content-2);
+  --color-ink-extra-muted: var(--content-3);
+  --color-ink-placeholder: var(--content-4);
+  --color-ink-disabled: var(--content-4);
+
+  --color-edge: var(--edge);
+  --color-edge-muted: var(--edge-muted);
+
+  --color-accent: var(--accent);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-accent-ink: color-mix(in oklch, var(--accent) calc(100% - var(--ink-shift)), black);
+  --color-accent-bg: color-mix(in oklch, var(--accent) 15%, transparent);
+
+  --color-red: var(--red);
+  --color-red-ink: color-mix(in oklch, var(--red) calc(100% - var(--ink-shift)), black);
+  --color-red-bg: color-mix(in oklch, var(--red) 15%, transparent);
+
+  --color-orange: var(--orange);
+  --color-orange-ink: color-mix(in oklch, var(--orange) calc(100% - var(--ink-shift)), black);
+  --color-orange-bg: color-mix(in oklch, var(--orange) 15%, transparent);
+
+  --color-amber: var(--amber);
+  --color-amber-ink: color-mix(in oklch, var(--amber) calc(100% - var(--ink-shift)), black);
+  --color-amber-bg: color-mix(in oklch, var(--amber) 15%, transparent);
+
+  --color-yellow: var(--yellow);
+  --color-yellow-ink: color-mix(in oklch, var(--yellow) calc(100% - var(--ink-shift)), black);
+  --color-yellow-bg: color-mix(in oklch, var(--yellow) 15%, transparent);
+
+  --color-lime: var(--lime);
+  --color-lime-ink: color-mix(in oklch, var(--lime) calc(100% - var(--ink-shift)), black);
+  --color-lime-bg: color-mix(in oklch, var(--lime) 15%, transparent);
+
+  --color-green: var(--green);
+  --color-green-ink: color-mix(in oklch, var(--green) calc(100% - var(--ink-shift)), black);
+  --color-green-bg: color-mix(in oklch, var(--green) 15%, transparent);
+
+  --color-teal: var(--teal);
+  --color-teal-ink: color-mix(in oklch, var(--teal) calc(100% - var(--ink-shift)), black);
+  --color-teal-bg: color-mix(in oklch, var(--teal) 15%, transparent);
+
+  --color-cyan: var(--cyan);
+  --color-cyan-ink: color-mix(in oklch, var(--cyan) calc(100% - var(--ink-shift)), black);
+  --color-cyan-bg: color-mix(in oklch, var(--cyan) 15%, transparent);
+
+  --color-blue: var(--blue);
+  --color-blue-ink: color-mix(in oklch, var(--blue) calc(100% - var(--ink-shift)), black);
+  --color-blue-bg: color-mix(in oklch, var(--blue) 15%, transparent);
+
+  --color-violet: var(--violet);
+  --color-violet-ink: color-mix(in oklch, var(--violet) calc(100% - var(--ink-shift)), black);
+  --color-violet-bg: color-mix(in oklch, var(--violet) 15%, transparent);
+
+  --color-purple: var(--purple);
+  --color-purple-ink: color-mix(in oklch, var(--purple) calc(100% - var(--ink-shift)), black);
+  --color-purple-bg: color-mix(in oklch, var(--purple) 15%, transparent);
+
+  --color-pink: var(--pink);
+  --color-pink-ink: color-mix(in oklch, var(--pink) calc(100% - var(--ink-shift)), black);
+  --color-pink-bg: color-mix(in oklch, var(--pink) 15%, transparent);
+
+  --color-warning: var(--warning);
+  --color-warning-ink: color-mix(in oklch, var(--warning) calc(100% - var(--ink-shift)), black);
+  --color-warning-bg: color-mix(in oklch, var(--warning) 15%, transparent);
+
+  --color-success: var(--green);
+  --color-success-ink: color-mix(in oklch, var(--green) calc(100% - var(--ink-shift)), black);
+  --color-success-bg: color-mix(in oklch, var(--green) 15%, transparent);
+
+  --color-failure: var(--red);
+  --color-failure-ink: color-mix(in oklch, var(--red) calc(100% - var(--ink-shift)), black);
+  --color-failure-bg: color-mix(in oklch, var(--red) 15%, transparent);
+
+  --color-write: var(--blue);
+  --color-write-ink: color-mix(in oklch, var(--blue) calc(100% - var(--ink-shift)), black);
+  --color-write-bg: color-mix(in oklch, var(--blue) 15%, transparent);
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Layers. A surface steps one shade lighter per depth, so a card on a card
+   still reads. <Layer depth={n}> sets data-depth; bg-surface, bg-hover and
+   bg-input follow the nearest one. */
+:root {
+  --layer-surface: var(--surface-2);
+}
+[data-depth='0'] { --layer-surface: var(--surface-1); }
+[data-depth='1'] { --layer-surface: var(--surface-2); }
+[data-depth='2'] { --layer-surface: var(--surface-3); }
+[data-depth='3'],
+[data-depth='4'] { --layer-surface: var(--surface-4); }
+:root,
+[data-depth] {
+  --layer-hover: color-mix(in oklch, var(--layer-surface) 92%, var(--content-0));
+  --layer-input: color-mix(in oklch, var(--layer-surface) 94%, var(--content-0));
+}
+
+/* Stacking order, lowest first. */
+@utility z-sticky { z-index: 10; }
+@utility z-action-menu { z-index: 30; }
+@utility z-popover { z-index: 50; }
+@utility z-dialog { z-index: 60; }
+@utility z-toast { z-index: 70; }
+@utility z-tooltip { z-index: 80; }
+
+/* Glass: every floating surface. Pair it with a translucent fill such as
+   bg-menu-glass. */
+@utility glass {
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  box-shadow:
+    inset 0 0.5px 0 0 color-mix(in oklch, var(--content-0) 10%, transparent),
+    0 12px 32px -12px rgb(0 0 0 / var(--shadow-strength));
+}
+
+/* A pane: a raised control. Hairline specular rim, soft cast shadow. */
+@utility pane {
+  box-shadow:
+    inset 0 0.5px 0 0 color-mix(in oklch, var(--content-0) 12%, transparent),
+    0 1px 2px 0 rgb(0 0 0 / calc(var(--shadow-strength) * 0.6));
+}
+
+@utility focus-ring {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+/* Motion for Base UI popups. Base UI sets data-starting-style while a popup
+   mounts and data-ending-style while it leaves. */
+@utility motion-pop {
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity 150ms var(--ease-out),
+    scale 150ms var(--ease-out);
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+@utility motion-dialog {
+  transition:
+    opacity 200ms var(--ease-out),
+    scale 200ms var(--ease-out);
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    scale: 0.97;
+  }
+}
+@utility motion-fade {
+  transition: opacity 200ms var(--ease-out);
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background: var(--color-page);
+    color: var(--color-ink);
+  }
+  /* Base UI portals popups to <body>; an isolated root keeps them on top. */
+  #root,
+  #storybook-root {
+    isolation: isolate;
+  }
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+  ::placeholder {
+    color: var(--color-ink-placeholder);
+  }
+}
