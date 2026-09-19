@@ -1,92 +1,97 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import { Switch } from '@/components/Switch';
-import { PHONE } from '../phone';
+import { ToggleSwitch } from '@/components/ToggleSwitch';
 
 /**
- * Turns a setting on or off, and the change applies at once. If the change
- * waits for a Save button, use a Checkbox.
+ * An on/off switch for a setting that applies immediately. If the change
+ * needs a save step, use a Checkbox instead.
  *
  * **Do**
- * - Name the setting in its on state: "Read receipts", not "Disable read
- *   receipts".
- * - Use `md` in settings and `sm` in toolbars.
+ * - Use a switch only when the change takes effect immediately.
+ * - Label the setting in its on-state ("Read receipts", not "Disable read
+ *   receipts").
+ * - Use `size="md"` in settings and `size="sm"` in toolbars.
  *
  * **Don't**
- * - Put a switch in a form with a Save button.
- * - Add "On" and "Off" text: the control already says it.
+ * - Put a switch in a form that has a Save button — use a Checkbox.
+ * - Pair a switch with an on/off text label; the control already says it.
  */
 const meta = {
-  title: 'Forms/Switch',
-  component: Switch,
-  args: { label: 'Desktop notifications', size: 'md' },
-  argTypes: { size: { control: 'select', options: ['sm', 'md'] } },
-} satisfies Meta<typeof Switch>;
+  title: 'Forms/ToggleSwitch',
+  component: ToggleSwitch,
+} satisfies Meta<typeof ToggleSwitch>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Pass `checked` and `onCheckedChange` to control it, or `defaultChecked`. The label is part of the hit target. */
+/**
+ * Controlled via `checked` and `onChange`, or uncontrolled via
+ * `defaultChecked`. The whole component — including the gap between control
+ * and label — is one hit target.
+ */
 export const Basic: Story = {
-  render: function Render(args) {
-    const [on, setOn] = useState(true);
-    return <Switch {...args} checked={on} onCheckedChange={setOn} />;
+  render: function Render() {
+    const [enabled, setEnabled] = useState(true);
+    return (
+      <div className="flex flex-col gap-3">
+        <ToggleSwitch
+          checked={enabled}
+          onChange={setEnabled}
+          label="Desktop notifications"
+          labelClass="text-sm text-ink"
+        />
+        <span className="text-xs text-ink-subtle">Currently {enabled ? 'on' : 'off'}</span>
+      </div>
+    );
   },
 };
 
-/** `md` for settings rows, `sm` for toolbars. */
+/**
+ * `md` is the default, for settings rows; `sm` is the compact toolbar size.
+ */
 export const Sizes: Story = {
   render: () => (
-    <div className="flex items-center gap-6">
+    <div className="flex flex-wrap items-center gap-6">
       {(['sm', 'md'] as const).map((size) => (
         <div key={size} className="flex flex-col items-start gap-1.5">
           <span className="font-mono text-xs text-ink-subtle">{size}</span>
-          <Switch size={size} defaultChecked aria-label={`Example ${size}`} />
+          <ToggleSwitch size={size} defaultChecked />
         </div>
       ))}
     </div>
   ),
 };
 
-export const Disabled: Story = {
-  render: () => (
-    <div className="flex flex-col gap-3">
-      <Switch label="Read receipts" disabled defaultChecked />
-      <Switch label="Typing indicators" disabled />
-    </div>
-  ),
-};
-
-const ROWS = [
-  { label: 'Read receipts', description: 'Let others see when you read a message.', on: true },
-  { label: 'Typing indicators', description: 'Show when you are writing a reply.', on: false },
-];
-
-/** The settings row: the name and a description on the left, the switch on the right. */
+/**
+ * The standard settings pattern: label and description on the left, switch
+ * on the right.
+ */
 export const SettingsRow: Story = {
-  name: 'Settings row',
-  render: () => (
-    <div className="flex max-w-md flex-col divide-y divide-edge-muted">
-      {ROWS.map((row) => (
-        <label key={row.label} className="flex items-center justify-between gap-4 py-3">
-          <span className="flex flex-col gap-0.5">
-            <span className="text-sm text-ink">{row.label}</span>
-            <span className="text-xs text-ink-subtle">{row.description}</span>
-          </span>
-          <Switch defaultChecked={row.on} />
-        </label>
-      ))}
-    </div>
-  ),
-};
-
-/** On a phone the track grows to 44 by 24px. */
-export const Phone: Story = {
-  ...PHONE,
-  render: () => (
-    <div className="flex flex-col gap-4">
-      <Switch label="Read receipts" defaultChecked />
-      <Switch label="Typing indicators" />
-    </div>
-  ),
+  render: () => {
+    const rows = [
+      {
+        label: 'Read receipts',
+        description: 'Let others see when you read a message.',
+        on: true,
+      },
+      {
+        label: 'Typing indicators',
+        description: 'Show when you are composing.',
+        on: false,
+      },
+    ];
+    return (
+      <div className="flex w-full max-w-md flex-col divide-y divide-edge-muted">
+        {rows.map((row) => (
+          <div key={row.label} className="flex items-center justify-between gap-4 py-3">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm text-ink">{row.label}</span>
+              <span className="text-xs text-ink-subtle">{row.description}</span>
+            </div>
+            <ToggleSwitch size="md" defaultChecked={row.on} aria-label={row.label} />
+          </div>
+        ))}
+      </div>
+    );
+  },
 };

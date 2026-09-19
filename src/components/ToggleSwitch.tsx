@@ -1,66 +1,98 @@
-import { Switch as Base } from '@base-ui/react/switch';
-import type { ComponentProps, ReactNode } from 'react';
+import { Switch } from '@base-ui/react/switch';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/cn';
 
-export type SwitchSize = 'sm' | 'md';
-
-const TRACK: Record<SwitchSize, string> = {
-  sm: 'h-4 w-7',
-  md: 'h-5 w-9 touch:h-6 touch:w-11',
-};
-
-const THUMB: Record<SwitchSize, string> = {
-  sm: 'size-3 data-checked:translate-x-3',
-  md: 'size-4 data-checked:translate-x-4 touch:size-5 touch:data-checked:translate-x-5',
-};
-
-export type SwitchProps = Omit<ComponentProps<typeof Base.Root>, 'className'> & {
-  className?: string;
-  /** The setting, named in its on state: "Read receipts", not "Disable read receipts". */
+export type ToggleSwitchProps = {
+  onChange?: (checked: boolean) => void;
+  defaultChecked?: boolean;
+  labelClass?: string;
   label?: ReactNode;
-  description?: ReactNode;
-  size?: SwitchSize;
+  disabled?: boolean;
+  checked?: boolean;
+  /** Visual size. `md` (default) sits in settings rows; `sm` is the compact
+   *  toolbar size. */
+  size?: 'sm' | 'md';
+  className?: string;
+  controlClass?: string;
+  name?: string;
+  'aria-label'?: string;
 };
+
+const SWITCH_SIZES = {
+  sm: {
+    control: 'h-4 w-6',
+    thumb: 'top-0.5 left-0.5 h-3',
+    stretched: 'w-4 data-checked:translate-x-1',
+    normal: 'w-3 data-checked:translate-x-2',
+  },
+  md: {
+    control: 'h-5 w-9',
+    thumb: 'top-0.5 left-0.5 h-4',
+    stretched: 'w-5 data-checked:translate-x-3',
+    normal: 'w-4 data-checked:translate-x-4',
+  },
+} as const;
 
 /**
- * Turns a setting on or off, and the change applies at once. A change that
- * waits for a Save button is a Checkbox. With a label, the label and the
- * gap are part of the hit target.
+ * An on/off switch for a setting that applies immediately. If the change
+ * needs a save step, use a Checkbox instead.
+ *
+ * @do Use a switch only when the change takes effect immediately.
+ * @do Label the setting in its on-state ("Read receipts", not "Disable read
+ *   receipts").
+ * @do Use `size="md"` in settings and `size="sm"` in toolbars.
+ * @dont Do not put a switch in a form that has a Save button — use a Checkbox.
+ * @dont Do not pair a switch with an on/off text label; the control already
+ *   says it.
  */
-export function Switch({ label, description, size = 'md', className, ...props }: SwitchProps) {
-  const control = (
-    <Base.Root
-      {...props}
-      className={cn(
-        'relative inline-flex shrink-0 items-center rounded-full bg-ink-muted/40 p-0.5 outline-none transition-colors duration-150',
-        'focus-visible:focus-ring data-checked:bg-accent',
-        'data-disabled:cursor-not-allowed data-disabled:opacity-50',
-        TRACK[size],
-        !label && className
-      )}
-    >
-      <Base.Thumb
-        className={cn(
-          'block rounded-full bg-surface shadow-sm transition-transform duration-150 ease-out',
-          THUMB[size]
-        )}
-      />
-    </Base.Root>
-  );
-  if (!label) return control;
+export function ToggleSwitch({
+  onChange,
+  defaultChecked,
+  labelClass,
+  label,
+  disabled,
+  checked,
+  size = 'md',
+  className,
+  controlClass,
+  ...props
+}: ToggleSwitchProps) {
+  const sizing = SWITCH_SIZES[size];
+  const [isStretched, setIsStretched] = useState(false);
+  const stretchTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(stretchTimeout.current), []);
+
+  const handleChange = (next: boolean) => {
+    setIsStretched(true);
+    clearTimeout(stretchTimeout.current);
+    stretchTimeout.current = setTimeout(() => setIsStretched(false), 75);
+    onChange?.(next);
+  };
+
+  // The root is a label, so its gap and padding toggle the switch too: one hit target.
   return (
-    <label
-      className={cn(
-        'flex items-center gap-2 text-sm text-ink has-data-disabled:cursor-not-allowed has-data-disabled:text-ink-disabled',
-        description && 'items-start',
-        className
-      )}
-    >
-      {control}
-      <span className="flex flex-col gap-0.5">
-        {label}
-        {description && <span className="text-xs text-ink-subtle">{description}</span>}
-      </span>
+    <label className={cn('inline-flex items-center gap-2', className)}>
+      <Switch.Root
+        {...props}
+        checked={checked}
+        defaultChecked={defaultChecked}
+        onCheckedChange={handleChange}
+        disabled={disabled}
+        className={cn(
+          'relative rounded-full bg-ink-muted/40 transition-colors duration-100 data-checked:bg-accent',
+          sizing.control,
+          controlClass
+        )}
+      >
+        <Switch.Thumb
+          className={cn(
+            'absolute rounded-full bg-surface transition-all duration-100 ease-in-out',
+            sizing.thumb,
+            isStretched ? sizing.stretched : sizing.normal
+          )}
+        />
+      </Switch.Root>
+      {label != null && <span className={cn(labelClass)}>{label}</span>}
     </label>
   );
 }
