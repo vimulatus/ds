@@ -12,7 +12,6 @@ import {
   ShareNetwork,
   SignOut,
   Sparkle,
-  Tray,
   UserCircle,
 } from '@phosphor-icons/react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -163,8 +162,7 @@ export const List: Story = {
     <Shell view="tasks">
       <EmptyStatePanel
         centered
-        graphic={Tray}
-        graphicClassName="size-12"
+        kind="no-items"
         title="No tasks"
         description="Tasks assigned to you show up here."
       />

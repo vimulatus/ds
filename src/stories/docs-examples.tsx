@@ -6,7 +6,6 @@ import {
   Plus,
   ShareNetwork,
   Trash,
-  Tray,
 } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { Badge } from '@/components/Badge';
@@ -251,8 +250,7 @@ export function EmptyStates() {
         <EmptyStatePanel
           centered
           className="min-h-40 w-full"
-          graphic={Tray}
-          graphicClassName="size-8 text-ink-extra-muted"
+          kind="no-items"
           title="No files yet"
           description="Upload a file or drop one here."
         >
@@ -263,8 +261,7 @@ export function EmptyStates() {
         <EmptyStatePanel
           centered
           className="min-h-40 w-full"
-          graphic={Tray}
-          graphicClassName="size-8 text-ink-extra-muted"
+          kind="no-items"
           title="Nothing to see here!"
           description="It looks like you haven't uploaded anything yet."
         />
