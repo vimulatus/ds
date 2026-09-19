@@ -1,7 +1,7 @@
 import { Button as Base } from '@base-ui/react/button';
 import type { ComponentProps } from 'react';
 import { cn } from '@/lib/cn';
-import { Tooltip } from './Tooltip';
+import { Tooltip, type TooltipProps } from './Tooltip';
 
 export type ButtonVariant = 'ghost' | 'outlined' | 'accent' | 'danger' | 'cta';
 export type ButtonSize = 'sm' | 'md' | 'icon-sm' | 'icon-md';
@@ -43,13 +43,15 @@ export type ButtonProps = Omit<ComponentProps<typeof Base>, 'className'> & {
   label?: string;
   /** A key combination shown in the tooltip, such as "⌘K". */
   shortcut?: string;
+  /** Which side of the button the tooltip opens on. */
+  tooltipSide?: TooltipProps['side'];
 };
 
 /**
  * Triggers an action. `variant` carries emphasis, `size` carries density.
  * Give a screen at most one `cta`.
  */
-export function Button({ variant, size, label, shortcut, className, ...props }: ButtonProps) {
+export function Button({ variant, size, label, shortcut, tooltipSide, className, ...props }: ButtonProps) {
   const button = (
     <Base
       aria-label={label}
@@ -59,7 +61,7 @@ export function Button({ variant, size, label, shortcut, className, ...props }: 
   );
   if (!label) return button;
   return (
-    <Tooltip content={label} shortcut={shortcut}>
+    <Tooltip content={label} shortcut={shortcut} side={tooltipSide}>
       {button}
     </Tooltip>
   );

@@ -3,7 +3,7 @@ import { CaretRight, Check } from '@phosphor-icons/react';
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import { type ButtonSize, type ButtonVariant, buttonClasses } from './Button';
-import { Tooltip } from './Tooltip';
+import { Tooltip, type TooltipProps } from './Tooltip';
 
 /**
  * A list of actions or choices behind a trigger. Group related rows, put the
@@ -21,6 +21,8 @@ export type MenuTriggerProps = Omit<ComponentProps<typeof Base.Trigger>, 'classN
   size?: ButtonSize;
   /** The accessible name and tooltip. Required for an icon-only trigger. */
   label?: string;
+  /** Which side of the trigger the tooltip opens on. */
+  tooltipSide?: TooltipProps['side'];
 };
 
 /** Opens the menu. Styled as a `Button`, and lit while the menu is open. */
@@ -28,6 +30,7 @@ export function MenuTrigger({
   variant = 'outlined',
   size = 'md',
   label,
+  tooltipSide,
   className,
   ...props
 }: MenuTriggerProps) {
@@ -39,7 +42,11 @@ export function MenuTrigger({
     />
   );
   if (!label) return trigger;
-  return <Tooltip content={label}>{trigger}</Tooltip>;
+  return (
+    <Tooltip content={label} side={tooltipSide}>
+      {trigger}
+    </Tooltip>
+  );
 }
 
 const SURFACE =
