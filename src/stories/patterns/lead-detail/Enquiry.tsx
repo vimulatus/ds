@@ -9,8 +9,8 @@ import {
   MenuRadioItem,
   MenuTrigger,
 } from '@/components/Menu';
-import { PillButton } from '@/components/PillButton';
 import { Progress } from '@/components/Progress';
+import { cn } from '@/lib/cn';
 import { PersonLine, SourceBadge } from './Assign';
 import { type Enquiry, PROJECTS, STAGE_LABEL, STAGES, type Stage } from './data';
 
@@ -105,15 +105,20 @@ export function EnquiryRow({
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="mr-1 text-xs text-ink-subtle">Preferences</span>
         {units.map((unit) => (
-          <PillButton
+          <button
             key={unit}
-            size="sm"
-            pressed={enquiry.wants.includes(unit)}
-            onPressedChange={(pressed) => toggle(unit, pressed)}
-            className="touch:h-9 touch:px-3"
+            type="button"
+            aria-pressed={enquiry.wants.includes(unit)}
+            onClick={() => toggle(unit, !enquiry.wants.includes(unit))}
+            className={cn(
+              'rounded-full border px-2 py-0.5 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-60 touch:min-h-9 touch:px-3',
+              enquiry.wants.includes(unit)
+                ? 'border-transparent bg-accent-bg text-accent'
+                : 'border-edge-muted text-ink-muted hover:bg-hover'
+            )}
           >
             {unit}
-          </PillButton>
+          </button>
         ))}
       </div>
     </section>

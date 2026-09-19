@@ -17,10 +17,10 @@ export type RailItem = {
 };
 
 /** A glyph in the rail's footer: settings, help. It joins the rail's arrow-key order. */
-export function RailButton(props: Omit<Parameters<typeof Button>[0], 'size' | 'variant' | 'tooltipSide'>) {
+export function RailButton(props: Omit<Parameters<typeof Button>[0], 'size' | 'variant' | 'tooltipPlacement'>) {
   return (
     <Toolbar.Button
-      render={<Button {...props} variant="ghost" size="icon-md" tooltipSide="right" />}
+      render={<Button {...props} variant="ghost" size="icon-md" tooltipPlacement="right" />}
     />
   );
 }
@@ -94,7 +94,7 @@ export function SidebarRail({ items, activeId, onSelect, mark, footer, className
                     size="icon-md"
                     label={item.label}
                     shortcut={item.hotkey}
-                    tooltipSide="right"
+                    tooltipPlacement="right"
                     aria-current={active ? 'page' : undefined}
                     onClick={() => onSelect(item.id)}
                     className={cn(

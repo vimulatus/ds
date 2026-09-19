@@ -4,49 +4,54 @@ import { Button } from '@/components/Button';
 import { ButtonGroup } from '@/components/ButtonGroup';
 
 /**
- * Outlined buttons joined into one control: they share hairlines and only
- * the ends are rounded. Use it for a few actions on one thing, such as
- * previous and next.
- *
- * - **Do** name the group with `aria-label`.
- * - **Do** keep every button `outlined` and one size.
- * - **Don't** join unrelated actions; space them apart instead.
+ * Buttons joined into one frame. The group owns the rim, the rounding and
+ * the glass; its buttons take its `variant` and `size`. `ButtonGroup.Divider`
+ * draws the rule between two buttons. Use it for a few actions on one thing,
+ * such as previous and next.
  */
 const meta = {
   title: 'Primitives/ButtonGroup',
   component: ButtonGroup,
+  args: { variant: 'outlined', size: 'md' },
+  argTypes: {
+    variant: { control: 'select', options: ['ghost', 'outlined', 'accent', 'danger', 'cta'] },
+    size: { control: 'select', options: ['sm', 'md'] },
+  },
+  render: (args) => (
+    <ButtonGroup {...args} aria-label="Range">
+      <Button>Day</Button>
+      <ButtonGroup.Divider />
+      <Button>Week</Button>
+      <ButtonGroup.Divider />
+      <Button>Month</Button>
+    </ButtonGroup>
+  ),
 } satisfies Meta<typeof ButtonGroup>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Text: Story = {
-  render: () => (
-    <ButtonGroup aria-label="Range">
-      <Button variant="outlined">Day</Button>
-      <Button variant="outlined">Week</Button>
-      <Button variant="outlined">Month</Button>
-    </ButtonGroup>
-  ),
-};
+export const Text: Story = {};
 
 /** Icon-only buttons carry a `label`; the tooltip does not break the join. */
 export const Icons: Story = {
   render: () => (
     <div className="flex items-center gap-4">
-      <ButtonGroup aria-label="Pages">
-        <Button variant="outlined" size="icon-md" label="Previous">
+      <ButtonGroup variant="outlined" size="icon-md" aria-label="Pages">
+        <Button label="Previous">
           <CaretLeft />
         </Button>
-        <Button variant="outlined" size="icon-md" label="Next">
+        <ButtonGroup.Divider />
+        <Button label="Next">
           <CaretRight />
         </Button>
       </ButtonGroup>
-      <ButtonGroup aria-label="Layout">
-        <Button variant="outlined" size="icon-sm" label="List">
+      <ButtonGroup variant="outlined" size="icon-sm" aria-label="Layout">
+        <Button label="List">
           <ListBullets />
         </Button>
-        <Button variant="outlined" size="icon-sm" label="Grid">
+        <ButtonGroup.Divider />
+        <Button label="Grid">
           <SquaresFour />
         </Button>
       </ButtonGroup>
@@ -54,16 +59,15 @@ export const Icons: Story = {
   ),
 };
 
-/** `sm` for a dense header. */
-export const Small: Story = {
+/** `vertical` stacks the buttons. */
+export const Vertical: Story = {
   render: () => (
-    <ButtonGroup aria-label="Pages">
-      <Button variant="outlined" size="sm">
+    <ButtonGroup variant="outlined" size="icon-md" orientation="vertical" aria-label="Zoom">
+      <Button label="Previous">
         <CaretLeft />
-        Previous
       </Button>
-      <Button variant="outlined" size="sm">
-        Next
+      <ButtonGroup.Divider />
+      <Button label="Next">
         <CaretRight />
       </Button>
     </ButtonGroup>

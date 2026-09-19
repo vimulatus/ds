@@ -54,7 +54,7 @@ export const Sizes: Story = {
 export const IconOnly: Story = {
   render: () => (
     <div className="flex items-center gap-2">
-      <Button size="icon-sm" label="Search" shortcut="⌘K">
+      <Button size="icon-sm" label="Search" shortcut="cmd+k">
         <MagnifyingGlass />
       </Button>
       <Button size="icon-md" variant="outlined" label="Create">

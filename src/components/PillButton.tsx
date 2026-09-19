@@ -1,33 +1,35 @@
-import { Toggle } from '@base-ui/react/toggle';
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
+import { Button } from './Button';
 
-export type PillButtonProps = Omit<ComponentProps<typeof Toggle>, 'className'> & {
+export type PillButtonTone = 'cta' | 'subtle';
+
+export interface PillButtonProps {
+  /** `cta` is the primary action; `subtle` a quiet ink-tinted pill. */
+  tone?: PillButtonTone;
+  /** An optional leading icon, such as a plus for a create action. */
+  icon?: ComponentType<{ className?: string }>;
+  onClick: () => void;
   className?: string;
-  size?: 'sm' | 'md';
-  /** A count after the label, such as the items the filter would show. */
-  count?: ReactNode;
-};
+  children: ReactNode;
+}
 
 /**
- * A rounded filter pill that stays pressed while its filter is on. A row
- * of them narrows one list; each toggles on its own.
+ * A rounded-full pill for empty states and setup cards. Tight vertical
+ * padding; a leading icon tightens the left padding so the icon, not the
+ * pill's edge, sets the rhythm.
  */
-export function PillButton({ size = 'md', count, className, children, ...props }: PillButtonProps) {
+export function PillButton({ tone, icon: Icon, onClick, className, children }: PillButtonProps) {
+  const subtle = tone === 'subtle';
   return (
-    <Toggle
-      {...props}
-      className={cn(
-        'inline-flex shrink-0 select-none items-center gap-1.5 whitespace-nowrap rounded-full border border-edge font-medium text-ink-muted outline-none transition-colors',
-        'hover:bg-hover hover:text-ink focus-visible:focus-ring [&_svg]:shrink-0',
-        'data-pressed:border-transparent data-pressed:bg-accent-bg data-pressed:text-accent-ink',
-        'data-disabled:pointer-events-none data-disabled:opacity-50',
-        size === 'sm' ? 'h-6 px-2.5 text-xs [&_svg]:size-3.5' : 'h-8 px-3 text-sm [&_svg]:size-4',
-        className
-      )}
+    <Button
+      variant={subtle ? 'outlined' : 'cta'}
+      size="md"
+      className={cn('rounded-full py-1', subtle ? 'bg-ink/5 px-2.5' : Icon ? 'pl-3 pr-4' : 'px-4', className)}
+      onClick={onClick}
     >
+      {Icon && <Icon className="size-4" />}
       {children}
-      {count != null && <span className="text-xs tabular-nums opacity-70">{count}</span>}
-    </Toggle>
+    </Button>
   );
 }
