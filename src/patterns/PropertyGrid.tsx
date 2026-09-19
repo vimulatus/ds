@@ -2,14 +2,36 @@ import type { ComponentProps, ReactNode } from 'react';
 import { Input } from '@/components/Input';
 import { cn } from '@/lib/cn';
 
+export type PropertyGridProps = ComponentProps<'div'> & {
+  /** Enter in one of the grid's inputs saves the edits. */
+  onSave?: () => void;
+  /** Escape in one of the grid's inputs throws the edits away. */
+  onDiscard?: () => void;
+};
+
 /**
  * Label and value pairs in two columns. Put it in a `ResourceDetail.Section`
- * and in the `Fold`, so both widths show the same properties.
+ * and in the `Fold`, so both widths show the same properties. With `onSave`
+ * and `onDiscard` it is the form behind `ResourceDetail.Changes`: Enter saves
+ * and Escape discards from any input in the grid, but not from a popup that
+ * a property opens.
  */
-export function PropertyGrid({ className, ...props }: ComponentProps<'div'>) {
+export function PropertyGrid({ onSave, onDiscard, onKeyDown, className, ...props }: PropertyGridProps) {
   return (
     <div
       {...props}
+      onKeyDown={(event) => {
+        onKeyDown?.(event);
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement) || !event.currentTarget.contains(target)) return;
+        if (event.key === 'Enter' && onSave) {
+          event.preventDefault();
+          onSave();
+        } else if (event.key === 'Escape' && onDiscard) {
+          event.preventDefault();
+          onDiscard();
+        }
+      }}
       className={cn(
         'grid grid-cols-[6.5rem_1fr] items-center gap-x-3 gap-y-2.5 text-sm',
         className

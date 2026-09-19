@@ -81,7 +81,16 @@ function Body({ className, children }: { className?: string; children: ReactNode
 }
 
 /** The title block at the top of the article: the name, then a line of facts. */
-function Title({ children, meta }: { children: ReactNode; meta?: ReactNode }) {
+function Title({
+  children,
+  meta,
+  footer,
+}: {
+  children: ReactNode;
+  meta?: ReactNode;
+  /** Under the facts, inside the block: the resource's next step, such as a due follow-up. */
+  footer?: ReactNode;
+}) {
   return (
     <header className="flex flex-col gap-3">
       <h1 className="text-2xl font-semibold tracking-tight text-ink">{children}</h1>
@@ -90,6 +99,7 @@ function Title({ children, meta }: { children: ReactNode; meta?: ReactNode }) {
           {meta}
         </div>
       )}
+      {footer}
     </header>
   );
 }
@@ -159,7 +169,8 @@ function Block({
 
 /**
  * Floats at the bottom once an edit differs from the saved resource. Save is
- * the page's one `cta` while it is up. Enter and Escape belong to the form.
+ * the page's one `cta` while it is up. Enter and Escape belong to the form:
+ * pass the same handlers to `PropertyGrid`'s `onSave` and `onDiscard`.
  */
 function Changes({
   count,
