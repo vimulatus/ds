@@ -5,6 +5,7 @@ import { Button } from '@/components/Button';
 import { Dropdown } from '@/components/Dropdown';
 import { Toolbar } from '@/components/Toolbar';
 import { EntityList } from '@/patterns/EntityList';
+import { SwipableRow } from '@/patterns/SwipableRow';
 import { ROWS } from './sample';
 
 function Column({ children }: { children: ReactNode }) {
@@ -52,14 +53,24 @@ const BULK = (
 
 type ListArgs = Partial<ComponentProps<typeof EntityList>>;
 
-function Demo({ initialSelected = [], items = ROWS, ...props }: ListArgs & { initialSelected?: string[] }) {
+function Demo({ initialSelected = [], items: initialItems = ROWS, ...props }: ListArgs & { initialSelected?: string[] }) {
+  const [items, setItems] = useState(initialItems);
   const [active, setActive] = useState('contract');
   const [selected, setSelected] = useState<Set<string>>(new Set(initialSelected));
+  const remove = (id: string) => setItems((prev) => prev.filter((item) => item.id !== id));
   return (
     <Column>
       <EntityList
         label="Recent files"
         items={items.map((item) => ({ ...item, actions: ACTIONS }))}
+        renderRow={(item, row) => (
+          <SwipableRow
+            leading={{ label: 'Star', icon: <Star />, onAction: () => {} }}
+            trailing={[{ label: 'Delete', icon: <Trash />, tone: 'failure', dismiss: true, onAction: () => remove(item.id) }]}
+          >
+            {row}
+          </SwipableRow>
+        )}
         activeId={active}
         onOpen={setActive}
         selected={selected}
@@ -79,6 +90,8 @@ function Demo({ initialSelected = [], items = ROWS, ...props }: ListArgs & { ini
  * The list is one tab stop. Arrow keys move focus, Home and End jump, Enter
  * opens, x toggles selection, Escape clears it, and Shift+F10 opens the
  * focused row's menu.
+ *
+ * In a phone viewport the rows swipe: right to star, left to delete.
  */
 const meta = {
   title: 'Lists/EntityList',
