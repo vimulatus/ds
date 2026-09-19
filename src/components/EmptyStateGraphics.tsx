@@ -97,7 +97,7 @@ export function NoSearchResultsGraphic({ className }: GraphicProps) {
   );
 }
 
-/** A funnel. */
+/** Three lines, each shorter than the one above: a filter narrowing the list. */
 export function NoFilterResultsGraphic({ className }: GraphicProps) {
   return (
     <Slab
@@ -112,7 +112,9 @@ export function NoFilterResultsGraphic({ className }: GraphicProps) {
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d="M102 74h36l-14 17v12l-8 4V91Z" fill="none" strokeWidth="2" />
+          <path d="M102 76h36" fill="none" strokeWidth="2" />
+          <path d="M108 88h24" fill="none" strokeWidth="2" />
+          <path d="M114 100h12" fill="none" strokeWidth="2" />
         </g>
       )}
     />
