@@ -110,7 +110,7 @@ export const HashedColors: Story = {
  */
 export const Group: Story = {
   render: () => (
-    <Card className="w-fit gap-4">
+    <Card variant="filled" depth={1} className="w-fit gap-4 p-3">
       {(['sm', 'md', 'lg'] as const).map((size) => (
         <div key={size} className="flex items-center gap-3">
           <span className="w-8 font-mono text-xs text-ink-subtle">{size}</span>

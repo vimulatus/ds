@@ -115,7 +115,12 @@ function Aside({ children }: { children: ReactNode }) {
 
 /** A card in the aside. */
 function Section({ title, children }: { title: ReactNode; children: ReactNode }) {
-  return <Card title={title}>{children}</Card>;
+  return (
+    <Card variant="outlined" depth={1} className="gap-3 bg-surface p-3">
+      <span className="text-xs font-medium text-ink-muted">{title}</span>
+      {children}
+    </Card>
+  );
 }
 
 /**

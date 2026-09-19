@@ -1,34 +1,38 @@
-import { FileText } from '@phosphor-icons/react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { Card, type CardVariant } from '@/components/Card';
 
 /**
- * A surface that groups related content: a hairline edge, rounded-xl, no
- * shadow. It sits at depth 1; a card inside a card steps one shade lighter,
- * so nesting still reads without a heavier edge.
+ * An intrinsic-height frame for rich content. It composes the same Title,
+ * Description and Metadata slots as list rows, so a card and a row carry
+ * one hierarchy. Radius is `xl` (12px); the edge is a hairline.
  */
 const meta = {
   title: 'Primitives/Card',
   component: Card,
-  args: { title: 'Launch plan', depth: 1 },
-  argTypes: { depth: { control: 'select', options: [0, 1, 2, 3, 4] } },
+  args: { variant: 'outlined' },
+  argTypes: {
+    variant: { control: 'select', options: ['ghost', 'outlined', 'filled'] },
+    depth: { control: 'select', options: [0, 1, 2, 3, 4] },
+  },
   render: (args) => (
     <Card {...args} className="max-w-96">
-      <div className="flex items-center gap-2">
-        <FileText className="size-4 text-write" />
-        <span className="text-sm font-medium text-ink">Spring launch brief</span>
-        <span className="ml-auto text-xs text-ink-subtle">Edited 2 h ago</span>
-      </div>
-      <p className="text-sm text-ink-muted">
-        The rollout ships behind a flag on Monday. Support gets the help article on Friday.
-      </p>
-      <div className="flex items-center justify-between">
+      <Card.Header>
+        <Card.Title>Launch plan</Card.Title>
+        <Card.Metadata>
+          <span>Edited 2h ago</span>
+          <span>4 comments</span>
+        </Card.Metadata>
+      </Card.Header>
+      <Card.Body>
+        The rollout ships behind a flag on Monday. Support gets the new replies on Friday.
+      </Card.Body>
+      <Card.Footer>
         <span className="text-xs text-ink-subtle">Shared with 6 people</span>
         <Button variant="outlined" size="sm">
           Open
         </Button>
-      </div>
+      </Card.Footer>
     </Card>
   ),
 } satisfies Meta<typeof Card>;
@@ -38,32 +42,18 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {};
 
-/** Depth 0 to 4, each one shade lighter than the last. Depths 3 and 4 share the top shade. */
-export const Depth: Story = {
+/** `ghost` has no frame, `outlined` a muted edge, `filled` the layer surface. */
+export const Variants: Story = {
   render: () => (
-    <div className="grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-5">
-      {([0, 1, 2, 3, 4] as const).map((depth) => (
-        <Card key={depth} depth={depth} title={`depth ${depth}`}>
-          <div className="h-10" />
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+      {(['ghost', 'outlined', 'filled'] as CardVariant[]).map((variant) => (
+        <Card key={variant} variant={variant} depth={1}>
+          <Card.Header>
+            <Card.Title>{variant}</Card.Title>
+            <Card.Description>Same slots, a different frame.</Card.Description>
+          </Card.Header>
         </Card>
       ))}
     </div>
-  ),
-};
-
-/** A card inside a card: pass the next depth and the inner surface steps up a shade. */
-export const Nesting: Story = {
-  render: () => (
-    <Card title="Launch" className="max-w-md">
-      <Card depth={2} title="Checklist">
-        <ul className="flex flex-col gap-1 text-sm text-ink-muted">
-          <li>Draft the announcement</li>
-          <li>Record the demo</li>
-        </ul>
-        <Card depth={3} title="Blocked">
-          <p className="text-sm text-ink-muted">Waiting on the pricing page.</p>
-        </Card>
-      </Card>
-    </Card>
   ),
 };

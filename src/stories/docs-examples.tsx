@@ -113,9 +113,12 @@ export function DepthLadder() {
       <div className="rounded-xl border border-edge-muted bg-panel p-3">
         <span className="text-xs text-ink-subtle">bg-panel</span>
         <div className="mt-2">
-          <Card title="Depth 1">
+          <Card variant="filled" depth={1}>
+            <Card.Header>
+              <Card.Title>Depth 1</Card.Title>
+            </Card.Header>
             <Layer depth={2}>
-              <div className="rounded-lg border border-edge-muted bg-surface p-3 text-xs text-ink-muted">
+              <div className="m-3 mt-0 rounded-lg border border-edge-muted bg-surface p-3 text-xs text-ink-muted">
                 Depth 2: one shade nearer
               </div>
             </Layer>
