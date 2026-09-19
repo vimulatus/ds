@@ -88,21 +88,23 @@ function DialogDrawer(props: DialogProps) {
 
 /** Whether this dialog animates in: only when asked, and not when it takes over from another dialog. */
 function useAnimateOnOpen(open: boolean, animate: boolean | undefined) {
-  const [animateOnOpen, setAnimateOnOpen] = useState(false);
+  // Decided while rendering the open, so the first painted frame already carries the animation.
+  const [state, setState] = useState({ open: false, animate: false });
+  if (state.open !== open) {
+    const handoff = openDialogCount > 0 || performance.now() - lastAllDialogsClosedAt < DIALOG_HANDOFF_WINDOW_MS;
+    setState({ open, animate: open && !handoff && Boolean(animate) });
+  }
+
   useEffect(() => {
     if (!open) return;
-    const handoff = openDialogCount > 0 || performance.now() - lastAllDialogsClosedAt < DIALOG_HANDOFF_WINDOW_MS;
-    setAnimateOnOpen(!handoff && Boolean(animate));
     openDialogCount += 1;
     return () => {
-      setAnimateOnOpen(false);
       openDialogCount = Math.max(0, openDialogCount - 1);
       if (openDialogCount === 0) lastAllDialogsClosedAt = performance.now();
     };
-    // `animate` is read when the dialog opens, not tracked while it is open.
   }, [open]);
 
-  return animateOnOpen;
+  return state.animate;
 }
 
 function DesktopDialog(props: DialogProps) {
