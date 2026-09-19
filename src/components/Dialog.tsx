@@ -95,7 +95,14 @@ export function DialogBody({ className, children }: PartProps) {
   return <div className={cn('flex flex-col gap-3', className)}>{children}</div>;
 }
 
-/** The actions row, right-aligned: the dismissive action first, the commit last. */
+/**
+ * The actions row, right-aligned: the dismissive action first, the commit
+ * last. In touch mode its buttons grow to 40px for a thumb.
+ */
 export function DialogFooter({ className, children }: PartProps) {
-  return <div className={cn('flex justify-end gap-2', className)}>{children}</div>;
+  return (
+    <div className={cn('flex justify-end gap-2 touch:[&>*]:h-10 touch:[&>*]:px-4 touch:[&>*]:text-base', className)}>
+      {children}
+    </div>
+  );
 }
