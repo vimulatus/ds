@@ -173,8 +173,9 @@ function Block({
 }
 
 /**
- * Floats at the bottom once an edit differs from the saved resource. Save is
- * the page's one `cta` while it is up. Enter and Escape belong to the form:
+ * Floats at the bottom once an edit differs from the saved resource, and
+ * above the app shell's bottom bar on touch. Save is the page's one `cta`
+ * while it is up. Enter and Escape belong to the form:
  * pass the same handlers to `PropertyGrid`'s `onSave` and `onDiscard`.
  */
 function Changes({
@@ -193,7 +194,7 @@ function Changes({
     <div
       role="region"
       aria-label="Unsaved changes"
-      className="glass fixed bottom-4 left-1/2 z-action-menu flex -translate-x-1/2 items-center gap-3 rounded-xl border border-edge-muted bg-menu-glass py-2 pr-2 pl-4 text-sm touch:bottom-[max(1rem,env(safe-area-inset-bottom))]"
+      className="glass fixed bottom-4 left-1/2 z-action-menu flex -translate-x-1/2 items-center gap-3 rounded-xl border border-edge-muted bg-menu-glass py-2 pr-2 pl-4 text-sm touch:bottom-[max(calc(var(--bottom-nav-height,0px)+1rem),var(--safe-bottom))]"
     >
       <span className="whitespace-nowrap text-ink">
         {count} unsaved {count === 1 ? 'change' : 'changes'}

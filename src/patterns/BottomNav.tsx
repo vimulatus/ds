@@ -67,6 +67,7 @@ export function BottomNav({ items, activeId, onSelect, mark, footer }: BottomNav
   const rest = items.slice(TAB_COUNT);
   const moreActive = rest.some((item) => item.id === activeId);
 
+  // AppShell's --bottom-nav-height mirrors the tab height and this bottom padding.
   return (
     <nav aria-label="Main" className="flex shrink-0 bg-page px-2 pb-[max(--spacing(1),var(--safe-bottom))]">
       {tabs.map((item) => (
