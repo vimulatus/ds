@@ -135,7 +135,7 @@ export type CalloutContentProps = Omit<ComponentProps<'div'>, 'className'> & {
   portal?: boolean;
 };
 
-function PinnedContent({ variant = 'default', portal, className, children }: CalloutContentProps) {
+function PinnedContent({ variant = 'default', portal, className, children, ...rest }: CalloutContentProps) {
   const context = useContext(CalloutContext);
   const fallbacks =
     typeof context.flip === 'string' ? (context.flip.split(' ') as Placement[]) : undefined;
@@ -156,7 +156,7 @@ function PinnedContent({ variant = 'default', portal, className, children }: Cal
   });
 
   const positioner = (
-    <div ref={refs.setFloating} role="note" className={CONTENT_CLASS} style={floatingStyles}>
+    <div role="note" {...rest} ref={refs.setFloating} className={CONTENT_CLASS} style={floatingStyles}>
       <CalloutSurface variant={variant} className={className}>
         {children}
       </CalloutSurface>

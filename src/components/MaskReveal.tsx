@@ -2,7 +2,7 @@ import { Toggle } from '@base-ui/react/toggle';
 import { Eye, EyeSlash } from '@phosphor-icons/react';
 import { type ReactNode, useRef, useState } from 'react';
 import { cn } from '@/lib/cn';
-import { PinnedCallout } from './Callout';
+import { Callout } from './Callout';
 
 type Source =
   | {
@@ -124,9 +124,11 @@ export function MaskReveal({
         </span>
       </Toggle>
       {status === 'denied' && (
-        <PinnedCallout anchor={anchor} variant="danger" placement="bottom-start" role="alert">
-          {deniedMessage ?? `You don't have permission to view this ${label}.`}
-        </PinnedCallout>
+        <Callout pinned open anchorRef={anchor} placement="bottom-start">
+          <Callout.Content variant="danger" role="alert">
+            {deniedMessage ?? `You don't have permission to view this ${label}.`}
+          </Callout.Content>
+        </Callout>
       )}
     </>
   );
