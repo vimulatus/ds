@@ -17,7 +17,7 @@ type Story = StoryObj<typeof meta>;
 
 /**
  * `sm` is 24px and `md` is 32px. Pick one size for a row of controls and
- * their tops and bottoms match. In touch mode an `md` field or button is 40px tall.
+ * their tops and bottoms match. In touch mode an `md` field or button is 40px tall, and an `sm` button is 32px.
  */
 export const ControlHeights: Story = {
   render: () => (
