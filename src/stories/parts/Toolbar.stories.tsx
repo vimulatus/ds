@@ -2,7 +2,7 @@ import {
   ArrowClockwise,
   ArrowCounterClockwise,
   Copy,
-  LinkSimple,
+  Link,
   MagnifyingGlassMinus,
   MagnifyingGlassPlus,
   TextB,
@@ -15,74 +15,81 @@ import { useState } from 'react';
 import { Toolbar } from '@/components/Toolbar';
 
 /**
- * A floating bar of compact actions. It owns its frame (glass, a hairline,
- * rounded-xl), and its buttons are ghost `icon-sm` unless told otherwise.
- * Arrow keys move between them.
+ * A floating surface for compact actions. It owns its frame (`rounded-xl`,
+ * padding, border, surface and shadow) and sets the default size and variant
+ * for its `Toolbar.Button` children, so callers compose controls without
+ * restyling them. Arrow keys move between the buttons.
  *
- * - **Do** cluster related buttons in a `Group` and part distinct sets with
- *   a `Separator`.
- * - **Do** give every icon-only button a `label`: its name and tooltip.
- * - **Don't** restyle the frame at the call site.
+ * - **Do** cluster related controls with `Toolbar.Group` and separate distinct
+ *   action sets with `Toolbar.Divider`.
+ * - **Do** set shared button size and variant on the Toolbar root.
+ * - **Don't** recreate the toolbar's background, border, padding, or shadow
+ *   at the call site.
  */
 const meta = {
   title: 'Parts/Toolbar',
-  component: Toolbar.Root,
-} satisfies Meta<typeof Toolbar.Root>;
+  component: Toolbar,
+} satisfies Meta;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj;
 
+/** Group related buttons and separate distinct action sets with `Toolbar.Divider`. */
 export const Basic: Story = {
   render: () => (
-    <Toolbar.Root aria-label="Selection">
-      <Toolbar.Button label="Undo" shortcut="⌘Z">
-        <ArrowCounterClockwise />
-      </Toolbar.Button>
-      <Toolbar.Separator />
+    <Toolbar size="icon-sm">
+      <Toolbar.Group>
+        <Toolbar.Button label="Undo">
+          <ArrowCounterClockwise />
+        </Toolbar.Button>
+      </Toolbar.Group>
+      <Toolbar.Divider />
       <Toolbar.Group>
         <Toolbar.Button label="Copy">
           <Copy />
         </Toolbar.Button>
         <Toolbar.Button label="Copy link">
-          <LinkSimple />
+          <Link />
         </Toolbar.Button>
       </Toolbar.Group>
-      <Toolbar.Separator />
-      <Toolbar.Button label="Delete" className="text-failure-ink hover:text-failure-ink">
+      <Toolbar.Divider />
+      <Toolbar.Button label="Delete" className="text-failure-ink">
         <Trash />
       </Toolbar.Button>
-    </Toolbar.Root>
+    </Toolbar>
   ),
 };
 
-/** `md` buttons carry text beside icons. */
-export const WithText: Story = {
-  render: () => {
-    const [zoom, setZoom] = useState(100);
-    return (
-      <Toolbar.Root aria-label="Zoom">
-        <Toolbar.Button size="md" onClick={() => setZoom(100)}>
-          Fit to screen
+function ZoomToolbar() {
+  const [zoom, setZoom] = useState(100);
+  return (
+    <Toolbar size="md">
+      <Toolbar.Button onClick={() => setZoom(100)}>Fit to screen</Toolbar.Button>
+      <Toolbar.Divider />
+      <Toolbar.Group>
+        <Toolbar.Button size="icon-md" label="Zoom out" onClick={() => setZoom((value) => Math.max(25, value - 25))}>
+          <MagnifyingGlassMinus />
         </Toolbar.Button>
-        <Toolbar.Separator />
-        <Toolbar.Group>
-          <Toolbar.Button size="icon-md" label="Zoom out" onClick={() => setZoom((v) => Math.max(25, v - 25))}>
-            <MagnifyingGlassMinus />
-          </Toolbar.Button>
-          <span className="w-12 text-center text-sm text-ink tabular-nums">{zoom}%</span>
-          <Toolbar.Button size="icon-md" label="Zoom in" onClick={() => setZoom((v) => Math.min(200, v + 25))}>
-            <MagnifyingGlassPlus />
-          </Toolbar.Button>
-        </Toolbar.Group>
-      </Toolbar.Root>
-    );
-  },
+        <Toolbar.Button className="w-14 tabular-nums" onClick={() => setZoom(100)}>
+          {zoom}%
+        </Toolbar.Button>
+        <Toolbar.Button size="icon-md" label="Zoom in" onClick={() => setZoom((value) => Math.min(200, value + 25))}>
+          <MagnifyingGlassPlus />
+        </Toolbar.Button>
+      </Toolbar.Group>
+    </Toolbar>
+  );
+}
+
+/** The `md` size supports text actions and compact widgets alongside icon controls. */
+export const MediumWithText: Story = {
+  render: () => <ZoomToolbar />,
 };
 
-/** `vertical` stacks the buttons; separators turn to match. */
+/** `vertical` stacks the controls; dividers turn horizontal to match. */
 export const Vertical: Story = {
   render: () => (
-    <Toolbar.Root orientation="vertical" aria-label="Format">
+    <Toolbar size="icon-sm" orientation="vertical">
       <Toolbar.Group>
         <Toolbar.Button label="Bold">
           <TextB />
@@ -94,18 +101,18 @@ export const Vertical: Story = {
           <TextUnderline />
         </Toolbar.Button>
       </Toolbar.Group>
-      <Toolbar.Separator />
-      <Toolbar.Button label="Delete" className="text-failure-ink hover:text-failure-ink">
+      <Toolbar.Divider />
+      <Toolbar.Button label="Delete" className="text-failure-ink">
         <Trash />
       </Toolbar.Button>
-    </Toolbar.Root>
+    </Toolbar>
   ),
 };
 
-/** `Spacer` pushes what follows to the far end. */
+/** `Toolbar.Spacer` pushes the controls after it to the far end. */
 export const WithSpacer: Story = {
   render: () => (
-    <Toolbar.Root className="w-80" aria-label="History">
+    <Toolbar size="icon-sm" className="w-80">
       <Toolbar.Group>
         <Toolbar.Button label="Undo">
           <ArrowCounterClockwise />
@@ -118,6 +125,6 @@ export const WithSpacer: Story = {
       <Toolbar.Button size="sm" variant="outlined">
         Done
       </Toolbar.Button>
-    </Toolbar.Root>
+    </Toolbar>
   ),
 };

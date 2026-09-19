@@ -1,24 +1,24 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TagDot } from '@/components/TagDot';
-import { HUES, hashHue } from '@/lib/hue';
+import { getHashedPaletteColor, PALETTE_COLORS } from '@/lib/hue';
 
 const TAGS = ['design', 'engineering', 'launch', 'research', 'support'];
 
 /**
- * A colored dot before a label. Without a `hue` it falls back to
- * `ink-extra-muted`.
+ * A circular color marker. Supply one `fill`, or `fills` for up to four pie
+ * slices. Repeated fills increase their share; distinct fills keep input
+ * order. With no fill it falls back to `ink-extra-muted`.
  *
- * - **Do** pass the label as children, so color is not the only thing that
- *   tells two tags apart.
- * - **Do** hash the hue from the tag's name when the tag has no color of its own.
+ * - **Do** pair the dot with a text label so color is not the only identifier.
+ * - **Do** put the parent tag's fill first when summarizing a tag branch.
  */
 const meta = {
   title: 'Parts/TagDot',
   component: TagDot,
-  args: { hue: 'blue', size: 'md', children: 'design' },
+  args: { size: 'md', fill: 'var(--color-blue)' },
   argTypes: {
-    hue: { control: 'select', options: [undefined, ...HUES] },
     size: { control: 'select', options: ['sm', 'md'] },
+    fill: { control: 'text' },
   },
 } satisfies Meta<typeof TagDot>;
 
@@ -27,38 +27,56 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {};
 
-/** `sm` is 8px, `md` 10px. Without children it renders the dot alone. */
-export const Sizes: Story = {
+/** One fill, two, and four. Past four distinct fills, the extras drop. */
+export const Fills: Story = {
   render: () => (
     <div className="flex items-center gap-4">
-      <TagDot hue="blue" size="sm" />
-      <TagDot hue="blue" />
       <TagDot />
+      <TagDot fill="var(--color-blue)" />
+      <TagDot fills={['var(--color-blue)', 'var(--color-yellow)']} />
+      <TagDot fills={['var(--color-blue)', 'var(--color-blue)', 'var(--color-blue)', 'var(--color-yellow)']} />
+      <TagDot fills={['var(--color-blue)', 'var(--color-yellow)', 'var(--color-red)', 'var(--color-green)']} />
     </div>
   ),
 };
 
-/** The 12 hues, in the order the hash indexes into. */
-export const Hues: Story = {
+/** sm: 8px, md (default): 10px. */
+export const Sizes: Story = {
   render: () => (
-    <div className="grid grid-cols-3 gap-x-6 gap-y-2 sm:grid-cols-4">
-      {HUES.map((hue) => (
-        <TagDot key={hue} hue={hue}>
-          <span className="font-mono text-xs text-ink-muted">{hue}</span>
-        </TagDot>
+    <div className="flex items-center gap-4">
+      {(['sm', 'md'] as const).map((size) => (
+        <TagDot key={size} size={size} fill="var(--color-blue)" />
       ))}
     </div>
   ),
 };
 
-/** Tags as a list shows them, each colored from its name. */
+/** The twelve palette colors, in the stable order the hash indexes into. */
+export const Palette: Story = {
+  render: () => (
+    <div className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-4">
+      {PALETTE_COLORS.map((color) => (
+        <div key={color} className="flex items-center gap-2">
+          <TagDot fill={`var(--color-${color})`} />
+          <span className="font-mono text-xs text-ink-muted">{color}</span>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+/**
+ * With a label, as tags render in lists. `getHashedPaletteColor` picks each
+ * tag's color from its name, so it stays stable without being stored.
+ */
 export const WithLabel: Story = {
   render: () => (
     <div className="flex flex-col gap-1.5">
       {TAGS.map((tag) => (
-        <TagDot key={tag} hue={hashHue(tag)}>
+        <div key={tag} className="flex items-center gap-2 text-sm text-ink">
+          <TagDot fill={`var(--color-${getHashedPaletteColor(tag)})`} />
           {tag}
-        </TagDot>
+        </div>
       ))}
     </div>
   ),
