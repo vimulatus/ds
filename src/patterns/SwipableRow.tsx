@@ -4,18 +4,20 @@ import { useTouch } from '@/lib/touch';
 
 export type SwipeTone = 'accent' | 'success' | 'failure' | 'warning' | 'neutral';
 
-/** What the swipe paints behind the row. `neutral` is the quiet grey, a step darker on the leading side. */
-const TONE: Record<Exclude<SwipeTone, 'neutral'>, string> = {
-  accent: 'bg-accent',
-  success: 'bg-success',
-  failure: 'bg-failure',
-  warning: 'bg-warning',
+/**
+ * Each action is the tone's tint with its ink, so a swipe reads without shouting over the list.
+ * Light inks are too bright to read on their tint, so `LIGHT_INK` darkens them toward `ink`.
+ */
+const TONE: Record<SwipeTone, string> = {
+  accent: 'bg-accent-bg text-accent-ink',
+  success: 'bg-success-bg text-success-ink',
+  failure: 'bg-failure-bg text-failure-ink',
+  warning: 'bg-warning-bg text-warning-ink',
+  neutral: 'bg-edge-muted text-ink-muted',
 };
-const toneClass = (tone: SwipeTone, side: 'leading' | 'trailing') =>
-  tone === 'neutral' ? (side === 'leading' ? 'bg-edge' : 'bg-edge-muted') : TONE[tone];
+const LIGHT_INK = 'light-mode:[&>*]:text-[color-mix(in_oklab,currentColor_55%,var(--color-ink))]';
 
 export type SwipeAction = {
-  /** The accessible name. The action shows its icon alone. */
   label: string;
   icon: ReactNode;
   tone?: SwipeTone;
@@ -40,14 +42,12 @@ const SETTLE_MS = 250;
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
- * Swipe actions for a row on touch. The swipe paints the side it opens in
- * the action's color, quiet grey by default, and each action shows its icon
- * alone, growing from half size once letting go would act. Swipe left to reveal the trailing
- * actions; let go past half their width and they stay open, swipe past half
- * the row and the first one commits. Swipe right past a third of the row to
- * commit the leading action. A short drag springs back. A vertical drag
- * scrolls the list as usual. Off touch it renders the row alone: the row's
- * menu carries the same actions.
+ * Swipe actions for a row on touch, each a tinted icon over its label. Swipe
+ * left to reveal the trailing actions; let go past half their width and they
+ * stay open, swipe past half the row and the first one commits. Swipe right
+ * past a third of the row to commit the leading action. A short drag springs
+ * back. A vertical drag scrolls the list as usual. Off touch it renders the
+ * row alone: the row's menu carries the same actions.
  */
 export function SwipableRow({ children, trailing = [], leading, className }: SwipableRowProps) {
   const touch = useTouch();
@@ -114,10 +114,7 @@ export function SwipableRow({ children, trailing = [], leading, className }: Swi
     if (state?.axis === 'x') release();
   };
 
-  const side = offset < 0 ? 'trailing' : 'leading';
   const behind = offset < 0 ? trailing : leading ? [leading] : [];
-  // The icons grow from half size once letting go would do something: keep the actions open, or commit.
-  const past = offset < 0 ? armedLeft || -offset > revealWidth / 2 : armedRight;
 
   return (
     <div
@@ -144,19 +141,15 @@ export function SwipableRow({ children, trailing = [], leading, className }: Swi
                   tabIndex={-1}
                   onClick={() => run(action)}
                   className={cn(
-                    'flex min-w-0 basis-0 items-center justify-center overflow-hidden transition-[flex-grow] duration-200 ease-out',
-                    toneClass(action.tone ?? 'neutral', side),
-                    armed ? 'grow-[99]' : 'grow'
+                    'flex min-w-0 flex-col items-center justify-center gap-1 overflow-hidden text-xs font-medium transition-[flex-grow] duration-200 ease-out [&_svg]:size-6',
+                    TONE[action.tone ?? 'neutral'],
+                    LIGHT_INK,
+                    armed ? 'grow-[99]' : 'grow',
+                    'basis-0'
                   )}
                 >
-                  <span
-                    className={cn(
-                      'flex text-panel [&_svg]:size-8 transition-transform duration-300 ease-in-out',
-                      past ? 'scale-100' : 'scale-50'
-                    )}
-                  >
-                    {action.icon}
-                  </span>
+                  {action.icon}
+                  <span className="max-w-full truncate">{action.label}</span>
                 </button>
               );
             })}
