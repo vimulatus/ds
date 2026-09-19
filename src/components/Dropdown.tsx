@@ -6,6 +6,8 @@ import {
   type ReactNode,
   useCallback,
   useContext,
+  useEffect,
+  useRef,
   useState,
 } from 'react';
 import { cn } from '@/lib/cn';
@@ -94,6 +96,22 @@ function onCtrlNavigation(event: React.KeyboardEvent) {
   event.target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
 }
 
+/**
+ * A menu opened by pointer starts with its first item lit, as a keyboard
+ * open does. A tap-opened menu starts plain.
+ */
+function useHighlightFirstItem(popup: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    if (document.documentElement.dataset.touchDevice === 'true') return;
+    const frame = requestAnimationFrame(() => {
+      const el = popup.current;
+      if (!el || el.querySelector('[data-highlighted]')) return;
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [popup]);
+}
+
 function Popup({
   sub,
   depth = 2,
@@ -108,6 +126,8 @@ function Popup({
 }: DropdownContentProps & { sub?: boolean }) {
   const { placement, gutter, shift } = useContext(PositionContext);
   const { sentinel, container } = usePortalContainer(mount, portalScope);
+  const popupRef = useRef<HTMLDivElement>(null);
+  useHighlightFirstItem(popupRef);
   const position = sub ? { side: 'right' as const, align: 'start' as const, sideOffset: 2, alignOffset: -7 } : { ...fromPlacement(placement), sideOffset: gutter, alignOffset: shift };
   return (
     <>
@@ -118,6 +138,7 @@ function Popup({
           <Layer depth={depth}>
             <Base.Popup
               {...props}
+              ref={popupRef}
               data-surface=""
               style={surfaceStyle({ style: style as React.CSSProperties })}
               className={cn(SURFACE_CLASS, CONTENT_CLASS, className)}
@@ -154,6 +175,7 @@ export type DropdownGroupLabelProps = Classed<ComponentProps<typeof Base.GroupLa
 function DropdownGroupLabel({ className, ...props }: DropdownGroupLabelProps) {
   return (
     <Base.GroupLabel
+      render={<span />}
       {...props}
       className={cn('px-2 h-7 flex items-center text-xs text-ink-extra-muted', className)}
     />

@@ -292,16 +292,18 @@ function ActionButtons({ actions, mobile }: { actions: ToastAction[]; mobile?: b
   });
 }
 
+/** The close button. Its wrapper holds the row height the button sits in. */
 function CloseButton({ className }: { className?: string }) {
   return (
-    <Base.Close
-      className={className}
-      render={
-        <Button variant="ghost" size="icon-sm">
-          <X />
-        </Button>
-      }
-    />
+    <div className={className}>
+      <Base.Close
+        render={
+          <Button variant="ghost" size="icon-sm">
+            <X />
+          </Button>
+        }
+      />
+    </div>
   );
 }
 
