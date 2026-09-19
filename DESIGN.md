@@ -4,6 +4,26 @@ The rules live in Storybook. `src/stories/Principles.mdx` holds the design
 principles. `src/stories/Copy.mdx` holds the rules for copy. This file
 records the decisions for each pattern.
 
+## App shell
+
+`src/patterns/AppShell.tsx` is the window: one rail and one canvas on the
+page background.
+
+- **Desktop.** `SidebarRail` is a 56px column of glyphs on the left. The
+  canvas is a rounded `bg-panel` pane, 8px in from the page on the other
+  three sides, so a strip of page floats it off the rail.
+- **Phone.** On touch the same rail renders as `BottomNav`: a bar of tabs
+  under the canvas, built from the rail's `items`, so a screen defines its
+  navigation once. The canvas keeps its radius and floats 8px in on all four
+  sides, clear of the top safe area.
+- **Tabs.** The first four items, then More. Each tab is a glyph over a
+  short label, at least 44px. The active tab is `accent` with a filled
+  glyph; the rest are `ink-muted`. Unread is the rail's dot.
+- **More.** A `MobileDrawer` sheet: the workspace mark, the other items, then
+  the rail's footer. `RailButton` and `RailAccount` render there as rows.
+  More reads active when the active item lives in the sheet.
+- **Bar.** On the page colour, not glass. It clears the bottom safe area.
+
 ## Resource detail
 
 `src/patterns/ResourceDetail.tsx` shows one resource: a document, a task or a
@@ -42,7 +62,8 @@ properties. It draws no layout of its own.
   aside. There is no list of leads beside it; views of many leads belong to
   the list, not the detail. Below 1224px the properties move into the
   `Fold`, closed, with the owner, source and budget as its summary. On a
-  phone the canvas fills the screen.
+  phone the lead sits in the app shell's floating canvas, above the bottom
+  bar.
 - **Contact.** The masked number and the email sit under the name, and the
   number is a `MaskReveal`: the value is its own reveal control. The aside
   holds facts, not contact details. "Call" is an `accent` link that leads
