@@ -1,6 +1,8 @@
+import { FileText } from '@phosphor-icons/react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button } from '@/components/Button';
 import { Card, type CardVariant } from '@/components/Card';
+import { Item } from '@/components/Item';
 
 /**
  * An intrinsic-height frame for rich content. It composes the same Title,
@@ -18,13 +20,20 @@ const meta = {
   render: (args) => (
     <Card {...args} className="max-w-96">
       <Card.Header>
-        <Card.Title>Launch plan</Card.Title>
-        <Card.Metadata>
-          <span>Edited 2h ago</span>
-          <span>4 comments</span>
-        </Card.Metadata>
+        <Item className="p-0">
+          <Item.Media className="text-write">
+            <FileText />
+          </Item.Media>
+          <Item.Content>
+            <Card.Title>Launch plan</Card.Title>
+            <Card.Metadata>
+              <span>Edited 2h ago</span>
+              <span>4 comments</span>
+            </Card.Metadata>
+          </Item.Content>
+        </Item>
       </Card.Header>
-      <Card.Body>
+      <Card.Body className="text-ink-muted">
         The rollout ships behind a flag on Monday. Support gets the new replies on Friday.
       </Card.Body>
       <Card.Footer>

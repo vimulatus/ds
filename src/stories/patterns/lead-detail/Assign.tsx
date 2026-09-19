@@ -2,7 +2,6 @@ import { Check } from '@phosphor-icons/react';
 import { useState } from 'react';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
-import { Item } from '@/components/Item';
 import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from '@/components/Popover';
 import { PEOPLE, type Person, SOURCE_HUE, type Source } from './data';
 
@@ -45,18 +44,23 @@ export function AssignPopover({
           {PEOPLE.map((candidate) => {
             const current = candidate.name === person.name;
             return (
-              <Item
+              <button
                 key={candidate.name}
-                icon={<Avatar name={candidate.name} size="md" aria-hidden />}
-                label={<span className="text-ink">{candidate.name}</span>}
-                description={candidate.role}
-                meta={current ? <Check className="size-3.5 text-accent" /> : undefined}
+                type="button"
                 aria-current={current || undefined}
                 onClick={() => {
                   onAssign(candidate);
                   setOpen(false);
                 }}
-              />
+                className="flex items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-sm hover:bg-hover focus-visible:outline-2 focus-visible:outline-accent touch:min-h-11"
+              >
+                <Avatar name={candidate.name} size="md" aria-hidden />
+                <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                  <span className="text-ink">{candidate.name}</span>
+                  <span className="text-xs text-ink-subtle">{candidate.role}</span>
+                </span>
+                {current && <Check className="size-3.5 text-accent" />}
+              </button>
             );
           })}
         </div>

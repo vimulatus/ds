@@ -3,7 +3,6 @@ import { CaretRight, Plus, Prohibit, WhatsappLogo } from '@phosphor-icons/react'
 import { useState } from 'react';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
-import { Item } from '@/components/Item';
 import { Menu, MenuContent, MenuGroup, MenuItem, MenuLabel, MenuTrigger } from '@/components/Menu';
 import { cn } from '@/lib/cn';
 import { Property, PropertyGrid } from '@/patterns/PropertyGrid';
@@ -71,34 +70,25 @@ function ProjectRow({
   const fit = !closed && project.fit;
   return (
     <Collapsible.Root render={<li />} className="flex flex-col">
-      <Collapsible.Trigger
-        render={
-          <Item
-            icon={<CaretRight className="size-3! transition-transform in-data-panel-open:rotate-90" />}
-            label={
-              <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                <span className="font-medium text-ink">{project.name}</span>
-                <span className="text-xs text-ink-subtle">
-                  {project.locality} · from {project.from}
-                </span>
-              </span>
-            }
-            meta={
-              closed?.closed ? (
-                <Badge size="sm" hue="red">
-                  Not interested
-                  <span className="hidden @[560px]/article:inline">· {closed.closed.reason}</span>
-                </Badge>
-              ) : fit ? (
-                <Badge size="sm" hue="green" className="hidden @[560px]/article:inline-flex">
-                  {fit}
-                </Badge>
-              ) : undefined
-            }
-            className="-mx-2 w-auto py-2.5 touch:min-h-11"
-          />
-        }
-      />
+      <Collapsible.Trigger className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-2.5 text-left hover:bg-hover focus-visible:outline-2 focus-visible:outline-accent touch:min-h-11">
+        <CaretRight className="size-3 shrink-0 text-ink-subtle transition-transform in-data-panel-open:rotate-90" />
+        <span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <span className="text-sm font-medium text-ink">{project.name}</span>
+          <span className="text-xs text-ink-subtle">
+            {project.locality} · from {project.from}
+          </span>
+        </span>
+        {closed?.closed ? (
+          <Badge size="sm" hue="red">
+            Not interested
+            <span className="hidden @[560px]/article:inline">· {closed.closed.reason}</span>
+          </Badge>
+        ) : fit ? (
+          <Badge size="sm" hue="green" className="hidden @[560px]/article:inline-flex">
+            {fit}
+          </Badge>
+        ) : undefined}
+      </Collapsible.Trigger>
       <Collapsible.Panel className="flex flex-col gap-3 pt-1 pb-4 pl-6">
         {closed?.closed && (
           <TintRow tone="red" icon={<Prohibit />} label="Not interested">
