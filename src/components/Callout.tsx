@@ -2,6 +2,8 @@ import { Popover } from '@base-ui/react/popover';
 import {
   autoUpdate,
   flip as flipMiddleware,
+  hide,
+  limitShift,
   offset,
   type Placement,
   shift,
@@ -139,16 +141,20 @@ function PinnedContent({ variant = 'default', portal, className, children, ...re
   const context = useContext(CalloutContext);
   const fallbacks =
     typeof context.flip === 'string' ? (context.flip.split(' ') as Placement[]) : undefined;
-  const { refs, floatingStyles } = useFloating({
+  const { refs, floatingStyles, middlewareData } = useFloating({
     placement: context.placement,
     whileElementsMounted: autoUpdate,
     middleware: [
       offset(context.gutter),
       context.flip !== false &&
         flipMiddleware({ fallbackPlacements: fallbacks, padding: context.overflowPadding }),
-      shift({ padding: context.overflowPadding }),
+      // Shift only as far as the anchor reaches, so an anchor scrolled out of
+      // view takes its callout with it instead of leaving it floating.
+      shift({ padding: context.overflowPadding, limiter: limitShift() }),
+      hide(),
     ],
   });
+  const hidden = middlewareData.hide?.referenceHidden;
   const anchor = context.anchorRef;
   // A ref fills after render, so read it after every commit.
   useLayoutEffect(() => {
@@ -156,7 +162,13 @@ function PinnedContent({ variant = 'default', portal, className, children, ...re
   });
 
   const positioner = (
-    <div role="note" {...rest} ref={refs.setFloating} className={CONTENT_CLASS} style={floatingStyles}>
+    <div
+      role="note"
+      {...rest}
+      ref={refs.setFloating}
+      className={CONTENT_CLASS}
+      style={{ ...floatingStyles, visibility: hidden ? 'hidden' : undefined }}
+    >
       <CalloutSurface variant={variant} className={className}>
         {children}
       </CalloutSurface>
