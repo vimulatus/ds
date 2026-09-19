@@ -1,66 +1,85 @@
 import { Tabs as Base } from '@base-ui/react/tabs';
-import type { ComponentProps, ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { cn } from '@/lib/cn';
 
-export type Tab = { value: string; label: ReactNode; disabled?: boolean };
+export type TabItem = {
+  value: string;
+  label: string | (() => ReactNode);
+};
 
 export type TabsProps = {
-  list: Tab[];
+  list: TabItem[];
   value?: string;
   defaultValue?: string;
-  onValueChange?: (value: string) => void;
-  /** Tabs share the width equally. */
-  fullWidth?: boolean;
-  /** `TabsPanel`s, one per tab. Leave empty when the tabs filter content elsewhere. */
-  children?: ReactNode;
+  onChange?: (value: string) => void;
+  disabled?: boolean;
   className?: string;
+  itemClass?: string;
+  labelClass?: string;
+  fullWidth?: boolean;
+  'aria-label'?: string;
 };
 
 /**
- * Switches between views of one thing. A hairline runs under the row and
- * an underline slides to the active tab; labels step from `ink-subtle` to
- * `ink`. Arrow keys move between tabs.
+ * A borderless switcher. No track: a hairline pill with the `active` scrim
+ * slides behind the checked item. It renders no panels; show the content
+ * for `value` yourself.
  */
 export function Tabs({
   list,
   value,
   defaultValue,
-  onValueChange,
-  fullWidth,
-  children,
+  onChange,
+  disabled,
   className,
+  itemClass,
+  labelClass,
+  fullWidth,
+  'aria-label': ariaLabel,
 }: TabsProps) {
+  const [uncontrolled, setUncontrolled] = useState(defaultValue ?? list[0]?.value);
+  const current = value ?? uncontrolled;
+
   return (
     <Base.Root
-      value={value}
-      defaultValue={defaultValue ?? list[0]?.value}
-      onValueChange={(next) => onValueChange?.(String(next))}
-      className={cn('flex flex-col', className)}
+      value={current}
+      onValueChange={(next) => {
+        setUncontrolled(String(next));
+        onChange?.(String(next));
+      }}
+      className="contents"
     >
-      <Base.List className="relative flex items-center gap-1 border-b border-edge-muted">
-        {list.map((tab) => (
+      <Base.List
+        activateOnFocus
+        aria-label={ariaLabel}
+        className={cn('relative inline-flex h-8 items-center', fullWidth && 'flex w-full', className)}
+      >
+        <Base.Indicator className="pointer-events-none absolute top-0 left-0 z-0 h-(--active-tab-height) w-(--active-tab-width) [transform:translateX(var(--active-tab-left))] rounded-xl border border-edge-muted bg-active transition-[transform,width,height] duration-50" />
+        {list.map((item) => (
           <Base.Tab
-            key={tab.value}
-            value={tab.value}
-            disabled={tab.disabled}
+            key={item.value}
+            value={item.value}
+            disabled={disabled}
             className={cn(
-              'flex h-8 select-none items-center justify-center whitespace-nowrap rounded-md px-2 text-sm font-medium text-ink-subtle outline-none transition-colors',
-              'hover:text-ink focus-visible:focus-ring data-active:text-ink',
-              'data-disabled:pointer-events-none data-disabled:text-ink-disabled',
-              fullWidth && 'flex-1'
+              'relative z-1 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent/20',
+              fullWidth && 'flex-1',
+              itemClass
             )}
           >
-            {tab.label}
+            <span
+              data-checked={item.value === current ? '' : undefined}
+              className={cn(
+                'flex h-8 items-center px-4 text-xs font-medium rounded-full select-none',
+                'text-ink-extra-muted hover:text-ink data-checked:text-ink',
+                fullWidth && 'w-full justify-center',
+                labelClass
+              )}
+            >
+              {typeof item.label === 'function' ? item.label() : item.label}
+            </span>
           </Base.Tab>
         ))}
-        <Base.Indicator className="absolute -bottom-px left-0 h-0.5 w-(--active-tab-width) translate-x-(--active-tab-left) rounded-full bg-ink transition-[translate,width] duration-200 ease-out" />
       </Base.List>
-      {children}
     </Base.Root>
   );
-}
-
-/** The content of one tab. */
-export function TabsPanel({ className, ...props }: Omit<ComponentProps<typeof Base.Panel>, 'className'> & { className?: string }) {
-  return <Base.Panel {...props} className={cn('pt-3 outline-none focus-visible:focus-ring', className)} />;
 }

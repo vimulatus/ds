@@ -1,7 +1,7 @@
 import { type FormEvent, useState } from 'react';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
-import { Tabs, TabsPanel } from '@/components/Tabs';
+import { Tabs } from '@/components/Tabs';
 import { Timeline, TimelineEvent } from '@/components/Timeline';
 import type { FollowUp, Moment, Note } from './data';
 import { FollowUpList } from './FollowUp';
@@ -85,27 +85,23 @@ export function Activity({
   onNote: (content: string) => void;
 }) {
   const open = followUps.filter((followUp) => followUp.state !== 'done').length;
+  const [tab, setTab] = useState('timeline');
   return (
-    <section aria-label="Activity">
+    <section className="flex flex-col gap-4" aria-label="Activity">
       <Tabs
         list={[
           { value: 'timeline', label: 'Timeline' },
           { value: 'notes', label: `Notes · ${notes.length}` },
           { value: 'followups', label: `Follow-ups · ${open}` },
         ]}
-      >
-        <TabsPanel value="timeline" className="flex flex-col gap-4 pt-4">
-          <NoteComposer onSave={onNote} />
-          <MomentList moments={moments} />
-        </TabsPanel>
-        <TabsPanel value="notes" className="flex flex-col gap-4 pt-4">
-          <NoteComposer onSave={onNote} />
-          <NoteList notes={notes} />
-        </TabsPanel>
-        <TabsPanel value="followups" className="pt-4">
-          <FollowUpList followUps={followUps} />
-        </TabsPanel>
-      </Tabs>
+        value={tab}
+        onChange={setTab}
+        className="-mx-4"
+      />
+      {tab !== 'followups' && <NoteComposer onSave={onNote} />}
+      {tab === 'timeline' && <MomentList moments={moments} />}
+      {tab === 'notes' && <NoteList notes={notes} />}
+      {tab === 'followups' && <FollowUpList followUps={followUps} />}
     </section>
   );
 }
