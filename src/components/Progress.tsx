@@ -81,7 +81,7 @@ export function ProgressBar({ value, label, showValue, className }: ProgressBarP
       {label && <Base.Label className="text-xs text-ink-muted">{label}</Base.Label>}
       {showValue && <Base.Value className="col-start-2 text-xs text-ink-subtle tabular-nums" />}
       <Base.Track className="col-span-2 h-1 overflow-hidden rounded-full bg-edge-muted">
-        <Base.Indicator className="rounded-full bg-accent transition-[width] duration-500 ease-out data-indeterminate:w-1/3 data-indeterminate:animate-pulse" />
+        <Base.Indicator className="h-full rounded-full bg-accent transition-[width] duration-500 ease-out data-indeterminate:w-1/3 data-indeterminate:animate-pulse" />
       </Base.Track>
     </Base.Root>
   );

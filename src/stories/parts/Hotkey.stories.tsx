@@ -40,17 +40,19 @@ export const Keys: Story = {
 export const Inline: Story = {
   render: () => (
     <div className="flex w-64 flex-col gap-0.5 rounded-lg border border-edge-muted p-1">
-      {[
-        ['New document', 'mod+n'],
-        ['Search', 'mod+k'],
-        ['Close', 'escape'],
-      ].map(([label, shortcut]) => (
+      {(
+        [
+          ['New document', 'mod+n'],
+          ['Search', 'mod+k'],
+          ['Close', 'escape'],
+        ] as const
+      ).map(([label, shortcut]) => (
         <div
           key={label}
           className="flex items-center justify-between rounded-md px-2 py-1 text-sm text-ink hover:bg-hover"
         >
           {label}
-          <Hotkey variant="inline" shortcut={shortcut!} />
+          <Hotkey variant="inline" shortcut={shortcut} />
         </div>
       ))}
     </div>

@@ -19,7 +19,8 @@ export function TagDot({ hue, size = 'md', className, children, ...props }: TagD
       className={cn(
         'shrink-0 rounded-full',
         size === 'sm' ? 'size-2' : 'size-2.5',
-        hue ? HUE_CLASSES[hue].fill : 'bg-ink-extra-muted'
+        hue ? HUE_CLASSES[hue].fill : 'bg-ink-extra-muted',
+        children == null && className
       )}
     />
   );

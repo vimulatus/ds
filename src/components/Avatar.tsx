@@ -44,6 +44,8 @@ export type AvatarProps = Omit<ComponentProps<typeof Base.Root>, 'className'> & 
 export function Avatar({ name, src, size = 'md', shape = 'circle', className, ...props }: AvatarProps) {
   return (
     <Base.Root
+      role="img"
+      aria-label={name}
       {...props}
       className={cn(
         'relative inline-flex shrink-0 select-none overflow-hidden bg-surface align-middle',
@@ -53,6 +55,7 @@ export function Avatar({ name, src, size = 'md', shape = 'circle', className, ..
       )}
     >
       <Base.Fallback
+        aria-hidden
         className={cn(
           'absolute inset-0 flex items-center justify-center font-medium leading-none',
           HUE_CLASSES[hashHue(name)].tint
@@ -63,7 +66,7 @@ export function Avatar({ name, src, size = 'md', shape = 'circle', className, ..
       {src && (
         <Base.Image
           src={src}
-          alt={name}
+          alt=""
           className="absolute inset-0 size-full object-cover data-error:invisible data-loading:invisible"
         />
       )}
