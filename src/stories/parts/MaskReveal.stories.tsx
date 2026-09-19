@@ -54,5 +54,44 @@ export const Controlled: Story = {
   },
 };
 
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * The value comes from the server on reveal. `onReveal` resolves it; the
+ * reveal is fetched once, then a click toggles it like any other.
+ */
+export const Fetched: Story = {
+  args: { value: undefined },
+  render: () => (
+    <MaskReveal
+      masked="+1 415 ••• ••82"
+      label="phone number"
+      onReveal={async () => {
+        await wait(600);
+        return '+1 415 555 0182';
+      }}
+    />
+  ),
+};
+
+/**
+ * The viewer may not see the value. `onReveal` returns `null` (or throws),
+ * the value stays masked, and a danger callout says why. It clears when
+ * focus leaves the control.
+ */
+export const Denied: Story = {
+  args: { value: undefined },
+  render: () => (
+    <MaskReveal
+      masked="+1 415 ••• ••82"
+      label="phone number"
+      onReveal={async () => {
+        await wait(600);
+        return null;
+      }}
+    />
+  ),
+};
+
 /** On a phone a tap toggles the value; no eye, no blur. */
 export const Phone: Story = { ...PHONE, render: InContext.render };
