@@ -8,11 +8,11 @@ detail pattern.
 
 A Storybook of Vasu's visual language, built on Base UI, that he studies and reuses in his own projects.
 
-**Stage:** new. A clean-room rebuild of the earlier Solid prototype (`macro-ds`) in React and Base UI. Nothing consumes it yet.
+**Stage:** new. A clean-room rebuild of an earlier Solid prototype, in React and Base UI. Nothing consumes it yet.
 
 - **Users** — ? Vasu, as a reference while he designs his own projects. His shadcn/Radix system in `~/Documents/projects/design-system` is separate.
 - **Works when** — ? every story renders in both themes and at iPhone 14 where it has a phone form, and a pattern story composes the components instead of redrawing them
-- **Non-goals** — code from the Macro app or its brand: the look was only inspiration, so no file is ported or transliterated from `macro-ds/src/ui`, `src/patterns` or `tokens.css`. Splits and a second per-view sidebar. Email and channel rows. A published package: local only, no remote. The touch press shimmer.
+- **Non-goals** — code or branding from the product that inspired the look: write every component fresh, never port or transliterate. Splits and a second per-view sidebar. Email and channel rows. A published package: local only, no remote. The touch press shimmer.
 
 ## Ship
 
@@ -26,8 +26,10 @@ A Storybook of Vasu's visual language, built on Base UI, that he studies and reu
 src/styles/     palette.css (raw colors) -> themes.css (roles per theme) -> tokens.css (Tailwind @theme, layers, glass, motion, touch)
 src/lib/        cn (clsx + tailwind-merge), touch (data-touch, useTouch)
 src/components/ one file per component. Base UI parts styled with Tailwind, or plain elements
-src/patterns/   compositions of components: ResourceDetail, PropertyGrid, shell, lists
+src/patterns/   compositions of components: ResourceDetail, PropertyGrid, AppShell (SidebarRail, Canvas),
+                EntityList, ListEntity, EntityIcon, SwipableRow
 src/stories/    one folder per Storybook section; a pattern story composes src/patterns
+                (patterns/lead-detail/ is the lead's domain, composed on ResourceDetail)
 ```
 
 ## Conventions
@@ -41,3 +43,4 @@ src/stories/    one folder per Storybook section; a pattern story composes src/p
 - `touch:` and `not-touch:` variants style touch mode; `useTouch()` reads it in React.
 - Icons are `@phosphor-icons/react`. A component sizes them with `[&_svg]:size-*`.
 - A story file opens with a doc comment that says what the component is for.
+- A detail page composes `ResourceDetail` and `PropertyGrid`; extend a part with a prop or slot rather than redrawing the layout.

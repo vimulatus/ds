@@ -24,6 +24,7 @@ import { AppShell } from '@/patterns/AppShell';
 import { ResourceDetail } from '@/patterns/ResourceDetail';
 import { RailAccount, RailButton, type RailItem, SidebarRail } from '@/patterns/SidebarRail';
 import { PHONE } from '../phone';
+import { LeadDetail } from './lead-detail/LeadDetail';
 
 /**
  * The window: the sidebar rail, then the canvas, both on the page
@@ -48,7 +49,7 @@ const ITEMS: RailItem[] = [
   { id: 'tasks', label: 'Tasks', icon: ListChecks, hotkey: 'G T', unread: true },
   { id: 'calendar', label: 'Calendar', icon: CalendarBlank, hotkey: 'G R' },
   { id: 'agents', label: 'Agents', icon: Sparkle, hotkey: 'G A' },
-  { id: 'customers', label: 'Customers', icon: Buildings, hotkey: 'G O' },
+  { id: 'leads', label: 'Leads', icon: Buildings, hotkey: 'G L' },
 ];
 
 function Rail({ initial }: { initial: string }) {
@@ -136,6 +137,15 @@ export const Default: Story = {
 };
 
 /** A list view in the canvas. The list stands empty here; the canvas holds whatever the view renders. */
+/** A lead in the canvas, with Leads active on the rail. */
+export const Lead: Story = {
+  render: () => (
+    <Shell view="leads">
+      <LeadDetail />
+    </Shell>
+  ),
+};
+
 export const List: Story = {
   render: () => (
     <Shell view="tasks">
