@@ -36,7 +36,7 @@ src/stories/    one folder per Storybook section; a pattern story composes src/p
 
 - Import by path: `@/components/Button`, `@/patterns/ResourceDetail`. No barrel file.
 - A component wraps Base UI when Base UI has the behavior. Base UI docs ship in `node_modules/@base-ui/react/docs`.
-- Colors come from role utilities only: `bg-page|panel|surface|hover|input|menu|dialog|tooltip`, `text-ink|ink-muted|ink-subtle|ink-extra-muted|ink-placeholder|ink-disabled`, `border-edge|edge-muted`, `accent`, and `<hue>`, `<hue>-ink`, `<hue>-bg` for the 12 hues plus `success`, `failure`, `warning`, `write`. Never a raw palette color.
+- Colors come from role utilities only: `bg-page|panel|surface|hover|input|menu|dialog|tooltip`, `text-ink|ink-muted|ink-subtle|ink-extra-muted|ink-placeholder|ink-disabled`, `border-edge|edge-muted`, `accent`, and `<hue>`, `<hue>-ink`, `<hue>-bg` for the 12 hues plus `success`, `failure`, `warning`, `write`. Never a raw palette color. The `--color-*` variables exist only inside tokens.css (`@theme inline`), so JSX uses the utility class, never `var(--color-…)`; a class built at runtime needs a literal class map such as `src/lib/hue.ts`.
 - A floating surface is `glass bg-menu-glass` with `border-edge-muted`, and animates with `motion-pop`, `motion-dialog` or `motion-fade`. Stacking uses `z-sticky|action-menu|popover|dialog|toast|tooltip`.
 - `Layer depth={n}` steps `bg-surface` one shade per depth. `Card` sets depth 1.
 - Variants are `ghost`, `outlined`, `accent`, `danger`, `cta`; sizes are `sm` (24px) and `md` (32px), with `icon-sm` and `icon-md`. A screen has at most one `cta`.
