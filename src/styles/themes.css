@@ -59,8 +59,8 @@
   --edge: var(--gray-910);
   --edge-muted: var(--gray-920);
 
-  --accent: var(--periwinkle-600);
-  --accent-contrast: var(--gray-160);
+  --accent: var(--periwinkle-480);
+  --accent-contrast: var(--gray-1000);
 
   --red: var(--red-500);
   --orange: var(--orange-500);
