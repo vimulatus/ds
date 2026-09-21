@@ -17,7 +17,7 @@ A Storybook of Vasu's visual language, built on Base UI, that he studies and reu
 ## Ship
 
 - **Run** — `bun run storybook`, port 6006. The toolbar "Theme" menu switches `dark` and `light` (`data-theme` on `<html>`). A phone or tablet viewport sets `data-touch-device="true"` on `<html>`.
-- **Gate** — `bun run typecheck` and `bun run build-storybook` pass. A change to `Chart` also passes `node checks/chart.check.mjs` against the running Storybook, a change to `RankedBars` passes `node checks/ranked-bars.check.mjs`, and a change to `Donut` passes `node checks/donut.check.mjs`. Look at a changed story in Dark and Light, and at iPhone 14 when it has a phone form.
+- **Gate** — `bun run typecheck` and `bun run build-storybook` pass. A change to `Chart` also passes `node checks/chart.check.mjs` against the running Storybook, a change to `RankedBars` passes `node checks/ranked-bars.check.mjs`, a change to `Donut` passes `node checks/donut.check.mjs`, and a change to a focus outline or to the layers in `src/styles` passes `node checks/focus-ring.check.mjs`. Look at a changed story in Dark and Light, and at iPhone 14 when it has a phone form.
 - **Ship** — none. Local only; land on `main`.
 
 ## Where things live

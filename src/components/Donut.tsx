@@ -204,7 +204,7 @@ export function Donut<Row>({
           <button
             type="button"
             aria-label={`${label}. Arrow keys move between slices. Enter pins a slice`}
-            className="chart-ring absolute inset-0 cursor-default rounded-full"
+            className="absolute inset-0 cursor-default rounded-full focus-visible:focus-ring"
             onKeyDown={onKeyDown}
             // Firefox clicks a button on Space's keyup, whatever keydown did.
             onKeyUp={(e) => {

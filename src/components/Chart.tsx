@@ -568,7 +568,7 @@ export function Chart<Row>({
                 data-chart-ui=""
                 aria-label={end === 'start' ? 'Range start' : 'Range end'}
                 aria-valuetext={formatX(shown[end])}
-                className="chart-handle absolute flex w-4 -translate-x-1/2 cursor-ew-resize items-center justify-center rounded"
+                className="absolute flex w-4 -translate-x-1/2 cursor-ew-resize items-center justify-center rounded focus-visible:focus-ring"
                 style={{ left: end === 'start' ? leftOf(shown.start) : rightOf(shown.end), top: p.top, height: p.g.height }}
                 onPointerDown={(e) => grabHandle(e, shown[end === 'start' ? 'end' : 'start'])}
                 onKeyDown={(e) => nudgeHandle(e, end)}

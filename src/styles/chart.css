@@ -42,15 +42,3 @@
   outline-offset: 1px;
   border-radius: 4px;
 }
-
-/* tokens.css clears every :focus-visible outline outside a layer, which the focus-ring utility cannot win back,
-   so the donut's ring and a range's handles get their ring here. */
-.chart-handle:focus {
-  outline: none;
-}
-
-.chart-ring:focus-visible,
-.chart-handle:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 1px;
-}

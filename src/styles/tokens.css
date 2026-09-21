@@ -1019,8 +1019,11 @@ a {
   will-change: transform, opacity;
   opacity: 0 !important;
 }
-:focus-visible {
-  outline: none;
+/* In the base layer, so the focus-ring and outline utilities outrank it. Outside a layer it beat them all. */
+@layer base {
+  :focus-visible {
+    outline: none;
+  }
 }
 
 input[type="time"]::-webkit-calendar-picker-indicator {

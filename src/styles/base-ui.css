@@ -37,7 +37,7 @@
   }
 }
 
-/* A keyboard focus ring. The tokens clear the default outline. */
+/* A keyboard focus ring. The tokens clear the default outline in the base layer, which a utility outranks. */
 @utility focus-ring {
   outline: 2px solid var(--color-accent);
   outline-offset: 1px;
