@@ -1,0 +1,56 @@
+/* Series colors for charts. In dark a series is the hue itself. In light the
+   hue's lightness is capped at 0.62, because lime and cyan at their light
+   values read at under 2:1 as a 2px line on a white card; capped, every
+   series keeps 3:1 and neighbours stay apart for red-green colour blindness. */
+:root,
+[data-theme='dark'] {
+  --chart-lightness-cap: 1;
+}
+
+[data-theme='light'] {
+  --chart-lightness-cap: 0.62;
+}
+
+:root {
+  --chart-blue: oklch(from var(--color-blue) min(l, var(--chart-lightness-cap)) c h);
+  --chart-orange: oklch(from var(--color-orange) min(l, var(--chart-lightness-cap)) c h);
+  --chart-violet: oklch(from var(--color-violet) min(l, var(--chart-lightness-cap)) c h);
+  --chart-lime: oklch(from var(--color-lime) min(l, var(--chart-lightness-cap)) c h);
+  --chart-pink: oklch(from var(--color-pink) min(l, var(--chart-lightness-cap)) c h);
+  --chart-cyan: oklch(from var(--color-cyan) min(l, var(--chart-lightness-cap)) c h);
+}
+
+/* The vendor paints its tooltip from these; the glass classes do the rest. */
+.chart {
+  --ts-chart-tooltip-background: var(--color-menu-glass);
+  --ts-chart-tooltip-color: var(--color-ink);
+  --ts-chart-tooltip-border: 0.5px solid var(--color-edge-muted);
+  --ts-chart-tooltip-border-radius: 12px;
+  --ts-chart-tooltip-shadow: none;
+  --ts-chart-tooltip-padding: 0;
+  --ts-chart-tooltip-max-width: none;
+  --ts-chart-tooltip-font: inherit;
+}
+
+/* The plot takes focus for its arrow keys. A click must not ring it; the keyboard gets the system's ring. */
+.chart-plot svg:focus {
+  outline: none;
+}
+
+.chart-plot svg:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
+
+/* tokens.css clears every :focus-visible outline outside a layer, which the focus-ring utility cannot win back,
+   so the donut's ring and a range's handles get their ring here. */
+.chart-handle:focus {
+  outline: none;
+}
+
+.chart-ring:focus-visible,
+.chart-handle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}

@@ -10,6 +10,7 @@
 @import "./themes.css";
 @import "./base-ui.css";
 @import "./grain.css";
+@import "./chart.css";
 
 @source "../**/*.{ts,tsx,mdx}";
 

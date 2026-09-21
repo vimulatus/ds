@@ -1,8 +1,8 @@
 # base-ds
 
 A React design system on Base UI, documented in Storybook: tokens, two themes,
-primitives, forms, menus, small parts, lists, the app shell and the resource
-detail pattern.
+primitives, forms, menus, small parts, lists, charts, the app shell and the
+resource detail pattern.
 
 ## Product
 
@@ -17,16 +17,17 @@ A Storybook of Vasu's visual language, built on Base UI, that he studies and reu
 ## Ship
 
 - **Run** — `bun run storybook`, port 6006. The toolbar "Theme" menu switches `dark` and `light` (`data-theme` on `<html>`). A phone or tablet viewport sets `data-touch-device="true"` on `<html>`.
-- **Gate** — `bun run typecheck` and `bun run build-storybook` pass. Look at a changed story in Dark and Light, and at iPhone 14 when it has a phone form.
+- **Gate** — `bun run typecheck` and `bun run build-storybook` pass. A change to `Chart` also passes `node checks/chart.check.mjs` against the running Storybook, a change to `RankedBars` passes `node checks/ranked-bars.check.mjs`, and a change to `Donut` passes `node checks/donut.check.mjs`. Look at a changed story in Dark and Light, and at iPhone 14 when it has a phone form.
 - **Ship** — none. Local only; land on `main`.
 
 ## Where things live
 
 ```
 src/styles/     palette.css (raw colors) -> themes.css (roles per theme) -> tokens.css (Tailwind @theme, layers, glass,
-                motion, touch), copied as is from the prototype; base-ui.css adds what Base UI needs
+                motion, touch), copied as is from the prototype; base-ui.css adds what Base UI needs, chart.css the series colors
 src/lib/        cn (clsx + tailwind-merge), touch (data-touch-device, useTouch), mobile (useMobile), hue,
-                variants (createVariants), placement
+                variants (createVariants), placement, chart (window math; ring.ts, the donut's maths; parts.tsx, the key, legend and
+                tooltip body charts share; tanstack*, the only files that import TanStack Charts)
 src/components/ one file per component. Base UI parts styled with Tailwind, or plain elements
 src/patterns/   compositions of components: ResourceDetail, PropertyGrid, AppShell (SidebarRail, BottomNav, Canvas),
                 EntityList, ListEntity, EntityIcon, SwipableRow
@@ -37,7 +38,7 @@ src/stories/    one folder per Storybook section; a pattern story composes src/p
 ## Conventions
 
 - Import by path: `@/components/Button`, `@/patterns/ResourceDetail`. No barrel file.
-- A component keeps the prototype's API and look, written fresh on Base UI. Vasu's own designs are the exceptions: MaskReveal, Hotkey, EmptyStatePanel and its drawings, RadioGroup, the EntityList and ListEntity row look, the app shell and the tinted swipe actions.
+- A component keeps the prototype's API and look, written fresh on Base UI. Vasu's own designs are the exceptions: MaskReveal, Hotkey, EmptyStatePanel and its drawings, RadioGroup, the EntityList and ListEntity row look, the app shell, the tinted swipe actions, Chart, RankedBars and Donut.
 - A component wraps Base UI when Base UI has the behavior. Base UI docs ship in `node_modules/@base-ui/react/docs`.
 - Colors come from role utilities only: `bg-page|panel|surface|hover|input|menu|dialog|tooltip`, `text-ink|ink-muted|ink-subtle|ink-extra-muted|ink-placeholder|ink-disabled`, `border-edge|edge-muted`, `accent`, and `<hue>`, `<hue>-ink`, `<hue>-bg` for the 12 hues plus `success`, `failure`, `warning`, `write`. Never a raw palette color. A class built at runtime needs a literal class map such as `src/lib/hue.ts`, because Tailwind only emits classes it finds in the source.
 - A floating surface is `glass bg-menu-glass`, and animates with `menu-open-animation`, `dialog-content-open-animation` or `dialog-overlay-open-animation`; a scrim is `scrim-glass`. Stacking uses `z-modal-overlay|modal|action-menu|tool-tip|toast-region`.
