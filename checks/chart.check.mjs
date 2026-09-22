@@ -220,4 +220,44 @@ for (const kind of ['area', 'bar']) {
   await c.page.close();
 }
 
+// ---- curves: a line bends between its rows, passes through each one, and never leaves the two rows it joins
+/** Reads every series path: whether it is all curve segments, how far it strays outside the rows it joins, and its samples. */
+const readPaths = (page) =>
+  page.$$eval('.chart-plot svg path[data-ts-key]', (paths) =>
+    paths.map((path) => {
+      const d = path.getAttribute('d');
+      const numbers = (text) => text.split(/[ ,]+/).filter(Boolean).map(Number);
+      const commands = [...d.matchAll(/([MLCZ])([^MLCZ]*)/g)].map(([, letter, rest]) => ({ letter, at: numbers(rest).slice(-2) }));
+      const anchors = commands.filter((c) => c.at.length === 2).map((c) => c.at);
+      const length = path.getTotalLength();
+      const samples = Array.from({ length: 801 }, (_, i) => path.getPointAtLength((i / 800) * length)).map((p) => [p.x, p.y]);
+      let stray = 0;
+      for (const [x, y] of samples) {
+        const i = anchors.findIndex((a, n) => n + 1 < anchors.length && x >= a[0] && x <= anchors[n + 1][0]);
+        if (i < 0) continue;
+        const low = Math.min(anchors[i][1], anchors[i + 1][1]), high = Math.max(anchors[i][1], anchors[i + 1][1]);
+        stray = Math.max(stray, low - y, y - high);
+      }
+      return { key: path.getAttribute('data-ts-key'), filled: path.getAttribute('fill') !== 'none', d, letters: [...new Set(commands.map((c) => c.letter))].join(''), stray, samples };
+    }),
+  );
+
+for (const story of ['charts-line--default', 'charts-area--default', 'charts-area--stacked']) {
+  const c = await open(story);
+  const paths = await readPaths(c.page);
+  const lines = paths.filter((path) => !path.filled);
+  check(`${story}: every line is drawn as curves`, lines.length === 3 && lines.every((path) => path.letters === 'MC'), lines.map((path) => path.letters));
+  check(`${story}: no curve leaves the two rows it joins`, lines.every((path) => path.stray < 0.5), lines.map((path) => Number(path.stray.toFixed(2))));
+  if (story === 'charts-area--default') {
+    const fills = paths.filter((path) => path.filled);
+    check('area: a fill follows its line along the top', fills.length === 3 && fills.every((fill, i) => fill.d.startsWith(lines[i].d)), fills.map((fill) => fill.d.slice(0, 24)));
+  }
+  await c.click(0.5);
+  const svg = await (await c.page.$('.chart-plot svg')).boundingBox();
+  const dots = await c.page.$$eval(DOT, (els) => els.map((el) => { const r = el.getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; }));
+  const off = dots.map(([x, y]) => Math.min(...lines.flatMap((path) => path.samples.map(([px, py]) => Math.hypot(px + svg.x - x, py + svg.y - y)))));
+  check(`${story}: a pinned dot sits on its line`, dots.length === 3 && off.every((distance) => distance < 1.5), off.map((distance) => Number(distance.toFixed(2))));
+  await c.page.close();
+}
+
 await finish();

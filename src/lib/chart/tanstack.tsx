@@ -1,7 +1,9 @@
 import { useMemo, useRef, type ReactNode } from 'react';
 import { scaleTime } from 'd3-scale';
+import { curveMonotoneX } from 'd3-shape';
 import { areaY, defineChart, lineY } from '@tanstack/charts';
 import { decorative } from '@tanstack/charts/mark/decorative';
+import { d3Curve } from '@tanstack/charts/d3/shape';
 import { Chart as VendorChart } from '@tanstack/charts/react/tooltip';
 import { scaleLinear } from '@tanstack/charts/scales/linear';
 import { tooltip } from '@tanstack/charts/tooltip';
@@ -76,6 +78,9 @@ const FADING_FILL = { top: 0.28, bottom: 0 };
 
 const MAX_ROW_TICKS = 14;
 
+/** The one curve lines and areas are drawn with. It passes through every row and never leaves the two rows it joins. */
+const CURVE = d3Curve(curveMonotoneX);
+
 const TOOLTIP_CLASS =
   'chart-tooltip glass bg-menu-glass border border-edge-muted rounded-xl text-sm text-ink z-tool-tip';
 
@@ -107,11 +112,11 @@ export function Plot(props: PlotProps) {
                 ...(mark === 'area'
                   ? series.map((s, i) =>
                       decorative(
-                        areaY(rows(s), { id: `${s.id} fill`, x: 'x', y1: 'floor', y2: 'top', fill: `url(#fill-${i})`, fillOpacity: 1 }),
+                        areaY(rows(s), { id: `${s.id} fill`, x: 'x', y1: 'floor', y2: 'top', fill: `url(#fill-${i})`, fillOpacity: 1, curve: CURVE }),
                       ),
                     )
                   : []),
-                ...series.map((s) => lineY(rows(s), { id: s.id, x: 'x', y: 'top', stroke: s.color, strokeWidth: 2 })),
+                ...series.map((s) => lineY(rows(s), { id: s.id, x: 'x', y: 'top', stroke: s.color, strokeWidth: 2, curve: CURVE })),
               ],
         gradients:
           mark === 'area'

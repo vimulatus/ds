@@ -156,6 +156,11 @@ chart ignores it.
 - **Key.** A legend, tooltip or readout key mirrors the mark: a short line
   for lines and side-by-side areas, a block for stacked areas and bars. A
   hidden series shows its key hollow.
+- **Curve.** Lines and area edges bend between rows with one curve, the
+  monotone cubic. It passes through every row and never rises above or dips
+  below the two rows it joins, so it draws no peak the data lacks and nothing
+  under zero. There is no curve option: a looser curve invents extremes, and
+  a trend is a series the consumer derives, not a way of drawing the line.
 - **Area.** Side by side, each series is a 2px line over a fill of its colour
   that fades from 28% at the line to nothing at the baseline. Past three
   series the fills turn to mud, so the chart draws lines only.
