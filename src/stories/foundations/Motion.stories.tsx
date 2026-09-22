@@ -23,10 +23,13 @@ const TOKENS = [
   ['accordion-down / up', '150ms', 'ease-out', 'disclosures'],
   ['collapse (JS)', '140ms', 'ease-out', 'sidebar sections'],
   ['motion-sheet', '400ms', 'cubic-bezier(0.32, 0.72, 0, 1)', 'phone sheet, follows the finger'],
+  ['chart enter', '420ms', 'cubic-bezier(0.16, 1, 0.3, 1)', 'chart marks growing in, once'],
+  ['chart change', '240ms', 'cubic-bezier(0.16, 1, 0.3, 1)', 'a chart gliding to a new view'],
+  ['chart toggle', '120ms', 'cubic-bezier(0.16, 1, 0.3, 1)', 'a series shown or hidden from a legend'],
   ['hover', '0ms', 'none', 'every hover state'],
 ];
 
-/** The whole motion vocabulary. Durations sit between 120 and 160ms; the phone sheet takes 400ms. */
+/** The whole motion vocabulary. Surfaces sit between 120 and 160ms; charts take 120 to 420ms, the phone sheet 400ms. */
 export const Tokens: Story = {
   render: () => (
     <table className="w-full max-w-3xl text-sm">

@@ -2,6 +2,7 @@ import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'reac
 import type { ChartMark } from '@/components/Chart';
 import { Legend, SeriesKey, TooltipBody, formatChange, seriesColor, type TooltipRow } from '@/lib/chart/parts';
 import type { PlotSeries } from '@/lib/chart/tanstack';
+import { CHART_MOTION_VARS } from '@/lib/chart/motion';
 import { RankedPlot, type RankedGeometry, type RankedLayout } from '@/lib/chart/tanstack-ranked';
 import { useOutsidePress } from '@/lib/chart/outside';
 import { cn } from '@/lib/cn';
@@ -71,6 +72,8 @@ export function RankedBars<Row>({
   const root = useRef<HTMLDivElement>(null);
   const wrapper = useRef<HTMLDivElement>(null);
   const geometry = useRef<RankedGeometry | null>(null);
+  // A row's total rides the end of its bars as they move, so it never sits over a shrinking segment.
+  const [ends, setEnds] = useState<ReadonlyMap<string, number>>(new Map());
   const pinnedAt = useRef(0);
 
   useOutsidePress(root, () => setPin(null));
@@ -85,17 +88,17 @@ export function RankedBars<Row>({
   const max = useMemo(() => axisMax(data, marks, stacked), [data, marks, stacked]);
 
   const { categories, series } = useMemo(() => {
-    const shown = marks.filter((mark) => !hidden.has(mark.label));
-    const rows = [...data].sort((a, b) => rowTotal(b, shown) - rowTotal(a, shown));
+    const rows = [...data].sort((a, b) => rowTotal(b, marks) - rowTotal(a, marks));
     const height = rows.map(() => 0);
+    // A hidden series stays, collapsed to zero, so its bars shrink away and grow back rather than fade.
     const series = entries
       .map((entry, i) => ({ ...entry, mark: marks[i] as ChartMark<Row> }))
-      .filter((entry) => !hidden.has(entry.id))
       .map(({ mark, ...entry }): PlotSeries => {
-        const values = rows.map(mark.value);
+        const collapsed = hidden.has(entry.id);
+        const values = rows.map(mark.value).map((value) => (collapsed && value !== null ? 0 : value));
         const floors = [...height];
         if (stacked) values.forEach((value, i) => (height[i] = (height[i] ?? 0) + (value ?? 0)));
-        return { ...entry, values, floors };
+        return { ...entry, values, floors, collapsed };
       });
     return { categories: rows.map(category), series };
   }, [data, category, marks, entries, hidden, stacked]);
@@ -123,6 +126,7 @@ export function RankedBars<Row>({
   const valuesAt = (name: string) => {
     const i = categories.indexOf(name);
     return series
+      .filter((s) => !s.collapsed)
       .map((s) => ({ series: s, value: s.values[i] ?? null }))
       .filter((r): r is { series: PlotSeries; value: number } => r.value !== null);
   };
@@ -187,6 +191,8 @@ export function RankedBars<Row>({
       chartWidth: box.width,
       chartHeight: box.height,
       toPixel: (value: number) => surface.left - box.left + g.toPixel(value),
+      /** A px on the plot surface, in the wrapper. */
+      atSurface: (px: number) => surface.left - box.left + px,
     };
   })();
 
@@ -247,7 +253,8 @@ export function RankedBars<Row>({
 
       <div
         ref={wrapper}
-        className="chart relative touch-pan-y select-none"
+        className="chart chart-gliding relative touch-pan-y select-none"
+        style={CHART_MOTION_VARS}
         onKeyDown={(e) => {
           if (e.key === 'Escape') setPin(null);
         }}
@@ -279,6 +286,7 @@ export function RankedBars<Row>({
           formatValueTick={formatValueTick}
           onFocus={setHover}
           onActivate={onActivate}
+          onEnds={setEnds}
           onGeometry={(next) => {
             const before = geometry.current;
             geometry.current = next;
@@ -313,7 +321,7 @@ export function RankedBars<Row>({
                   <span
                     data-slot="ranked-bars-total"
                     className="absolute text-xs tabular-nums text-ink-muted"
-                    style={{ left: plot.toPixel(totalAt(name)) + 8, top: rowTop(i) + layout.barTop + layout.barRoom / 2 - 8 }}
+                    style={{ left: (ends.has(name) ? plot.atSurface(ends.get(name) as number) : plot.toPixel(totalAt(name))) + 8, top: rowTop(i) + layout.barTop + layout.barRoom / 2 - 8 }}
                   >
                     {formatValue(totalAt(name))}
                   </span>
@@ -370,7 +378,7 @@ function useSize() {
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
-/** A row's rank: the sum of what is showing, stacked or not, so both forms of one chart list the rows in one order. */
+/** A row's rank: the sum of every series, hidden or not, so hiding one never moves a row and both forms list one order. */
 function rowTotal<Row>(row: Row, marks: readonly ChartMark<Row>[]) {
   return marks.reduce((sum, mark) => sum + (mark.value(row) ?? 0), 0);
 }
@@ -382,7 +390,7 @@ function barLength<Row>(row: Row, marks: readonly ChartMark<Row>[], stacked: boo
 
 /**
  * Where the value axis ends: the next 1, 2, 2.5 or 5 times a power of ten past the longest row, so five even ticks
- * land on round numbers. It counts every series, hidden or not, so hiding one re-ranks the rows and the scale holds still.
+ * land on round numbers. It counts every series, hidden or not, so the scale holds still when one is hidden.
  */
 function axisMax<Row>(data: readonly Row[], marks: readonly ChartMark<Row>[], stacked: boolean) {
   const max = Math.max(1, ...data.map((row) => barLength(row, marks, stacked)));

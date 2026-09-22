@@ -1,9 +1,10 @@
 import { useMemo, useRef } from 'react';
 import { barX, defineChart, group, type ChartFocusStrategy } from '@tanstack/charts';
-import { Chart as VendorChart } from '@tanstack/charts/react';
+import { Chart as VendorChart } from '@tanstack/charts/react/core';
 import { scaleBand } from '@tanstack/charts/scales/band';
 import { scaleLinear } from '@tanstack/charts/scales/linear';
 import type { PlotSeries } from './tanstack';
+import { RENDERER, chartMotion, useChartMount } from './tanstack-motion';
 
 /**
  * Horizontal bars on a band of rows, drawn with TanStack's own `barX`. The
@@ -46,6 +47,8 @@ export type RankedPlotProps = {
   layout: RankedLayout;
   formatValueTick: (value: number) => string;
   onGeometry: (geometry: RankedGeometry) => void;
+  /** Where each row's bars end right now, in px from the surface's left, on every frame while they move. */
+  onEnds: (ends: ReadonlyMap<string, number>) => void;
   onFocus: (category: string | null) => void;
   onActivate: (category: string) => void;
 };
@@ -80,11 +83,14 @@ export function RankedPlot(props: RankedPlotProps) {
   // The formatter changes identity every render; the definition reads the latest without rebuilding for it.
   const latest = useRef(props);
   latest.current = props;
+  // The surface publishes its points as they move; one subscription per surface follows them.
+  const followed = useRef<unknown>(null);
 
   const definition = useMemo(() => {
     const bars: Bar[] = categories.flatMap((category, i) => {
       const drawn = series.filter((s) => s.values[i] != null);
-      return drawn.map((s, k) => {
+      const top = drawn.filter((s) => !s.collapsed);
+      return drawn.map((s) => {
         const from = stacked ? (s.floors[i] ?? 0) : 0;
         return {
           category,
@@ -92,7 +98,7 @@ export function RankedPlot(props: RankedPlotProps) {
           color: s.color,
           from,
           to: from + (s.values[i] as number),
-          freeEnd: !stacked || k === drawn.length - 1,
+          freeEnd: !stacked || s === top[top.length - 1],
         };
       });
     });
@@ -110,6 +116,8 @@ export function RankedPlot(props: RankedPlotProps) {
       .paddingInner(GAP / (each + GAP));
 
     return defineChart({
+      // Every series entrance here is the full one: rows hold their place, so a returning series grows back in.
+      motion: chartMotion(() => true),
       focus: focusRows(categories, rowHeight),
       chart: ({ width }) => {
         // Segments are authored in values, so the surface between them is 2px turned into a value.
@@ -119,7 +127,7 @@ export function RankedPlot(props: RankedPlotProps) {
             barX(bars, {
               id: 'bars',
               y: 'category',
-              x1: (bar) => bar.from + (bar.from > 0 ? gap : 0),
+              x1: (bar) => bar.from + (bar.from > 0 && bar.to > bar.from ? gap : 0),
               x2: 'to',
               z: 'series',
               key: (bar) => `${bar.series}:${bar.category}`,
@@ -160,8 +168,12 @@ export function RankedPlot(props: RankedPlotProps) {
     });
   }, [categories, series, stacked, max, ticks, layout]);
 
+  const mount = useChartMount();
+  if (!mount.ready) return <div ref={mount.holder} style={{ height: TOP + categories.length * layout.rowHeight + AXIS_ROOM }} />;
+
   return (
     <VendorChart
+      renderer={RENDERER}
       definition={definition}
       height={TOP + categories.length * layout.rowHeight + AXIS_ROOM}
       ariaLabel={props.label}
@@ -170,11 +182,19 @@ export function RankedPlot(props: RankedPlotProps) {
       onSelect={(point) => {
         if (point) props.onActivate(point.yValue);
       }}
-      onRender={({ svg, scene }) => {
+      onRender={({ surface, scene }) => {
         const x = scene.scales.x;
         if (!x) return;
+        if (surface !== followed.current) {
+          followed.current = surface;
+          surface.subscribePresentationPoints?.((points) => {
+            const ends = new Map<string, number>();
+            for (const point of points) ends.set(point.yValue, Math.max(ends.get(point.yValue) ?? 0, point.x));
+            latest.current.onEnds(ends);
+          });
+        }
         props.onGeometry({
-          surface: svg,
+          surface: surface.element,
           left: scene.chart.x,
           top: scene.chart.y,
           width: scene.chart.width,

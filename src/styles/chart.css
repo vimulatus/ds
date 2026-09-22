@@ -42,3 +42,36 @@
   outline-offset: 1px;
   border-radius: 4px;
 }
+
+/* Overlays move in step with the marks. The chart sets the timings, and takes `chart-gliding` away while the hand
+   drives the window, so nothing trails a wheel or a pan. */
+@media (prefers-reduced-motion: no-preference) {
+  .chart-gliding .chart-glide {
+    transition-property: left, top, width;
+    transition-duration: var(--chart-change);
+    transition-timing-function: var(--chart-ease);
+  }
+
+  /* A line draws on from the left: a dash as long as the path (`pathLength` 1) slides into view. */
+  .chart-plot-drawing g.ts-chart__line path[pathLength] {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: chart-draw var(--chart-enter) var(--chart-ease) forwards;
+  }
+
+  .chart-enter {
+    animation: chart-enter var(--chart-name-fade) ease-out var(--chart-name-delay) both;
+  }
+}
+
+@keyframes chart-enter {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes chart-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}

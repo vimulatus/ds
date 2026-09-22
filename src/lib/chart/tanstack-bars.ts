@@ -11,6 +11,7 @@ import type { PlotSeries } from './tanstack';
 type BarDatum = { series: string; position: number; value: number };
 
 const FREE_END_RADIUS = [4, 4, 0, 0] as const;
+const SQUARE = [0, 0, 0, 0] as const;
 const GAP = 2;
 /** The share of a band the bars take, and where that stops growing, in px. */
 const GROUPED = { share: 0.8, max: 96 };
@@ -43,19 +44,21 @@ export function timeBars({
       const band = Math.abs(x.map(new Date(origin + step)) - x.map(new Date(origin)));
       const { share, max } = stacked ? STACKED : GROUPED;
       const group = Math.min(band * share, max);
-      const width = stacked ? group : Math.max(0, (group - GAP * (series.length - 1)) / series.length);
+      const showing = series.filter((s) => !s.collapsed);
+      const width = stacked ? group : Math.max(0, (group - GAP * (showing.length - 1)) / showing.length);
 
       const nodes: SceneNode[] = [];
       const points: ChartPoint<BarDatum, Date, number>[] = [];
       positions.forEach((position, i) => {
         const centre = x.map(new Date(position));
         const drawn = series.filter((s) => s.values[i] != null);
+        const top = drawn.filter((s) => !s.collapsed);
         drawn.forEach((s, k) => {
           const value = s.values[i] as number;
           const floor = s.floors[i] ?? 0;
-          const top = y.map(floor + value);
+          const end = y.map(floor + value);
           const surfaceBelow = stacked && k > 0 ? GAP : 0;
-          const freeEnd = !stacked || k === drawn.length - 1;
+          const freeEnd = !stacked || s === top[top.length - 1];
           const point: ChartPoint<BarDatum, Date, number> = {
             key: `${s.id}:${position}`,
             markId: 'bars',
@@ -66,24 +69,25 @@ export function timeBars({
             xValue: new Date(position),
             yValue: value,
             x: centre,
-            y: top,
+            y: end,
             color: s.color,
           };
-          points.push(point);
+          if (!s.collapsed) points.push(point);
           nodes.push({
             kind: 'rect',
             key: point.key,
-            x: stacked ? centre - width / 2 : centre - group / 2 + series.indexOf(s) * (width + GAP),
-            y: top,
-            width,
-            height: Math.max(0, y.map(floor) - top - surfaceBelow),
-            cornerRadii: freeEnd ? FREE_END_RADIUS : undefined,
+            x: stacked ? centre - width / 2 : s.collapsed ? centre : centre - group / 2 + showing.indexOf(s) * (width + GAP),
+            y: end,
+            width: s.collapsed && !stacked ? 0 : width,
+            height: Math.max(0, y.map(floor) - end - surfaceBelow),
+            // Always given: the motion renderer morphs a bar only between two shapes that both carry radii.
+            cornerRadii: freeEnd ? FREE_END_RADIUS : SQUARE,
             style: { fill: s.color },
-            interaction: { point, affinity: 'x' },
+            interaction: s.collapsed ? undefined : { point, affinity: 'x' },
           });
         });
       });
-      return { nodes, points };
+      return { nodes: [{ kind: 'group', key: 'bars', className: 'ts-chart__bar ts-chart__bar-y', children: nodes }], points };
     },
   }));
 }

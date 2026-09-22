@@ -1,7 +1,7 @@
 // Behaviour checks for the horizontal stories of Charts/Bar, run against a live Storybook.
 //   bun run storybook            (port 6006)
 //   node checks/ranked-bars.check.mjs
-import { browser, finish, origin, test } from './harness.mjs';
+import { browser, check, finish, origin, test } from './harness.mjs';
 
 // The stories' sample data, so the expected ranking is worked out here and not copied from the screen.
 const PUMPS = {
@@ -233,13 +233,12 @@ await on(GROUPED, 'the pinned panel keeps the right edge and stays off its row',
 
 // ---- legend
 for (const [story, score, label] of [[GROUPED, total, 'grouped'], [STACKED, total, 'stacked']]) {
-  await on(story, `${label}: hiding a series re-ranks the rows and clears the pin`, async (c) => {
+  await on(story, `${label}: hiding a series keeps the rows in place and clears the pin`, async (c) => {
     await c.click(0);
     const before = await c.order();
     await c.toggle('Diesel');
     const after = await c.order();
-    const want = ranked((row) => score(row, ['petrol', 'cng']));
-    return [after.join() === want.join() && after.join() !== before.join() && (await c.pinned()).length === 0, { before, after, pinned: await c.pinned() }];
+    return [after.join() === before.join() && before.join() === ranked(score).join() && (await c.pinned()).length === 0, { before, after, pinned: await c.pinned() }];
   });
 }
 await on(STACKED, 'hiding a series keeps the value axis', async (c) => {
@@ -319,5 +318,62 @@ await on(PHONE, 'phone: the name sits above its bar and the legend below the plo
   const bars = await c.page.$$eval('.chart svg path', (els) => els.map((el) => el.getBoundingClientRect()).filter((r) => r.height > 8 && r.height < 40).map((r) => r.top));
   return [legend.top >= plot.bottom && names[0].bottom <= Math.min(...bars) + 0.5 && names[0].left - plot.left < 2, { legend: legend.top, plot: plot.bottom, name: names[0], bar: Math.min(...bars) }];
 }, { phone: true });
+
+// ---- hiding a series: its bars shrink away and the row's total rides the shrinking end, never over a bar
+{
+  const context = await browser.newContext({ viewport: { width: 1000, height: 700 } });
+  const page = await context.newPage();
+  await page.addInitScript(() => {
+    window.frames_ = [];
+    const tick = () => {
+      const bars = [...document.querySelectorAll('.chart-plot svg g.ts-chart__bar-x [data-ts-key]')];
+      const totals = [...document.querySelectorAll('[data-slot=ranked-bars-total]')];
+      if (bars.length && totals.length) {
+        const row = totals[0].getBoundingClientRect();
+        const painted = bars.map((bar) => bar.getBoundingClientRect()).filter((box) => box.width > 0.5 && box.top < row.bottom && box.bottom > row.top);
+        window.frames_.push({ t: performance.now(), right: Math.max(...painted.map((box) => box.right)), label: row.left, opacity: Math.min(...bars.map((bar) => getComputedStyle(bar).opacity)) });
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+  await page.goto(`${origin}/iframe.html?id=${STACKED}&viewMode=story`);
+  await page.waitForSelector('.chart-plot svg g.ts-chart__bar-x [data-ts-key]');
+  await page.waitForTimeout(1500); await page.evaluate(() => window.frames_.splice(0));
+  await page.click('button[aria-pressed]:has-text("CNG")'); await page.waitForTimeout(700);
+  const frames = await page.evaluate(() => window.frames_.splice(0));
+  const gap = frames.map((frame) => Math.round(frame.label - frame.right));
+  check('stacked: hiding the top series shrinks its bars instead of fading them', frames.every((frame) => frame.opacity === 1) && new Set(frames.map((frame) => frame.right)).size > 4, [frames.length, new Set(frames.map((frame) => frame.right)).size]);
+  check("stacked: the row's total stays just past the bar's end throughout", gap.every((px) => px >= 4 && px <= 14), [Math.min(...gap), Math.max(...gap)]);
+  await context.close();
+}
+
+// ---- motion: bars grow from their base once, hiding a series glides to the new ranking, and reduced motion snaps
+for (const reducedMotion of ['no-preference', 'reduce']) {
+  const context = await browser.newContext({ viewport: { width: 1000, height: 700 }, reducedMotion });
+  const page = await context.newPage();
+  await page.addInitScript(() => {
+    window.frames_ = [];
+    const tick = () => {
+      const bars = [...document.querySelectorAll('.chart-plot svg g.ts-chart__bar-x [data-ts-key]')];
+      if (bars.length) window.frames_.push(bars.map((bar) => `${bar.getAttribute('d') ?? ''}${bar.getAttribute('y') ?? ''}${bar.getAttribute('width') ?? ''}`).join('|'));
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+  await page.goto(`${origin}/iframe.html?id=charts-bar--horizontal&viewMode=story`);
+  await page.waitForSelector('.chart-plot svg g.ts-chart__bar-x [data-ts-key]');
+  const shapes = async (ms) => { await page.waitForTimeout(ms); return new Set(await page.evaluate(() => window.frames_.splice(0))).size; };
+  const entrance = await shapes(1200);
+  const rest = await shapes(200);
+  await page.click('button[aria-pressed]:has-text("Diesel")');
+  const hide = await shapes(700);
+  const moving = reducedMotion === 'no-preference';
+  // Without motion the bars may still be laid out twice: once at the default width, once at the measured one.
+  check(`motion ${reducedMotion}: bars ${moving ? 'grow in' : 'are whole at once'}`, moving ? entrance > 4 : entrance <= 2, entrance);
+  check(`motion ${reducedMotion}: then rest`, rest === 1, rest);
+  check(`motion ${reducedMotion}: hiding a series ${moving ? 'glides' : 'lands at once'}`, moving ? hide > 4 : hide <= 2, hide);
+  await context.close();
+}
 
 await finish();

@@ -1,7 +1,7 @@
 // Behaviour checks for the Charts/Donut stories, run against a live Storybook.
 //   bun run storybook            (port 6006)
 //   node checks/donut.check.mjs
-import { browser, finish, origin, test } from './harness.mjs';
+import { browser, check, finish, origin, test } from './harness.mjs';
 
 // The stories' sample data, so the expected angles, totals and shares are worked out here and not copied from the screen.
 const MODES = [
@@ -403,5 +403,32 @@ await on(PHONE, 'phone: a tap on another slice moves the focus, and a tap in the
   const cleared = await c.hole();
   return [moved[0] === 'UPI' && cleared[0] === 'Sales', { moved, cleared }];
 }, { phone: true });
+
+// ---- motion: the ring sweeps open once, a hidden slice closes while the rest take its room, and reduced motion snaps
+for (const reducedMotion of ['no-preference', 'reduce']) {
+  const context = await browser.newContext({ viewport: { width: 1000, height: 700 }, reducedMotion });
+  const page = await context.newPage();
+  await page.addInitScript(() => {
+    window.frames_ = [];
+    const tick = () => {
+      const path = document.querySelector('[data-slot=donut-ring] svg path');
+      if (path) window.frames_.push(path.getAttribute('d'));
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+  await page.goto(`${origin}/iframe.html?id=${DEFAULT}&viewMode=story`);
+  await page.waitForSelector(`${RING} svg path`);
+  const shapes = async (ms) => { await page.waitForTimeout(ms); return new Set(await page.evaluate(() => window.frames_.splice(0))).size; };
+  const entrance = await shapes(900);
+  const rest = await shapes(200);
+  await page.click('button[aria-pressed]:has-text("Cash")');
+  const hide = await shapes(600);
+  const moving = reducedMotion === 'no-preference';
+  check(`motion ${reducedMotion}: the ring ${moving ? 'sweeps open' : 'is whole at once'}`, moving ? entrance > 4 : entrance === 1, entrance);
+  check(`motion ${reducedMotion}: then rests`, rest === 1, rest);
+  check(`motion ${reducedMotion}: hiding a slice ${moving ? 'glides' : 'lands at once'}`, moving ? hide > 4 : hide <= 2, hide);
+  await context.close();
+}
 
 await finish();

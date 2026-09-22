@@ -260,4 +260,115 @@ for (const story of ['charts-line--default', 'charts-area--default', 'charts-are
   await c.page.close();
 }
 
+// ---- motion: the entrance and discrete jumps glide, the hand's own zoom and pan do not, and reduced motion snaps
+/** Opens a story recording, per frame from before its first paint, the first series group's transform and path. */
+async function openRecording(story, contextOptions = {}) {
+  const context = await browser.newContext({ viewport: { width: 1000, height: 640 }, ...contextOptions });
+  const page = await context.newPage();
+  await page.addInitScript(() => {
+    window.frames_ = [];
+    const tick = () => {
+      const path = document.querySelector('.chart-plot svg path[data-ts-key], .chart-plot svg rect[data-ts-key]');
+      if (path) {
+        const labels = [...document.querySelectorAll('.chart > span.text-ink-muted')].map((el) => `${el.textContent}:${getComputedStyle(el).opacity}`).join(' ');
+        const dash = getComputedStyle(path).strokeDashoffset;
+        window.frames_.push({ dash, t: performance.now(), transform: path.closest('g[transform]')?.getAttribute('transform') ?? null, d: [...document.querySelectorAll('.chart-plot svg [data-ts-key]')].map((el) => `${el.getAttribute('d') ?? el.getAttribute('height')}${el.closest('g[transform]')?.getAttribute('transform') ?? ''}${getComputedStyle(el.parentElement).opacity}`).join('|'), labels });
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+  await page.goto(`${origin}/iframe.html?id=${story}&viewMode=story`);
+  await page.waitForSelector('.chart-plot svg path[data-ts-key], .chart-plot svg rect[data-ts-key]');
+  const take = () => page.evaluate(() => window.frames_.splice(0));
+  return { context, page, take };
+}
+const distinct = (frames, key) => new Set(frames.map((frame) => frame[key])).size;
+
+for (const kind of ['line', 'area', 'bar']) {
+  const r = await openRecording(`charts-${kind}--default`);
+  await r.page.waitForTimeout(900);
+  const entrance = await r.take();
+  if (kind === 'line') check('line: the lines draw on from the left on first paint', distinct(entrance, 'dash') > 4 && distinct(entrance, 'transform') === 1, [distinct(entrance, 'dash'), distinct(entrance, 'transform')]);
+  else check(`${kind}: the marks grow in on first paint`, distinct(entrance, kind === 'bar' ? 'd' : 'transform') > 4, distinct(entrance, kind === 'bar' ? 'd' : 'transform'));
+  if (kind !== 'bar') {
+    // The names at the line ends: with an area they fade in as the fills grow; with a line they wait for the pen to reach the end.
+    const showing = (frame) => frame.labels.split(' ').some((label) => Number(label.split(':')[1]) > 0.05);
+    const first = entrance.findIndex(showing);
+    const named = first >= 0 && entrance.slice(first).every((frame) => frame.labels.split(' ').every((label) => Number(label.split(':')[1]) > 0));
+    if (kind === 'area') check('area: the names fade in while the fills are still growing', named && entrance[first].transform !== null && entrance[first].transform !== entrance[entrance.length - 1].transform, [first, entrance[first]?.transform]);
+    else check('line: the names appear once the pen has reached the end', named && parseFloat(entrance[first].dash) < 0.15, [first, entrance[first]?.dash]);
+  }
+  await r.page.waitForTimeout(200);
+  check(`${kind}: and come to rest`, distinct(await r.take(), 'd') === 1 , 'rest');
+
+  const svg = await (await r.page.$('.chart-plot svg')).boundingBox();
+  const at = (f) => svg.x + 60 + (svg.width - 150) * f;
+  await r.page.mouse.move(at(0.35), svg.y + 150); await r.page.mouse.down(); await r.page.mouse.move(at(0.55), svg.y + 150, { steps: 6 }); await r.page.mouse.up();
+  await r.page.waitForTimeout(150); await r.take();
+  await r.page.click('button:has-text("Zoom in")'); await r.page.waitForTimeout(700);
+  check(`${kind}: Zoom in glides to the new window`, distinct(await r.take(), 'd') > 4, 'frames');
+
+  await r.page.mouse.move(at(0.5), svg.y + 150); await r.page.waitForTimeout(100); await r.take();
+  await r.page.keyboard.down('Control'); await r.page.mouse.wheel(0, 300); await r.page.keyboard.up('Control');
+  await r.page.waitForTimeout(700);
+  const wheel = await r.take();
+  check(`${kind}: a wheel zoom lands at once`, distinct(wheel, 'd') <= 2, distinct(wheel, 'd'));
+
+  if (kind !== 'bar') {
+    await r.page.click('button[aria-pressed]:has-text("Diesel")'); await r.page.waitForTimeout(700);
+    const hide = await r.take();
+    await r.page.click('button[aria-pressed]:has-text("Diesel")'); await r.page.waitForTimeout(900);
+    const show = await r.take();
+    // The last frame on which anything still moved, counted from the click.
+    const settles = (frames, key) => { const last = frames[frames.length - 1][key]; const i = frames.findIndex((frame) => frame[key] === last); return Math.round(frames[i].t - frames[0].t); };
+    check(`${kind}: a series hidden from the legend has gone in under 220ms`, hide.length > 1 && settles(hide, 'd') < 220, settles(hide, 'd'));
+    check(`${kind}: and is back in under 220ms`, show.length > 1 && settles(show, 'd') < 220, settles(show, 'd'));
+    check(`${kind}: with its name at the line end`, settles(show, 'labels') < 220, settles(show, 'labels'));
+  }
+
+  if (kind === 'bar') {
+    await r.context.close();
+    // Stacked, the top series shrinks into the one below, which holds still: a fade would cross the segment under it.
+    const context = await browser.newContext({ viewport: { width: 1000, height: 640 } });
+    const page = await context.newPage();
+    await page.addInitScript(() => {
+      window.frames_ = [];
+      const tick = () => {
+        const bars = [...document.querySelectorAll('.chart-plot svg [data-ts-key^="CNG:"], .chart-plot svg [data-ts-key^="Diesel:"]')];
+        if (bars.length) {
+          const box = (prefix) => bars.filter((bar) => bar.getAttribute('data-ts-key').startsWith(prefix)).map((bar) => { const b = bar.getBBox(); return `${Math.round(b.x)},${Math.round(b.y)},${Math.round(b.width)},${Math.round(b.height)}`; }).join('|');
+          window.frames_.push({ cng: box('CNG'), diesel: box('Diesel'), opacity: Math.min(...bars.map((bar) => Number(getComputedStyle(bar).opacity))) });
+        }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+    await page.goto(`${origin}/iframe.html?id=charts-bar--stacked&viewMode=story`);
+    await page.waitForSelector('.chart-plot svg [data-ts-key]');
+    await page.waitForTimeout(1500); await page.evaluate(() => window.frames_.splice(0));
+    await page.click('button[aria-pressed]:has-text("CNG")'); await page.waitForTimeout(600);
+    const frames = await page.evaluate(() => window.frames_.splice(0));
+    const last = frames[frames.length - 1];
+    check('stacked bars: hiding the top series shrinks its segments to nothing, without fading', distinct(frames, 'cng') > 4 && frames.every((frame) => frame.opacity === 1) && /,0\|/.test(last.cng + '|'), [distinct(frames, 'cng'), last.cng.slice(0, 30)]);
+    const drift = Math.max(...frames.map((frame) => Math.max(...frame.diesel.split(/[|,]/).map((n, i) => Math.abs(Number(n) - Number(frames[0].diesel.split(/[|,]/)[i]))))));
+    check('stacked bars: the segments below hold still', drift <= 1, drift);
+    await context.close();
+    continue;
+  }
+
+  await r.page.mouse.click(at(0.5), svg.y + 120);
+  await r.page.click('button:has-text("Reset zoom")'); await r.page.mouse.move(5, 5); await r.page.waitForTimeout(500);
+  check(`${kind}: a pin that rode a view change is still drawn once`, (await r.page.$$(AXIS_CHIP)).length === 1, (await r.page.$$(AXIS_CHIP)).length);
+  await r.context.close();
+}
+
+{
+  const r = await openRecording('charts-line--default', { reducedMotion: 'reduce' });
+  await r.page.waitForTimeout(900);
+  const frames = await r.take();
+  check('reduced motion: nothing grows in', distinct(frames, 'transform') === 1 && distinct(frames, 'd') === 1, [distinct(frames, 'transform'), distinct(frames, 'd')]);
+  await r.context.close();
+}
+
 await finish();

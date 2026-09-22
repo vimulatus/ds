@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 import { ArrowCounterClockwise, X } from '@phosphor-icons/react';
 import { Button } from '@/components/Button';
 import { Hotkey } from '@/components/Hotkey';
+import { CHART_CHANGE_MS, CHART_ENTER_MS, CHART_MOTION_VARS } from '@/lib/chart/motion';
 import { Legend, SeriesKey, TooltipBody, formatChange, seriesColor, type TooltipRow } from '@/lib/chart/parts';
 import { Plot, type PlotGeometry, type PlotSeries } from '@/lib/chart/tanstack';
 import {
@@ -93,6 +94,14 @@ const END_LABEL_ROOM = 68;
 const BAR_EDGE_ROOM = 12;
 const DRAG_THRESHOLD = 4;
 const DOUBLE_CLICK_MS = 400;
+/** When the names at the line ends fade in: with the fills as they grow, or once a line's pen has reached the end. */
+const NAME_VARS: Record<'line' | 'area', CSSProperties> = {
+  area: { '--chart-name-delay': '0ms', '--chart-name-fade': `${CHART_ENTER_MS}ms` } as CSSProperties,
+  line: { '--chart-name-delay': `${CHART_ENTER_MS}ms`, '--chart-name-fade': `${CHART_CHANGE_MS}ms` } as CSSProperties,
+};
+
+/** How long after the last wheel, pinch or pan step the hand counts as resting. */
+const HAND_RESTS_MS = 160;
 
 type Drag =
   | { kind: 'pending'; x: number; shift: boolean }
@@ -160,8 +169,21 @@ export function Chart<Row>({
   const [draft, setDraft] = useState<ChartRange | null>(null);
   const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set());
   const [, setGeometryTick] = useState(0);
+  // The names at the line ends wait for the marks to grow in, then fade in together. After that a name comes with its line.
+  const [entering, setEntering] = useState(true);
 
   useEffect(() => setWin(extent), [extent]);
+
+  // While the hand drives the window, the plot must follow it frame for frame, so its motion rests.
+  const [handDriven, setHandDriven] = useState(false);
+  const handRests = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const driveWindow = useCallback((next: (w: ChartWindow) => ChartWindow) => {
+    setHandDriven(true);
+    setWin(next);
+    clearTimeout(handRests.current);
+    handRests.current = setTimeout(() => setHandDriven(false), HAND_RESTS_MS);
+  }, []);
+  useEffect(() => () => clearTimeout(handRests.current), []);
 
   const root = useRef<HTMLDivElement>(null);
   const wrapper = useRef<HTMLDivElement>(null);
@@ -188,16 +210,19 @@ export function Chart<Row>({
   };
 
   // Stacked, a series rides on the visible ones before it, so hiding one lets the rest settle down.
+  // A hidden bar series stays, collapsed to zero, so its bars shrink away; a line or area leaves.
   const visible = useMemo(() => {
     const height = positions.map(() => 0);
     return series
-      .filter((s) => !hidden.has(s.id))
+      .filter((s) => bars || !hidden.has(s.id))
       .map((s): PlotSeries => {
+        const collapsed = hidden.has(s.id);
+        const values = collapsed ? s.values.map((value) => (value === null ? null : 0)) : s.values;
         const floors = [...height];
-        if (stacks) s.values.forEach((value, i) => (height[i] = (height[i] ?? 0) + (value ?? 0)));
-        return { ...s, floors };
+        if (stacks) values.forEach((value, i) => (height[i] = (height[i] ?? 0) + (value ?? 0)));
+        return { ...s, values, floors, collapsed };
       });
-  }, [positions, series, hidden, stacks]);
+  }, [positions, series, hidden, stacks, bars]);
   const zoomed = isZoomed(win, extent);
   const shown = draft ?? selection;
 
@@ -244,7 +269,10 @@ export function Chart<Row>({
         d.shift && zoomed ? { kind: 'pan', x: d.x, window: win } : { kind: 'select', from: positionAt(d.x) ?? win.start };
       return;
     }
-    if (d.kind === 'pan') setWin(panBy(d.window, extent, ((d.x - e.clientX) / p.g.width) * span(d.window)));
+    if (d.kind === 'pan') {
+      const moved = ((d.x - e.clientX) / p.g.width) * span(d.window);
+      driveWindow(() => panBy(d.window, extent, moved));
+    }
     if (d.kind === 'select') setDraft(rangeOf(positions, d.from, positionAt(e.clientX) ?? d.from));
     if (d.kind === 'handle') setDraft(rangeOf(positions, d.fixed, positionAt(e.clientX) ?? d.fixed));
   }
@@ -316,10 +344,10 @@ export function Chart<Row>({
         // A trackpad pinch arrives as ctrl + wheel.
         e.preventDefault();
         const factor = Math.exp(Math.max(-30, Math.min(30, e.deltaY)) * 0.01);
-        setWin((w) => zoomAt(w, extent, place, factor, minSpan));
+        driveWindow((w) => zoomAt(w, extent, place, factor, minSpan));
       } else if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
         const width = geometry.current?.width ?? 1;
-        setWin((w) => {
+        driveWindow((w) => {
           if (!isZoomed(w, extent)) return w;
           e.preventDefault();
           return panBy(w, extent, (e.deltaX / width) * span(w));
@@ -334,7 +362,7 @@ export function Chart<Row>({
       if (place === null) return;
       e.preventDefault();
       if (e.type === 'gesturestart') scale = 1;
-      else setWin((w) => zoomAt(w, extent, place, scale / g.scale, minSpan));
+      else driveWindow((w) => zoomAt(w, extent, place, scale / g.scale, minSpan));
       scale = g.scale;
     };
     el.addEventListener('wheel', onWheel, { passive: false });
@@ -345,12 +373,13 @@ export function Chart<Row>({
       el.removeEventListener('gesturestart', onGesture);
       el.removeEventListener('gesturechange', onGesture);
     };
-  }, [extent, minSpan]);
+  }, [extent, minSpan, driveWindow]);
 
   /** The visible series with a value at a position, in the legend's order. `top` is where the value ends on the y axis. */
   const valuesAt = (position: number) => {
     const i = positions.indexOf(position);
     return visible
+      .filter((s) => !s.collapsed)
       .map((s) => ({ series: s, value: s.values[i] ?? null, top: (s.floors[i] ?? 0) + (s.values[i] ?? 0) }))
       .filter((r): r is { series: PlotSeries; value: number; top: number } => r.value !== null);
   };
@@ -392,30 +421,34 @@ export function Chart<Row>({
     const at = plot();
     if (!at) return null;
     const left = pixelOf(position);
+    const glide = pinned && 'chart-glide';
     return (
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
+      <div key={`${pinned ? 'pin' : 'hover'} marks ${position}`} className="pointer-events-none absolute inset-0" aria-hidden>
         {bars ? (
           <span
-            className={cn('absolute rounded border bg-ink/6', pinned ? 'border-edge' : 'border-transparent')}
+            className={cn('absolute rounded border bg-ink/6', pinned ? 'border-edge' : 'border-transparent', glide)}
             style={{ left: leftOf(position), width: rightOf(position) - leftOf(position), top: at.top, height: at.g.height }}
           />
         ) : (
           <>
             <span
-              className={cn('absolute border-l', pinned ? 'border-ink-muted' : 'border-dashed border-ink-disabled')}
+              className={cn('absolute border-l', pinned ? 'border-ink-muted' : 'border-dashed border-ink-disabled', glide)}
               style={{ left, top: at.top, height: at.g.height }}
             />
             {valuesAt(position).map(({ series: s, top }) => (
               <span
                 key={s.id}
-                className="absolute size-2.5 -translate-1/2 rounded-full ring-2 ring-panel"
+                className={cn('absolute size-2.5 -translate-1/2 rounded-full ring-2 ring-panel', glide)}
                 style={{ left, top: at.top + at.g.toPixelY(top) - at.g.top, backgroundColor: s.color }}
               />
             ))}
           </>
         )}
         <span
-          className="absolute -translate-x-1/2 whitespace-nowrap rounded-md border border-edge bg-menu px-2 py-0.5 text-xs font-medium tabular-nums text-ink"
+          className={cn(
+            'absolute -translate-x-1/2 whitespace-nowrap rounded-md border border-edge bg-menu px-2 py-0.5 text-xs font-medium tabular-nums text-ink',
+            glide,
+          )}
           style={{ left, top: at.top + at.g.height + 5 }}
         >
           {formatX(position)}
@@ -452,7 +485,7 @@ export function Chart<Row>({
     return labels.map(({ s, top }) => (
       <span
         key={s.id}
-        className="pointer-events-none absolute text-xs text-ink-muted"
+        className={cn('chart-glide pointer-events-none absolute text-xs text-ink-muted', entering && 'chart-enter')}
         style={{ left: at.left + at.g.width + 8, top }}
         aria-hidden
       >
@@ -512,9 +545,11 @@ export function Chart<Row>({
         ref={wrapper}
         className={cn(
           'chart relative touch-pan-y select-none',
+          !handDriven && 'chart-gliding',
           !touch && 'cursor-crosshair',
           drag.current?.kind === 'pan' && 'cursor-grabbing',
         )}
+        style={{ ...CHART_MOTION_VARS, ...(bars ? {} : NAME_VARS[kind]) }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -530,6 +565,7 @@ export function Chart<Row>({
           stacked={stacks}
           step={interval}
           window={win}
+          animate={!handDriven}
           yMax={yMax}
           marginRight={touch ? 8 : bars ? BAR_EDGE_ROOM : END_LABEL_ROOM}
           tooltip={!touch}
@@ -539,6 +575,7 @@ export function Chart<Row>({
           renderTooltip={(position) => (position === pin ? null : tooltipBody(position, pinInView ? pin : null))}
           onFocus={setHover}
           onActivate={onActivate}
+          onEntered={() => setEntering(false)}
           onGeometry={(g) => {
             const before = geometry.current;
             geometry.current = g;
@@ -607,10 +644,12 @@ export function Chart<Row>({
 
         {p && pinInView && pin !== null && !touch && (
           <div
+            // A new pin is a new panel: it lands where it was put, and only a view change glides it.
+            key={`panel ${pin}`}
             data-chart-ui=""
             role="status"
             className={cn(
-              'glass absolute cursor-default select-text rounded-xl border border-edge-muted bg-menu-glass text-sm',
+              'chart-glide glass absolute cursor-default select-text rounded-xl border border-edge-muted bg-menu-glass text-sm',
               pinFlips && '-translate-x-full',
             )}
             style={{ left: pinLeft + (pinFlips ? -16 : 16), top: p.top + (selection ? 48 : 4) }}

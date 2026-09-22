@@ -156,6 +156,20 @@ chart ignores it.
 - **Key.** A legend, tooltip or readout key mirrors the mark: a short line
   for lines and side-by-side areas, a block for stacked areas and bars. A
   hidden series shows its key hollow.
+- **Motion.** Lines draw on from the left and areas and bars grow from the
+  baseline, once, in 420ms; bars start a little after each other. The names
+  at the line ends fade in with the fills; with lines they wait for the pen to
+  reach the end. A line or area shown or hidden from the legend comes or goes
+  in 120ms, with its name. A bar series shrinks away and grows back in 240ms
+  instead, so nothing fades over the segment under it, and a ranked row's
+  total rides the moving end of its bars. Views glide in 240ms. All on the system curve: Zoom in, Reset zoom, a legend
+  toggle, side by side to stacked, new data. A wheel, a pinch and a pan land
+  at once, because easing them puts lag between the hand and the chart; the
+  glide comes back 160ms after the hand rests. Hover is never eased. Overlays
+  the component draws (the pin's marks and panel, the names at the line ends)
+  move on the same timing, and the names fade in once the marks have grown.
+  The donut sweeps open from 12 o'clock, and a hidden slice closes while the
+  rest take its room. Reduced motion snaps all of it.
 - **Curve.** Lines and area edges bend between rows with one curve, the
   monotone cubic. It passes through every row and never rises above or dips
   below the two rows it joins, so it draws no peak the data lacks and nothing
@@ -202,10 +216,11 @@ bars. It is its own component because it has no time axis: nothing zooms, no
 range is selected, and the header carries no hints. It takes the same `bar()`
 marks and the same `stacked` as `Chart`.
 
-- **Rank.** Rows sort by the total of what is showing, stacked or side by
-  side, so both forms list the rows in one order. Hiding a series can reorder
-  the rows, so it also lets go of the pin. The value axis covers every series
-  and holds still.
+- **Rank.** Rows sort by the total of every series, hidden or not, stacked or
+  side by side, so both forms list the rows in one order and hiding a series
+  never moves a row: rows swapping places read as the wrong chart. Hiding a
+  series still lets go of the pin. The value axis covers every series and
+  holds still.
 - **Row.** 56px. Side by side, the bars share 36px, 2px apart. Stacked, one
   24px bar with 2px of surface between segments, and the row's total just past
   its end in `ink-muted`. Only the free end of a bar is rounded, by 4px. The

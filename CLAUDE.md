@@ -26,8 +26,9 @@ A Storybook of Vasu's visual language, built on Base UI, that he studies and reu
 src/styles/     palette.css (raw colors) -> themes.css (roles per theme) -> tokens.css (Tailwind @theme, layers, glass,
                 motion, touch), copied as is from the prototype; base-ui.css adds what Base UI needs, chart.css the series colors
 src/lib/        cn (clsx + tailwind-merge), touch (data-touch-device, useTouch), mobile (useMobile), hue,
-                variants (createVariants), placement, chart (window math; ring.ts, the donut's maths; parts.tsx, the key, legend and
-                tooltip body charts share; tanstack*, the only files that import TanStack Charts)
+                variants (createVariants), placement, chart (window math; ring.ts, the donut's maths; motion.ts, chart timings and the
+                glide hook; parts.tsx, the key, legend and tooltip body charts share; tanstack*, the only files that import
+                TanStack Charts)
 src/components/ one file per component. Base UI parts styled with Tailwind, or plain elements
 src/patterns/   compositions of components: ResourceDetail, PropertyGrid, AppShell (SidebarRail, BottomNav, Canvas),
                 EntityList, ListEntity, EntityIcon, SwipableRow

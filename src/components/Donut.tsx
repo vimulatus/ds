@@ -3,6 +3,7 @@ import { X } from '@phosphor-icons/react';
 import { Button } from '@/components/Button';
 import { useOutsidePress } from '@/lib/chart/outside';
 import { Legend, formatChange, seriesColor } from '@/lib/chart/parts';
+import { useGlide } from '@/lib/chart/motion';
 import { ringSpans, sectorPath, spanAt } from '@/lib/chart/ring';
 import { cn } from '@/lib/cn';
 import { useTouch } from '@/lib/touch';
@@ -78,6 +79,14 @@ export function Donut<Row>({
     return showing.map((entry, i) => ({ ...entry, span: spans[i] as (typeof spans)[number] }));
   }, [entries, hidden]);
   const sum = slices.reduce((all, slice) => all + slice.value, 0);
+
+  // What is drawn glides: the ring sweeps open once, and a hidden slice closes to nothing while the others take its room.
+  const weights = entries.map((entry) => (hidden.has(entry.id) ? 0 : entry.value));
+  const [sweep = 1, ...drawnWeights] = useGlide([1, ...weights], [0, ...weights]);
+  const drawn = ringSpans(drawnWeights).map((span, i) => ({
+    entry: entries[i] as (typeof entries)[number],
+    span: { from: span.from * sweep, to: span.to * sweep },
+  }));
 
   const { size, thickness } = touch ? PHONE_RING : DESKTOP_RING;
   const centre = size / 2;
@@ -162,18 +171,18 @@ export function Donut<Row>({
           onClick={onClick}
         >
           <svg width={size} height={size} className="absolute inset-0" aria-hidden>
-            {slices.map((slice) => {
-              const held = slice === focus || slice === pinned;
+            {drawn.map(({ entry, span }) => {
+              const held = entry.id === focus?.id || entry.id === pinned?.id;
               return (
-                <g key={slice.id}>
+                <g key={entry.id}>
                   <path
-                    d={sectorPath(centre, slice.span, outer + (held ? GROWTH : 0), inner, gap) ?? undefined}
+                    d={sectorPath(centre, span, outer + (held ? GROWTH : 0), inner, gap) ?? undefined}
                     className="transition-opacity duration-120 motion-reduce:transition-none"
-                    style={{ fill: slice.color, opacity: focus && !held ? 0.35 : 1 }}
+                    style={{ fill: entry.color, opacity: focus && !held ? 0.35 : 1 }}
                   />
-                  {slice === pinned && (
+                  {entry.id === pinned?.id && (
                     <path
-                      d={sectorPath(centre, slice.span, outer + PIN_ARC.to, outer + PIN_ARC.from, gap) ?? undefined}
+                      d={sectorPath(centre, span, outer + PIN_ARC.to, outer + PIN_ARC.from, gap) ?? undefined}
                       className="fill-ink-muted"
                     />
                   )}

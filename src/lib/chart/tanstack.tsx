@@ -1,13 +1,14 @@
-import { useMemo, useRef, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { scaleTime } from 'd3-scale';
 import { curveMonotoneX } from 'd3-shape';
 import { areaY, defineChart, lineY } from '@tanstack/charts';
 import { decorative } from '@tanstack/charts/mark/decorative';
 import { d3Curve } from '@tanstack/charts/d3/shape';
-import { Chart as VendorChart } from '@tanstack/charts/react/tooltip';
+import { RendererChart as VendorChart } from '@tanstack/charts/react/tooltip';
 import { scaleLinear } from '@tanstack/charts/scales/linear';
 import { tooltip } from '@tanstack/charts/tooltip';
 import { timeBars } from './tanstack-bars';
+import { RENDERER, chartMotion, useChartMount } from './tanstack-motion';
 import type { ChartWindow } from './window';
 
 /**
@@ -27,6 +28,8 @@ export type PlotSeries = {
   values: readonly (number | null)[];
   /** Where each value starts: 0, or the top of the series under it in a stack. */
   floors: readonly number[];
+  /** Hidden from the legend. Its values are zero, so its bars shrink away and grow back rather than fade. */
+  collapsed?: boolean;
 };
 
 /** What is drawn for each series. An area is a line over a fill. */
@@ -55,6 +58,8 @@ export type PlotProps = {
   /** The time between two positions. A bar's band is this wide. */
   step: number;
   window: ChartWindow;
+  /** Off while the hand drives the window: a wheel, a pinch or a pan must land at once. */
+  animate: boolean;
   yMax: number;
   /** Room right of the plot, in px, for labels the component draws at the line ends. */
   marginRight: number;
@@ -66,6 +71,8 @@ export type PlotProps = {
   formatValueTick: (value: number) => string;
   renderTooltip: (position: number) => ReactNode;
   onGeometry: (geometry: PlotGeometry) => void;
+  /** Fires once the marks have grown in. */
+  onEntered: () => void;
   onFocus: (position: number | null) => void;
   onActivate: (position: number) => void;
 };
@@ -90,6 +97,12 @@ export function Plot(props: PlotProps) {
   // Formatters change identity every render; the definition reads the latest without rebuilding for them.
   const latest = useRef(props);
   latest.current = props;
+  const mount = useChartMount();
+  const entering = useRef(true);
+  entering.current = mount.entering;
+  useEffect(() => {
+    if (!mount.entering) latest.current.onEntered();
+  }, [mount.entering]);
 
   const definition = useMemo(() => {
     const toX = (position: number) => new Date(position);
@@ -162,6 +175,7 @@ export function Plot(props: PlotProps) {
           },
         },
         clip: true,
+        motion: props.animate ? chartMotion(() => entering.current, () => mark === 'line') : false,
         margin: { right: marginRight },
         focus: 'group-x',
         maxFocusDistance: Number.POSITIVE_INFINITY,
@@ -179,6 +193,8 @@ export function Plot(props: PlotProps) {
               use: tooltip,
               // The vendor pins one tooltip and freezes hover under it; the component pins its own.
               sticky: false,
+              // Hover follows the pointer at once; only the marks glide.
+              motion: false,
               className: TOOLTIP_CLASS,
               offset: 16,
               anchor: { x: 'point', y: tooltipSlot === 'top' ? 'plot-top' : 'plot-bottom' },
@@ -187,14 +203,17 @@ export function Plot(props: PlotProps) {
           }
         : {},
     );
-  }, [positions, series, mark, stacked, step, win.start, win.end, yMax, marginRight, props.tooltip, tooltipSlot]);
+  }, [positions, series, mark, stacked, step, win.start, win.end, yMax, marginRight, props.tooltip, props.animate, tooltipSlot]);
+
+  if (!mount.ready) return <div ref={mount.holder} style={{ height: props.height }} />;
 
   return (
     <VendorChart
+      renderer={RENDERER}
       definition={definition}
       height={props.height}
       ariaLabel={props.label}
-      className="chart-plot"
+      className={mark === 'line' && mount.entering ? 'chart-plot chart-plot-drawing' : 'chart-plot'}
       renderTooltipBody={({ points }) => {
         const first = points[0];
         return first ? props.renderTooltip(Number(first.xValue)) : null;
@@ -203,13 +222,15 @@ export function Plot(props: PlotProps) {
       onSelect={(point) => {
         if (point) props.onActivate(Number(point.xValue));
       }}
-      onRender={({ svg, scene }) => {
+      onRender={({ surface, scene }) => {
+        // A line draws on in CSS from a dash the length of the path; `pathLength` makes that length 1 for every line.
+        if (mark === 'line') for (const path of surface.element.querySelectorAll('g.ts-chart__line path')) path.setAttribute('pathLength', '1');
         const x = scene.scales.x;
         const y = scene.scales.y;
         if (!x?.invert || !y) return;
         const invert = x.invert;
         props.onGeometry({
-          surface: svg,
+          surface: surface.element,
           left: scene.chart.x,
           top: scene.chart.y,
           width: scene.chart.width,
